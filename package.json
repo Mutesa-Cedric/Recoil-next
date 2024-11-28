@@ -1,7 +1,8 @@
 {
   "name": "recoil-next",
-  "private": true,
-  "description": "Recoil - A state management library for React",
+  "version": "1.0.0",
+  "private": false,
+  "description": "Recoil-next (a fork of recoil) - A state management library for React",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "react-native": "native/index.js",
