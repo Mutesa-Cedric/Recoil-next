@@ -29,7 +29,7 @@ const testRecoil = getRecoilTestFn(() => {
   React = require('react');
   ({atomFamily} = require('Recoil'));
 
-  ({act} = require('ReactTestUtils'));
+  ({act} = require('react'));
   ({
     ReadsAtom,
     flushPromisesAndTimers,

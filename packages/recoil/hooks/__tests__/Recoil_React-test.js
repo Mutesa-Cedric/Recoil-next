@@ -25,10 +25,9 @@ let useRecoilState;
 
 const testRecoil = getRecoilTestFn(() => {
   React = require('react');
-  ({useState} = require('react'));
+  ({useState, act} = require('react'));
   // @fb-only: ({flushSync} = require('ReactDOMComet'));
   ({flushSync} = require('react-dom')); // @oss-only
-  ({act} = require('ReactTestUtils'));
 
   atom = require('../../recoil_values/Recoil_atom');
   ({

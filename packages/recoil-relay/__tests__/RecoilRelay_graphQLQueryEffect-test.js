@@ -34,7 +34,7 @@ const testRecoil = getRecoilTestFn(() => {
   ({atom, atomFamily} = require('Recoil'));
   ({commitLocalUpdate} = require('react-relay'));
 
-  ({act} = require('ReactTestUtils'));
+  ({act} = require('react'));
   ({
     ReadsAtom,
     flushPromisesAndTimers,

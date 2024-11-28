@@ -30,7 +30,7 @@ const testRecoil = getRecoilTestFn(() => {
   React = require('react');
   ({DefaultValue, atom, atomFamily} = require('Recoil'));
 
-  ({act} = require('ReactTestUtils'));
+  ({act} = require('react'));
   ({
     componentThatReadsAndWritesAtom,
     renderElements,

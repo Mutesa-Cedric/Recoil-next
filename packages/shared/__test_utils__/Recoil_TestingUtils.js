@@ -13,10 +13,11 @@
 
 import type {Store} from '../../recoil/core/Recoil_State';
 import type {RecoilState, RecoilValue, RecoilValueReadOnly} from 'Recoil';
+const {createRoot} = require('react-dom/client');
 
 // @fb-only: const ReactDOMComet = require('ReactDOMComet');
 // @fb-only: const ReactDOM = require('ReactDOMLegacy_DEPRECATED');
-const {act} = require('ReactTestUtils');
+const {act} = require('react');
 const {
   RecoilRoot,
   atom,
@@ -134,7 +135,7 @@ function renderLegacyReactRoot<Props>(
 
 // @fb-only: const createRoot = ReactDOMComet.createRoot;
 // $FlowFixMe[prop-missing] unstable_createRoot is not part of react-dom typing // @oss-only
-const createRoot = ReactDOM.createRoot ?? ReactDOM.unstable_createRoot; // @oss-only
+// const createRoot = ReactDOM.createRoot ?? ReactDOM.unstable_createRoot; // @oss-only
 
 function isConcurrentModeAvailable(): boolean {
   return createRoot != null;

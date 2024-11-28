@@ -46,7 +46,7 @@ const testRecoil = getRecoilTestFn(() => {
 
   React = require('react');
   ({useState} = require('react'));
-  ({act} = require('ReactTestUtils'));
+  ({act} = require('react'));
 
   ({
     getRecoilValueAsLoadable,

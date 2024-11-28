@@ -37,8 +37,7 @@ let React,
 
 const testRecoil = getRecoilTestFn(() => {
   React = require('react');
-  ({useState} = React);
-  ({act} = require('ReactTestUtils'));
+  ({useState, act} = React);
 
   ({
     useGotoRecoilSnapshot,

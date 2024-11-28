@@ -32,9 +32,8 @@ let React,
 
 const testRecoil = getRecoilTestFn(() => {
   React = require('react');
-  ({useState} = require('react'));
+  ({useState, act} = require('react'));
 
-  ({act} = require('ReactTestUtils'));
   ({retentionZone} = require('../../core/Recoil_RetentionZone'));
   ({
     useRecoilValue,

@@ -11,7 +11,7 @@
 
 'use strict';
 
-const {act} = require('ReactTestUtils');
+const {act} = require('react');
 
 const {
   getRecoilTestFn,

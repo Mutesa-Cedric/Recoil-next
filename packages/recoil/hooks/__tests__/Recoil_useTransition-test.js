@@ -32,7 +32,7 @@ let React,
 const testRecoil = getRecoilTestFn(() => {
   React = require('react');
   ({useState, useTransition} = React);
-  ({act} = require('ReactTestUtils'));
+  ({act} = require('react'));
   ({
     useRecoilValue,
     useRecoilState,

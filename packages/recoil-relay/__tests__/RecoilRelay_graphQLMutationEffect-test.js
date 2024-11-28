@@ -29,7 +29,7 @@ const testRecoil = getRecoilTestFn(() => {
   React = require('react');
   ({atom} = require('Recoil'));
 
-  ({act} = require('ReactTestUtils'));
+  ({act} = require('react'));
   ({MockPayloadGenerator} = require('relay-test-utils'));
   ({
     componentThatReadsAndWritesAtom,

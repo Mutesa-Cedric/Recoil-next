@@ -47,8 +47,7 @@ let React,
 
 const testRecoil = getRecoilTestFn(() => {
   React = require('react');
-  ({useEffect, useState, Profiler} = require('react'));
-  ({act} = require('ReactTestUtils'));
+  ({useEffect, useState, Profiler, act} = require('react'));
 
   Queue = require('../../adt/Recoil_Queue');
   ({batchUpdates} = require('../../core/Recoil_Batching'));

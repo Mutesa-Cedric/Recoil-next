@@ -8,7 +8,7 @@
 
 'use strict';
 
-const {act} = require('ReactTestUtils');
+const {act} = require('react');
 const {atom} = require('Recoil');
 
 const {

@@ -11,7 +11,7 @@
 import type {ItemKey, ItemSnapshot, ListenInterface} from '../RecoilSync';
 import type {Loadable} from 'Recoil';
 
-const {act} = require('ReactTestUtils');
+const {act} = require('react');
 const {
   DefaultValue,
   RecoilLoadable,

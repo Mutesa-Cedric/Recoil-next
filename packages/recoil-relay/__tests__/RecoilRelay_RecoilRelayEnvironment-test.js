@@ -42,7 +42,7 @@ const testRecoil = getRecoilTestFn(() => {
   ({atom, atomFamily} = require('Recoil'));
   ({useRelayEnvironment} = require('react-relay'));
 
-  ({act} = require('ReactTestUtils'));
+  ({act} = require('react'));
   ({MockPayloadGenerator, createMockEnvironment} = require('relay-test-utils'));
   ({
     ReadsAtom,

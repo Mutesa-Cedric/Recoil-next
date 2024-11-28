@@ -31,7 +31,7 @@ let React,
 
 const testRecoil = getRecoilTestFn(() => {
   React = require('react');
-  ({act} = require('ReactTestUtils'));
+  ({act} = require('react'));
 
   ({freshSnapshot} = require('../../core/Recoil_Snapshot'));
   atom = require('../../recoil_values/Recoil_atom');

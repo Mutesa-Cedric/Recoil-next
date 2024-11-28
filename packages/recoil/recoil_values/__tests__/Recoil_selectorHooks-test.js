@@ -61,9 +61,7 @@ let React,
 
 const testRecoil = getRecoilTestFn(() => {
   React = require('react');
-  ({useEffect, useState, Profiler} = require('react'));
-  ({act} = require('ReactTestUtils'));
-
+  ({useEffect, useState, Profiler, act} = require('react'));
   ({batchUpdates} = require('../../core/Recoil_Batching'));
   ({RecoilRoot} = require('../../core/Recoil_RecoilRoot'));
   atom = require('../../recoil_values/Recoil_atom');

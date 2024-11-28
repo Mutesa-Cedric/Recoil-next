@@ -44,7 +44,7 @@ const testRecoil = getRecoilTestFn(() => {
   ({useState} = require('react'));
   ({useRecoilCallback} = require('Recoil'));
 
-  ({act} = require('ReactTestUtils'));
+  ({act} = require('react'));
   ({MockPayloadGenerator} = require('relay-test-utils'));
   ({
     ReadsAtom,

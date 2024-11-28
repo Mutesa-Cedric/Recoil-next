@@ -34,7 +34,7 @@ const testRecoil = getRecoilTestFn(() => {
     makeStore,
   } = require('recoil-shared/__test_utils__/Recoil_TestingUtils');
 
-  ({act} = require('ReactTestUtils'));
+  ({act} = require('react'));
   atom = require('../../recoil_values/Recoil_atom');
   selector = require('../../recoil_values/Recoil_selector');
   ({

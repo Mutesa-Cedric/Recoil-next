@@ -34,8 +34,7 @@ let React,
 
 const testRecoil = getRecoilTestFn(() => {
   React = require('react');
-  ({useEffect, useState} = React);
-  ({act} = require('ReactTestUtils'));
+  ({useEffect, useState, act} = React);
   ({freshSnapshot} = require('../../core/Recoil_Snapshot'));
   atom = require('../../recoil_values/Recoil_atom');
   constSelector = require('../../recoil_values/Recoil_constSelector');

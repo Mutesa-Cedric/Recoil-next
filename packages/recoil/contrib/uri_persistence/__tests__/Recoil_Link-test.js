@@ -11,7 +11,7 @@
 'use strict';
 import type {MutableSnapshot, Snapshot} from 'Recoil_Snapshot';
 
-const {Simulate, act} = require('ReactTestUtils');
+const {Simulate} = require('ReactTestUtils');
 
 const {freshSnapshot} = require('../../../core/Recoil_Snapshot');
 const atom = require('../../../recoil_values/Recoil_atom');
@@ -20,6 +20,7 @@ const {
   LinkToRecoilStateChange,
 } = require('../Recoil_Link');
 const React = require('react');
+const {act} = require('react');
 const {
   componentThatReadsAndWritesAtom,
   flushPromisesAndTimers,

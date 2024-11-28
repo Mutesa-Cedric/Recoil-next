@@ -33,8 +33,7 @@ let React,
 
 const testRecoil = getRecoilTestFn(() => {
   React = require('react');
-  ({useEffect, useRef} = React);
-  ({act} = require('ReactTestUtils'));
+  ({useEffect, useRef, act} = React);
 
   ({
     renderElements,

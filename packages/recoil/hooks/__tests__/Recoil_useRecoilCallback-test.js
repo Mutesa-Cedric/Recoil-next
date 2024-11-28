@@ -40,8 +40,7 @@ let React,
 
 const testRecoil = getRecoilTestFn(() => {
   React = require('react');
-  ({useRef, useState, useEffect} = require('react'));
-  ({act} = require('ReactTestUtils'));
+  ({useRef, useState, useEffect, act} = require('react'));
 
   ({useStoreRef} = require('../../core/Recoil_RecoilRoot'));
   ({

@@ -1,5 +1,5 @@
 {
-  "name": "recoil",
+  "name": "recoil-next",
   "private": true,
   "description": "Recoil - A state management library for React",
   "main": "cjs/index.js",
@@ -13,7 +13,7 @@
     "native",
     "index.d.ts"
   ],
-  "repository": "https://github.com/facebookexperimental/Recoil.git",
+  "repository": "https://github.com/Mutesa-Cedric/Recoil-next.git",
   "license": "MIT",
   "scripts": {
     "prepare": "install-peers",
@@ -33,7 +33,7 @@
     "transit-js": "^0.8.874"
   },
   "peerDependencies": {
-    "react": ">=16.13.1"
+    "react": ">=18.3.1"
   },
   "peerDependenciesMeta": {
     "react-dom": {
@@ -69,8 +69,8 @@
     "eslint-plugin-fb-www": "^1.11.0",
     "eslint-plugin-flowtype": "^8.0.3",
     "eslint-plugin-jest": "^23.13.2",
-    "eslint-plugin-react": "^7.20.0",
-    "eslint-plugin-react-hooks": "^4.2.0",
+    "eslint-plugin-react": "^7.28.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-relay": "^1.8.3",
     "eslint-plugin-rulesdir": "^0.2.0",
     "eslint-plugin-unused-imports": "^2.0.0",
@@ -86,8 +86,8 @@
     "lint-staged": ">=10",
     "prettier": "^2.4.1",
     "promise-polyfill": "^8.1.3",
-    "react": ">=16.13.1",
-    "react-dom": ">=16.13.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "react-relay": "^13.2.0",
     "relay-compiler": "^13.2.0",
     "relay-runtime": "^13.2.0",

@@ -34,7 +34,7 @@ let React,
 const testRecoil = getRecoilTestFn(() => {
   React = require('react');
 
-  ({act} = require('ReactTestUtils'));
+  ({act} = require('react'));
   ({readInlineData} = require('relay-runtime'));
   ({MockPayloadGenerator} = require('relay-test-utils'));
   ({

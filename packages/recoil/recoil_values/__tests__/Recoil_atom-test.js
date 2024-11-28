@@ -53,7 +53,7 @@ const testRecoil = getRecoilTestFn(() => {
 
   React = require('react');
   ({useState, Profiler} = require('react'));
-  ({act} = require('ReactTestUtils'));
+  ({act} = require('react'));
 
   ({DEFAULT_VALUE, DefaultValue} = require('../../core/Recoil_Node'));
   ({RecoilRoot, useRecoilStoreID} = require('../../core/Recoil_RecoilRoot'));
