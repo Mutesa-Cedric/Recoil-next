@@ -12,3 +12,5 @@ function nullthrows<T>(x: T | null | undefined, message?: string): T {
     throw err(message ?? 'Got unexpected null or undefined');
 }
 
+export default nullthrows;
+
