@@ -1,11 +1,10 @@
 {
+  "files": [],
   "compilerOptions": {
     "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "node",
     "lib": ["DOM", "ES2020"],
-    "rootDir": "./src",
-    "outDir": "./dist",
     "strict": true,
     "esModuleInterop": true,
     "declaration": true,
@@ -13,8 +12,16 @@
     "sourceMap": true,
     "allowJs": false,
     "resolveJsonModule": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "recoil-shared/*": ["packages/shared/src/*"],
+      "recoil/*": ["packages/recoil/src/*"]
+    }
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "references": [
+    { "path": "./packages/shared" },
+    { "path": "./packages/recoil" }
+  ],
+  "include": []
 }

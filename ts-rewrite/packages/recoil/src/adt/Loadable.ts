@@ -2,9 +2,9 @@
  * TypeScript port of Recoil Loadable abstraction.
  */
 
-import err from '../shared/util/Recoil_err';
-import isPromise from '../shared/util/Recoil_isPromise';
-import nullthrows from '../shared/util/Recoil_nullthrows';
+import err from 'recoil-shared/util/Recoil_err';
+import isPromise from 'recoil-shared/util/Recoil_isPromise';
+import nullthrows from 'recoil-shared/util/Recoil_nullthrows';
 
 // Base class defines the required API but leaves implementation to subclasses.
 abstract class BaseLoadable<T> {

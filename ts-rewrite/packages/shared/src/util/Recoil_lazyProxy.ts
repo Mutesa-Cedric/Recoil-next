@@ -11,9 +11,9 @@ function lazyProxy<Base extends Record<string, any>, Factories extends Record<st
         get(target, prop: string) {
             if (!(prop in target) && prop in factories) {
                 // Compute and cache
-                target[prop] = factories[prop as keyof Factories]();
+                (target as any)[prop] = factories[prop as keyof Factories]();
             }
-            return target[prop as keyof typeof target];
+            return (target as any)[prop];
         },
         ownKeys(target) {
             // Materialize lazy properties before reporting keys

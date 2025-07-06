@@ -1,12 +1,11 @@
 /**
  * PersistentMap – a map abstraction with structural sharing (when HAMT enabled)
- * Ported from Recoil. In OSS builds we default to Hamt when the GK is enabled,
- * otherwise fallback to built-in Map.
+ * Ported from Recoil. Uses HAMT when the GK 'recoil_hamt_2020' is enabled, otherwise falls back to built-in Map.
  */
 
-import gkx from '../shared/util/Recoil_gkx';
+import gkx from 'recoil-shared/util/Recoil_gkx';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore – no types for hamt_plus
+// @ts-ignore – hamt_plus has no typings
 import hamt from 'hamt_plus';
 
 export interface PersistentMap<K extends string, V> {
@@ -56,11 +55,9 @@ class BuiltInMap<K extends string, V> implements PersistentMap<K, V> {
 }
 
 class HashArrayMappedTrieMap<K extends string, V> implements PersistentMap<K, V> {
-    // hamt_plus mutative context
     private _hamt: any;
     constructor(existing?: PersistentMap<K, V>) {
-        // create mutable hamt
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        // Create mutative clone
         this._hamt = (hamt.empty as any).beginMutation();
         if (existing instanceof HashArrayMappedTrieMap) {
             const h = existing._hamt.endMutation();
@@ -100,7 +97,9 @@ class HashArrayMappedTrieMap<K extends string, V> implements PersistentMap<K, V>
     }
 }
 
-export function persistentMap<K extends string, V>(existing?: PersistentMap<K, V>): PersistentMap<K, V> {
+export function persistentMap<K extends string, V>(
+    existing?: PersistentMap<K, V>,
+): PersistentMap<K, V> {
     if (gkx('recoil_hamt_2020')) {
         return new HashArrayMappedTrieMap(existing);
     }
