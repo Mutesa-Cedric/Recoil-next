@@ -1,0 +1,20 @@
+{
+    "name": "recoil-next-ts",
+    "version": "0.1.0",
+    "description": "TypeScript rewrite of Recoil Next",
+    "main": "dist/index.cjs.js",
+    "module": "dist/index.esm.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "rollup -c",
+        "test": "jest",
+        "lint": "eslint \"src/**/*.{ts,tsx}\"",
+        "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\""
+    },
+    "peerDependencies": {
+        "react": ">=18"
+    }
+}
