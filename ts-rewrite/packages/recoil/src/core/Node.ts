@@ -118,4 +118,6 @@ export function getConfigDeletionHandler(key: NodeKey): (() => void) | undefined
 }
 
 // Public exports replicating original module structure
-export { nodes, recoilValues }; 
+export { nodes, recoilValues };
+
+export type Trigger = 'get' | 'set'; 
