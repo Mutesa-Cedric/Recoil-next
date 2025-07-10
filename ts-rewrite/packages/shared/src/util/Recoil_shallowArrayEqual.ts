@@ -1,14 +1,26 @@
 /**
- * Perform a shallow equality comparison of two arrays.
+ * TypeScript port of Recoil_shallowArrayEqual.js
  */
 
-function shallowArrayEqual<T>(a: ReadonlyArray<T>, b: ReadonlyArray<T>): boolean {
-    if (a === b) return true;
-    if (a.length !== b.length) return false;
-    for (let i = 0; i < a.length; i++) {
-        if (a[i] !== b[i]) return false;
-    }
-    return true;
-}
+'use strict';
 
-export default shallowArrayEqual; 
+export default function shallowArrayEqual<TArr extends ReadonlyArray<unknown>>(
+    a: TArr,
+    b: TArr,
+): boolean {
+    if (a === b) {
+        return true;
+    }
+
+    if (a.length !== b.length) {
+        return false;
+    }
+
+    for (let i = 0, l = a.length; i < l; i++) {
+        if (a[i] !== b[i]) {
+            return false;
+        }
+    }
+
+    return true;
+} 

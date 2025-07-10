@@ -1,43 +1,52 @@
 /**
- * Least-Recently-Used cache with O(1) get/set/delete using a double-linked list.
+ * TypeScript port of Recoil_LRUCache.js
  */
 
-import nullthrows from 'recoil-shared/util/Recoil_nullthrows';
+'use strict';
 
-export interface LRUCacheOptions<K> {
-    maxSize: number;
-    mapKey?: (key: K) => unknown;
-}
+import nullthrows from '../../../shared/src/util/Recoil_nullthrows';
 
-interface CacheNode<K, V> {
+export type CacheNode<K, V> = {
     key: K;
     value: V;
     left: CacheNode<K, V> | null;
     right: CacheNode<K, V> | null;
-}
+};
 
-export class LRUCache<K, V> {
-    private _maxSize: number;
-    private _size = 0;
-    private _head: CacheNode<K, V> | null = null;
-    private _tail: CacheNode<K, V> | null = null;
-    private _map: Map<unknown, CacheNode<K, V>> = new Map();
-    private _keyMapper: (key: K) => unknown;
+type Options<K> = {
+    maxSize: number;
+    mapKey?: (key: K) => unknown;
+};
 
-    constructor(options: LRUCacheOptions<K>) {
+export class LRUCache<K = unknown, V = unknown> {
+    _maxSize: number;
+    _size: number;
+    _head: CacheNode<K, V> | null;
+    _tail: CacheNode<K, V> | null;
+    _map: Map<unknown, CacheNode<K, V>>;
+    _keyMapper: (key: K) => unknown;
+
+    constructor(options: Options<K>) {
         this._maxSize = options.maxSize;
+        this._size = 0;
+        this._head = null;
+        this._tail = null;
+        this._map = new Map<unknown, CacheNode<K, V>>();
         this._keyMapper = options.mapKey ?? (v => v);
     }
 
     head(): CacheNode<K, V> | null {
         return this._head;
     }
+
     tail(): CacheNode<K, V> | null {
         return this._tail;
     }
+
     size(): number {
         return this._size;
     }
+
     maxSize(): number {
         return this._maxSize;
     }
@@ -47,54 +56,96 @@ export class LRUCache<K, V> {
     }
 
     get(key: K): V | undefined {
-        const mapped = this._keyMapper(key);
-        const node = this._map.get(mapped);
-        if (!node) return undefined;
-        // Promote to head
+        const mappedKey = this._keyMapper(key);
+        const node = this._map.get(mappedKey);
+
+        if (!node) {
+            return undefined;
+        }
+
         this.set(key, node.value);
+
         return node.value;
     }
 
-    set(key: K, value: V): void {
-        const mapped = this._keyMapper(key);
-        // Remove if already present to re-insert at head
-        if (this._map.has(mapped)) {
+    set(key: K, val: V): void {
+        const mappedKey = this._keyMapper(key);
+        const existingNode = this._map.get(mappedKey);
+
+        if (existingNode) {
             this.delete(key);
         }
 
-        const newNode: CacheNode<K, V> = { key, value, left: null, right: this._head };
-        if (this._head) this._head.left = newNode; else this._tail = newNode;
-        this._head = newNode;
-        this._map.set(mapped, newNode);
+        const head = this.head();
+        const node: CacheNode<K, V> = {
+            key,
+            right: head,
+            left: null,
+            value: val,
+        };
+
+        if (head) {
+            head.left = node;
+        } else {
+            this._tail = node;
+        }
+
+        this._map.set(mappedKey, node);
+        this._head = node;
         this._size++;
-        if (this._size > this._maxSize) {
+
+        this._maybeDeleteLRU();
+    }
+
+    _maybeDeleteLRU(): void {
+        if (this.size() > this.maxSize()) {
             this.deleteLru();
         }
     }
 
     deleteLru(): void {
-        if (this._tail) {
-            this.delete(this._tail.key);
+        const tail = this.tail();
+
+        if (tail) {
+            this.delete(tail.key);
         }
     }
 
     delete(key: K): void {
-        const mapped = this._keyMapper(key);
-        const node = this._map.get(mapped);
-        if (!node) return;
-        if (node.left) node.left.right = node.right;
-        if (node.right) node.right.left = node.left;
-        if (node === this._head) this._head = node.right;
-        if (node === this._tail) this._tail = node.left;
-        this._map.delete(mapped);
+        const mappedKey = this._keyMapper(key);
+
+        if (!this._size || !this._map.has(mappedKey)) {
+            return;
+        }
+
+        const node = nullthrows(this._map.get(mappedKey));
+        const right = node.right;
+        const left = node.left;
+
+        if (right) {
+            right.left = node.left;
+        }
+
+        if (left) {
+            left.right = node.right;
+        }
+
+        if (node === this.head()) {
+            this._head = right;
+        }
+
+        if (node === this.tail()) {
+            this._tail = left;
+        }
+
+        this._map.delete(mappedKey);
         this._size--;
     }
 
     clear(): void {
-        this._map.clear();
-        this._head = this._tail = null;
         this._size = 0;
+        this._head = null;
+        this._tail = null;
+        this._map = new Map<unknown, CacheNode<K, V>>();
     }
-}
-
-export default LRUCache; 
+} 

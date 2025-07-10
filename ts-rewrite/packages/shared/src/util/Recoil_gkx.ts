@@ -1,27 +1,25 @@
 /**
- * OSS implementation of gkx backed by RecoilEnv.RECOIL_GKS_ENABLED.
+ * TypeScript port of Recoil_gkx.js
  */
+
+'use strict';
 
 import RecoilEnv from './Recoil_RecoilEnv';
 
-function gkx(gk: string): boolean {
+function Recoil_gkx_OSS(gk: string): boolean {
     return RecoilEnv.RECOIL_GKS_ENABLED.has(gk);
 }
 
-gkx.setPass = (gk: string): void => {
+Recoil_gkx_OSS.setPass = (gk: string): void => {
     RecoilEnv.RECOIL_GKS_ENABLED.add(gk);
 };
 
-gkx.setFail = (gk: string): void => {
+Recoil_gkx_OSS.setFail = (gk: string): void => {
     RecoilEnv.RECOIL_GKS_ENABLED.delete(gk);
 };
 
-gkx.clear = (): void => {
+Recoil_gkx_OSS.clear = (): void => {
     RecoilEnv.RECOIL_GKS_ENABLED.clear();
 };
 
-export default gkx as typeof gkx & {
-    setPass: (gk: string) => void;
-    setFail: (gk: string) => void;
-    clear: () => void;
-}; 
+export default Recoil_gkx_OSS; 

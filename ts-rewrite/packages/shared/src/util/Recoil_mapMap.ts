@@ -1,13 +1,17 @@
 /**
- * Creates a new Map with values transformed by callback.
+ * TypeScript port of Recoil_mapMap.js
  */
 
-function mapMap<K, V, U>(map: ReadonlyMap<K, V>, callback: (value: V, key: K) => U): Map<K, U> {
-    const result = new Map<K, U>();
+'use strict';
+
+export default function mapMap<TKey, TValue, TValueOut>(
+    map: ReadonlyMap<TKey, TValue>,
+    callback: (value: TValue, key: TKey) => TValueOut,
+): Map<TKey, TValueOut> {
+    const result = new Map<TKey, TValueOut>();
     map.forEach((value, key) => {
         result.set(key, callback(value, key));
     });
-    return result;
-}
 
-export default mapMap; 
+    return result;
+} 

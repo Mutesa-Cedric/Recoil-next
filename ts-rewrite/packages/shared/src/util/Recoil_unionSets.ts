@@ -1,15 +1,17 @@
 /**
- * Returns a new Set that is the union of all provided sets.
+ * TypeScript port of Recoil_unionSets.js
  */
 
-function unionSets<T>(...sets: ReadonlySet<T>[]): Set<T> {
-    const result = new Set<T>();
+'use strict';
+
+export default function unionSets<TValue>(
+    ...sets: ReadonlyArray<ReadonlySet<TValue>>
+): Set<TValue> {
+    const result = new Set<TValue>();
     for (const set of sets) {
         for (const value of set) {
             result.add(value);
         }
     }
     return result;
-}
-
-export default unionSets; 
+} 

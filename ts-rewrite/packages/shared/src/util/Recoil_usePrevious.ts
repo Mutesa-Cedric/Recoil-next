@@ -1,6 +1,8 @@
 /**
- * React hook that returns the previous value of a prop or state.
+ * TypeScript port of Recoil_usePrevious.js
  */
+
+'use strict';
 
 import { useEffect, useRef } from 'react';
 

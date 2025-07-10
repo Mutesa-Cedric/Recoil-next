@@ -5,8 +5,7 @@
 'use strict';
 
 import gkx from '../../../shared/src/util/Recoil_gkx';
-
-const hamt: any = require('hamt_plus');
+import hamt from 'hamt_plus';
 
 export interface PersistentMap<K extends string, V> {
     keys(): Iterable<K>;

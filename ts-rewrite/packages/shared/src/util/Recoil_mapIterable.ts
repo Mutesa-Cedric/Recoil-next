@@ -1,14 +1,15 @@
 /**
- * Returns an iterable mapping each value via callback while preserving laziness.
+ * TypeScript port of Recoil_mapIterable.js
  */
 
-function mapIterable<T, K>(iterable: Iterable<T>, callback: (v: T, index: number) => K): Iterable<K> {
-    return (function* () {
-        let index = 0;
-        for (const value of iterable) {
-            yield callback(value, index++);
-        }
-    })();
-}
+'use strict';
 
-export default mapIterable; 
+export default function* mapIterable<T, K>(
+    iterable: Iterable<T>,
+    callback: (v: T, index: number) => K,
+): Iterable<K> {
+    let index = 0;
+    for (const value of iterable) {
+        yield callback(value, index++);
+    }
+} 

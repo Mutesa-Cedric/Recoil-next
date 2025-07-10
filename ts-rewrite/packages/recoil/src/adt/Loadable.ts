@@ -8,7 +8,7 @@ import err from '../../../shared/src/util/Recoil_err';
 import isPromise from '../../../shared/src/util/Recoil_isPromise';
 import nullthrows from '../../../shared/src/util/Recoil_nullthrows';
 
-export class BaseLoadable<T> {
+export abstract class BaseLoadable<T> {
     getValue(): T {
         throw err('BaseLoadable');
     }
@@ -110,7 +110,7 @@ export class ErrorLoadable<T> extends BaseLoadable<T> {
         return this.contents;
     }
     map<S>(_map: (value: T) => Promise<S> | Loadable<S> | S): Loadable<S> {
-        return this as unknown as Loadable<S>;
+        return loadableWithError<S>(this.contents);
     }
 }
 

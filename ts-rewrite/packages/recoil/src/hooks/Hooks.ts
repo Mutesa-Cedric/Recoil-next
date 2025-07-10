@@ -21,7 +21,6 @@ import { DefaultValue, DEFAULT_VALUE } from '../core/Node';
 import {
     currentRendererSupportsUseSyncExternalStore,
     reactMode,
-    useSyncExternalStore,
 } from '../core/ReactMode';
 import { useStoreRef } from '../core/RecoilRoot';
 import { isRecoilValue, RecoilState, RecoilValue } from '../core/RecoilValue';
@@ -35,6 +34,7 @@ import {
 import { ComponentSubscription } from '../core/RecoilValueInterface';
 import { NodeKey, StoreRef, StoreState, TreeState } from '../core/State';
 import useRetain from './useRetain';
+import { useSyncExternalStore } from 'react';
 
 function handleLoadable<T>(
     loadable: Loadable<T>,

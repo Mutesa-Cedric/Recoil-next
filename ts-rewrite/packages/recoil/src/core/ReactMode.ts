@@ -1,8 +1,8 @@
 /** React mode and feature detection helpers */
 
 import React from 'react';
-import gkx from 'recoil-shared/util/Recoil_gkx';
-import recoverableViolation from 'recoil-shared/util/Recoil_recoverableViolation';
+import gkx from '../../../shared/src/util/Recoil_gkx';
+import recoverableViolation from '../../../shared/src/util/Recoil_recoverableViolation';
 
 // Polyfill type for React 18's useSyncExternalStore.
 // We intentionally use the same over-broad signature as the Flow source.

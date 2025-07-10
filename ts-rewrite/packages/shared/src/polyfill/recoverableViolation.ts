@@ -1,13 +1,17 @@
 /**
- * recoverableViolation – similar to Facebook's recoverableViolation
- * Logs an error in DEV but does not throw.
+ * TypeScript port of recoverableViolation.js
  */
 
-export default function recoverableViolation(message: string, _projectName: 'recoil', opts: { error?: Error } = {}): null {
-    // @ts-ignore __DEV__ may be injected by bundler
-    if (typeof __DEV__ !== 'undefined' && __DEV__) {
-        // eslint-disable-next-line no-console
-        console.error(message, opts.error);
+'use strict';
+const __DEV__ = process.env.NODE_ENV !== 'production';
+
+export default function recoverableViolation(
+    message: string,
+    _projectName: 'recoil',
+    { error }: { error?: Error } = {},
+): null {
+    if (__DEV__) {
+        console.error(message, error);
     }
     return null;
 } 

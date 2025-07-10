@@ -1,13 +1,15 @@
 /**
- * Combine multiple iterables into one iterable, preserving order.
+ * TypeScript port of Recoil_concatIterables.js
  */
 
-function* concatIterables<T>(...iterables: Iterable<T>[]): Iterable<T> {
-    for (const iterable of iterables) {
-        for (const val of iterable) {
+'use strict';
+
+export default function* concatIterables<TValue>(
+    iters: Iterable<Iterable<TValue>>,
+): Iterable<TValue> {
+    for (const iter of iters) {
+        for (const val of iter) {
             yield val;
         }
     }
-}
-
-export default concatIterables; 
+} 

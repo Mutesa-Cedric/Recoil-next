@@ -2,8 +2,7 @@
  * TypeScript port of Recoil_Batching.js
  */
 
-import { batchStart } from './RecoilValueInterface';
-import { unstable_batchedUpdates } from 'recoil-shared/util/Recoil_ReactBatchedUpdates';
+import { unstable_batchedUpdates } from '../../../shared/src/util/Recoil_ReactBatchedUpdates';
 
 // Generic callback type
 type Callback = () => unknown;
@@ -12,6 +11,18 @@ export type Batcher = (callback: Callback) => void;
 
 // During SSR, unstable_batchedUpdates may be undefined; fall back to plain execution.
 let batcher: Batcher = unstable_batchedUpdates ?? (cb => cb());
+
+// Minimal batch stack implementation for batchStart
+const batchStack: Array<Array<() => void>> = [];
+
+export function batchStart(): () => void {
+    const callbacks: Array<() => void> = [];
+    batchStack.push(callbacks);
+    return () => {
+        callbacks.forEach(fn => fn());
+        batchStack.pop();
+    };
+}
 
 /**
  * Set a custom batcher (e.g., for non-DOM React renderers).

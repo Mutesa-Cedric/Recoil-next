@@ -23,13 +23,10 @@ import {
     isRecoilValue,
 } from './RecoilValue';
 
-import err from 'recoil-shared/util/Recoil_err';
-import recoverableViolation from 'recoil-shared/util/Recoil_recoverableViolation';
-import nullthrows from 'recoil-shared/util/Recoil_nullthrows';
-import { batchStart as batchStartOriginal } from './Batching'; // Original from Batching.ts
-import { writeLoadableToTreeState as writeLoadableToTreeStateOriginal } from './FunctionalCore';
-import { invalidateDownstreams as invalidateDownstreamsOriginal } from './FunctionalCore';
-import { copyTreeState as copyTreeStateOriginal } from './FunctionalCore';
+import err from '../../../shared/src/util/Recoil_err';
+import recoverableViolation from '../../../shared/src/util/Recoil_recoverableViolation';
+import nullthrows from '../../../shared/src/util/Recoil_nullthrows';
+import { batchStart } from './Batching';
 
 type ValueOrUpdater<T> = T | ((curr: T) => T);
 
@@ -62,17 +59,7 @@ export function applyAtomValueWrites(
     return result;
 }
 
-// Minimal batch stack implementation for batchStart
-const batchStack: Array<Array<() => void>> = [];
 
-export function batchStart(): () => void {
-    const callbacks: Array<() => void> = [];
-    batchStack.push(callbacks);
-    return () => {
-        callbacks.forEach(fn => fn());
-        batchStack.pop();
-    };
-}
 
 export function writeLoadableToTreeState(
     state: TreeState,

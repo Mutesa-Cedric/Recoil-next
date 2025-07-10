@@ -1,9 +1,10 @@
 /**
- * TreeCache implementation (simplified) – used for selector caches.
+ * TypeScript port of Recoil_TreeCache.js
  */
 
-import recoverableViolation from 'recoil-shared/util/Recoil_recoverableViolation';
-import type {
+'use strict';
+
+import {
     GetHandlers,
     NodeCacheRoute,
     NodeValueGet,
@@ -11,39 +12,42 @@ import type {
     TreeCacheBranch,
     TreeCacheLeaf,
     TreeCacheNode,
-    TreeCacheImplementation,
 } from './TreeCacheImplementationType';
 
-// Placeholder until core module is ported
-const isFastRefreshEnabled = () => false;
+import { isFastRefreshEnabled } from '../core/ReactMode';
+import recoverableViolation from '../../../shared/src/util/Recoil_recoverableViolation';
 
-export interface TreeCacheOptions<T> {
+export type Options<T> = {
     name?: string;
-    mapNodeValue?: (val: unknown) => unknown;
+    mapNodeValue?: (value: unknown) => unknown;
     onHit?: (node: TreeCacheLeaf<T>) => void;
     onSet?: (node: TreeCacheLeaf<T>) => void;
-}
+};
 
 class ChangedPathError extends Error { }
 
-export default class TreeCache<T> implements TreeCacheImplementation<T> {
-    private _name?: string;
-    private _numLeafs = 0;
-    private _root: TreeCacheNode<T> | null = null;
-    private _onHit: (node: TreeCacheLeaf<T>) => void;
-    private _onSet: (node: TreeCacheLeaf<T>) => void;
-    private _mapNodeValue: (v: unknown) => unknown;
+export default class TreeCache<T = unknown> {
+    _name?: string;
+    _numLeafs: number;
+    _root: TreeCacheNode<T> | null;
 
-    constructor(opts: TreeCacheOptions<T> = {}) {
-        this._name = opts.name;
-        this._onHit = opts.onHit ?? (() => { });
-        this._onSet = opts.onSet ?? (() => { });
-        this._mapNodeValue = opts.mapNodeValue ?? (v => v);
+    _onHit: (node: TreeCacheLeaf<T>) => void;
+    _onSet: (node: TreeCacheLeaf<T>) => void;
+    _mapNodeValue: (value: unknown) => unknown;
+
+    constructor(options?: Options<T>) {
+        this._name = options?.name;
+        this._numLeafs = 0;
+        this._root = null;
+        this._onHit = options?.onHit ?? (() => { });
+        this._onSet = options?.onSet ?? (() => { });
+        this._mapNodeValue = options?.mapNodeValue ?? (val => val);
     }
 
     size(): number {
         return this._numLeafs;
     }
+
     root(): TreeCacheNode<T> | null {
         return this._root;
     }
@@ -52,8 +56,15 @@ export default class TreeCache<T> implements TreeCacheImplementation<T> {
         return this.getLeafNode(getNodeValue, handlers)?.value;
     }
 
-    getLeafNode(getNodeValue: NodeValueGet, handlers?: GetHandlers<T>): TreeCacheLeaf<T> | undefined {
-        let node: TreeCacheNode<T> | null = this._root;
+    getLeafNode(
+        getNodeValue: NodeValueGet,
+        handlers?: GetHandlers<T>,
+    ): TreeCacheLeaf<T> | undefined {
+        if (this._root == null) {
+            return undefined;
+        }
+
+        let node: TreeCacheNode<T> | undefined | null = this._root;
         while (node) {
             handlers?.onNodeVisit(node);
             if (node.type === 'leaf') {
@@ -61,71 +72,126 @@ export default class TreeCache<T> implements TreeCacheImplementation<T> {
                 return node;
             }
             const nodeValue = this._mapNodeValue(getNodeValue(node.nodeKey));
-            node = node.branches.get(nodeValue) ?? null;
+            node = node.branches.get(nodeValue);
         }
         return undefined;
     }
 
     set(route: NodeCacheRoute, value: T, handlers?: SetHandlers<T>): void {
         const addLeaf = () => {
-            let parent: TreeCacheBranch<T> | null = null;
-            let branchKey: unknown = undefined;
-            // iterate route to create/find branches
+            let node: TreeCacheBranch<T> | null = this._root as TreeCacheBranch<T> | null;
+            let branchKey: unknown;
             for (const [nodeKey, nodeValue] of route) {
-                let current: TreeCacheNode<T> | null = parent ? parent.branches.get(branchKey!) ?? null : this._root;
-                if (current && current.type === 'leaf') {
+                const root = this._root;
+                if (root?.type === 'leaf') {
                     throw this.invalidCacheError();
                 }
+
+                const parent: TreeCacheBranch<T> | null = node;
+                let current: TreeCacheNode<T> | null = parent ? parent.branches.get(branchKey) ?? null : root;
                 if (!current) {
                     current = {
                         type: 'branch',
                         nodeKey,
+                        parent,
                         branches: new Map(),
                         branchKey,
-                        parent,
                     };
-                    if (parent) parent.branches.set(branchKey!, current);
-                    else this._root = current;
+                    if (parent) {
+                        parent.branches.set(branchKey, current as TreeCacheBranch<T>);
+                    } else {
+                        this._root = current;
+                    }
                 }
+
+                if (current.type !== 'branch' || current.nodeKey !== nodeKey) {
+                    throw this.invalidCacheError();
+                }
+
                 handlers?.onNodeVisit?.(current);
-                parent = current;
+                node = current;
                 branchKey = this._mapNodeValue(nodeValue);
             }
-            // leaf
-            const leaf: TreeCacheLeaf<T> = { type: 'leaf', value, parent, branchKey };
-            parent ? parent.branches.set(branchKey!, leaf) : (this._root = leaf);
+
+            const oldLeaf: TreeCacheNode<T> | null = node
+                ? node.branches.get(branchKey) ?? null
+                : this._root;
+            if (
+                oldLeaf != null &&
+                (oldLeaf.type !== 'leaf' || oldLeaf.branchKey !== branchKey)
+            ) {
+                throw this.invalidCacheError();
+            }
+
+            const leafNode: TreeCacheLeaf<T> = {
+                type: 'leaf',
+                value,
+                parent: node,
+                branchKey,
+            };
+
+            if (node) {
+                node.branches.set(branchKey, leafNode);
+            } else {
+                this._root = leafNode;
+            }
             this._numLeafs++;
-            this._onSet(leaf);
-            handlers?.onNodeVisit?.(leaf);
+            this._onSet(leafNode);
+            handlers?.onNodeVisit?.(leafNode);
         };
 
         try {
             addLeaf();
-        } catch (e) {
-            if (e instanceof ChangedPathError) {
+        } catch (error) {
+            if (error instanceof ChangedPathError) {
                 this.clear();
                 addLeaf();
             } else {
-                throw e;
+                throw error;
             }
         }
     }
 
     delete(leaf: TreeCacheLeaf<T>): boolean {
-        if (!this._root) return false;
-        if (leaf === this._root) {
-            this.clear();
+        const root = this.root();
+        if (!root) {
+            return false;
+        }
+
+        if (leaf === root) {
+            this._root = null;
+            this._numLeafs = 0;
             return true;
         }
-        // detach from parent chain
-        let node: TreeCacheBranch<T> | null = leaf.parent;
-        let branchKey = leaf.branchKey;
+
+        let node: TreeCacheBranch<T> | undefined | null = leaf.parent;
+        let branchKey: unknown = leaf.branchKey;
         while (node) {
-            node.branches.delete(branchKey!);
-            if (node.branches.size || node === this._root) break;
-            branchKey = node.branchKey;
+            node.branches.delete(branchKey);
+            if (node === root) {
+                if (node.branches.size === 0) {
+                    this._root = null;
+                    this._numLeafs = 0;
+                } else {
+                    this._numLeafs--;
+                }
+                return true;
+            }
+
+            if (node.branches.size > 0) {
+                break;
+            }
+
+            branchKey = node?.branchKey;
             node = node.parent;
         }
+
+        for (; node !== root; node = node?.parent) {
+            if (node == null) {
+                return false;
+            }
+        }
+
         this._numLeafs--;
         return true;
     }
@@ -135,11 +201,20 @@ export default class TreeCache<T> implements TreeCacheImplementation<T> {
         this._root = null;
     }
 
-    private invalidCacheError(): ChangedPathError {
-        const message = isFastRefreshEnabled()
-            ? 'Possible Fast Refresh module reload detected. Resetting cache.'
-            : 'Invalid cache values. Resetting cache.';
-        recoverableViolation(message + (this._name ? ` - ${this._name}` : ''), 'recoil');
+    invalidCacheError(): ChangedPathError {
+        const CHANGED_PATH_ERROR_MESSAGE = isFastRefreshEnabled()
+            ? 'Possible Fast Refresh module reload detected.  ' +
+            'This may also be caused by an selector returning inconsistent values. ' +
+            'Resetting cache.'
+            : 'Invalid cache values.  This happens when selectors do not return ' +
+            'consistent values for the same input dependency values.  That may also ' +
+            'be caused when using Fast Refresh to change a selector implementation.  ' +
+            'Resetting cache.';
+        recoverableViolation(
+            CHANGED_PATH_ERROR_MESSAGE +
+            (this._name != null ? ` - ${this._name}` : ''),
+            'recoil',
+        );
         throw new ChangedPathError();
     }
 } 

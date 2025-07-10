@@ -43,7 +43,7 @@ function unwrapDependencies(
 ): ReadonlyArray<RecoilValue<unknown>> {
     return Array.isArray(dependencies)
         ? dependencies
-        : Object.getOwnPropertyNames(dependencies).map(key => (dependencies as any)[key]);
+        : Object.getOwnPropertyNames(dependencies).map(key => (dependencies as { [key: string]: RecoilValueReadOnly<unknown> })[key]);
 }
 
 function wrapResults<T>(
@@ -237,9 +237,9 @@ export const noWait: <T>(
     key: '__noWait',
     get: (dependency: RecoilValue<unknown>) => ({ get }) => {
         try {
-            return selector.value(loadableWithValue(get(dependency)));
+            return (selector as any).value(loadableWithValue(get(dependency)));
         } catch (exception) {
-            return selector.value(
+            return (selector as any).value(
                 isPromise(exception)
                     ? loadableWithPromise(exception)
                     : loadableWithError(exception as Error),

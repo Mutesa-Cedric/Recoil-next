@@ -1,15 +1,19 @@
 /**
- * Produce a new Map with entries for which the callback returns true.
+ * TypeScript port of Recoil_filterMap.js
  */
 
-function filterMap<K, V>(map: ReadonlyMap<K, V>, predicate: (value: V, key: K) => boolean): Map<K, V> {
-    const result = new Map<K, V>();
+'use strict';
+
+export default function filterMap<TKey, TValue>(
+    map: ReadonlyMap<TKey, TValue>,
+    callback: (value: TValue, key: TKey) => boolean,
+): Map<TKey, TValue> {
+    const result = new Map<TKey, TValue>();
     for (const [key, value] of map) {
-        if (predicate(value, key)) {
+        if (callback(value, key)) {
             result.set(key, value);
         }
     }
-    return result;
-}
 
-export default filterMap; 
+    return result;
+} 

@@ -1,15 +1,19 @@
 /**
- * Returns a new Set containing values from the original set that satisfy callback.
+ * TypeScript port of Recoil_filterSet.js
  */
 
-function filterSet<T>(set: ReadonlySet<T>, predicate: (value: T) => boolean): ReadonlySet<T> {
-    const result = new Set<T>();
+'use strict';
+
+export default function filterSet<TValue>(
+    set: ReadonlySet<TValue>,
+    callback: (value: TValue) => boolean,
+): ReadonlySet<TValue> {
+    const result = new Set<TValue>();
     for (const value of set) {
-        if (predicate(value)) {
+        if (callback(value)) {
             result.add(value);
         }
     }
-    return result;
-}
 
-export default filterSet; 
+    return result;
+} 

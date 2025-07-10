@@ -1,19 +1,21 @@
 /**
- * Returns a set containing all values from the first set that are not present
- * in any of the other provided sets.
+ * TypeScript port of Recoil_differenceSets.js
  */
 
-function differenceSets<T>(first: ReadonlySet<T>, ...others: ReadonlySet<T>[]): ReadonlySet<T> {
-    const result = new Set<T>();
-    FIRST: for (const value of first) {
-        for (const set of others) {
-            if (set.has(value)) {
+'use strict';
+
+export default function differenceSets<TValue>(
+    set: ReadonlySet<TValue>,
+    ...setsWithValuesToRemove: ReadonlyArray<ReadonlySet<TValue>>
+): ReadonlySet<TValue> {
+    const ret = new Set<TValue>();
+    FIRST: for (const value of set) {
+        for (const otherSet of setsWithValuesToRemove) {
+            if (otherSet.has(value)) {
                 continue FIRST;
             }
         }
-        result.add(value);
+        ret.add(value);
     }
-    return result;
-}
-
-export default differenceSets; 
+    return ret;
+} 

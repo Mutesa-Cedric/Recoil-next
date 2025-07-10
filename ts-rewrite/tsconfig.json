@@ -1,27 +1,22 @@
 {
-  "files": [],
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "lib": ["DOM", "ES2020"],
-    "strict": true,
-    "esModuleInterop": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "allowJs": false,
-    "resolveJsonModule": true,
+    "target": "es2015",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "recoil-shared/*": ["packages/shared/src/*"],
-      "recoil/*": ["packages/recoil/src/*"]
-    }
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "declaration": true,
+    "outDir": "dist"
   },
-  "references": [
-    { "path": "./packages/shared" },
-    { "path": "./packages/recoil" }
-  ],
-  "include": []
+  "include": ["packages/**/*", "src/**/*", "hamt_plus.d.ts"],
+  "exclude": ["**/__tests__/**"]
 }

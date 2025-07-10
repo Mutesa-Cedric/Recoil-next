@@ -10,10 +10,10 @@ import type { Graph } from './GraphTypes';
 import type { NodeKey, StateID } from './Keys';
 import type { Store } from './State';
 
-import differenceSets from 'recoil-shared/util/Recoil_differenceSets';
-import mapMap from 'recoil-shared/util/Recoil_mapMap';
-import nullthrows from 'recoil-shared/util/Recoil_nullthrows';
-import recoverableViolation from 'recoil-shared/util/Recoil_recoverableViolation';
+import differenceSets from '../../../shared/src/util/Recoil_differenceSets';
+import mapMap from '../../../shared/src/util/Recoil_mapMap';
+import nullthrows from '../../../shared/src/util/Recoil_nullthrows';
+import recoverableViolation from '../../../shared/src/util/Recoil_recoverableViolation';
 
 function makeGraph(): Graph {
     return {

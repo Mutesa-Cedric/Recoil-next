@@ -1,43 +1,52 @@
 /**
- * Helpers to work with Maps and Sets immutably (copy-on-write semantics).
+ * TypeScript port of Recoil_CopyOnWrite.js
  */
 
-export function setByAddingToSet<V>(set: ReadonlySet<V>, value: V): Set<V> {
-    const next = new Set<V>(set);
-    next.add(value);
+'use strict';
+
+export function setByAddingToSet<V>(set: ReadonlySet<V>, v: V): Set<V> {
+    const next = new Set(set);
+    next.add(v);
     return next;
 }
 
-export function setByDeletingFromSet<V>(set: ReadonlySet<V>, value: V): Set<V> {
-    const next = new Set<V>(set);
-    next.delete(value);
+export function setByDeletingFromSet<V>(set: ReadonlySet<V>, v: V): Set<V> {
+    const next = new Set(set);
+    next.delete(v);
     return next;
 }
 
-export function mapBySettingInMap<K, V>(map: ReadonlyMap<K, V>, key: K, value: V): Map<K, V> {
-    const next = new Map<K, V>(map);
-    next.set(key, value);
+export function mapBySettingInMap<K, V>(
+    map: ReadonlyMap<K, V>,
+    k: K,
+    v: V,
+): Map<K, V> {
+    const next = new Map(map);
+    next.set(k, v);
     return next;
 }
 
 export function mapByUpdatingInMap<K, V>(
     map: ReadonlyMap<K, V>,
-    key: K,
-    updater: (value: V | undefined) => V,
+    k: K,
+    updater: (v: V | undefined) => V,
 ): Map<K, V> {
-    const next = new Map<K, V>(map);
-    next.set(key, updater(next.get(key)));
+    const next = new Map(map);
+    next.set(k, updater(next.get(k)));
     return next;
 }
 
-export function mapByDeletingFromMap<K, V>(map: ReadonlyMap<K, V>, key: K): Map<K, V> {
-    const next = new Map<K, V>(map);
-    next.delete(key);
+export function mapByDeletingFromMap<K, V>(map: ReadonlyMap<K, V>, k: K): Map<K, V> {
+    const next = new Map(map);
+    next.delete(k);
     return next;
 }
 
-export function mapByDeletingMultipleFromMap<K, V>(map: ReadonlyMap<K, V>, keys: Set<K>): Map<K, V> {
-    const next = new Map<K, V>(map);
-    keys.forEach(k => next.delete(k));
+export function mapByDeletingMultipleFromMap<K, V>(
+    map: ReadonlyMap<K, V>,
+    ks: Set<K>,
+): Map<K, V> {
+    const next = new Map(map);
+    ks.forEach(k => next.delete(k));
     return next;
 } 

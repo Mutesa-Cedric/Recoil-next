@@ -16,7 +16,7 @@ import {
 } from './FunctionalCore';
 import { writeLoadableToTreeState, getRecoilValueAsLoadable } from './RecoilValueInterface';
 import { DEFAULT_VALUE, getNode } from './Node';
-import err from 'recoil-shared/util/Recoil_err';
+import err from '../../../shared/src/util/Recoil_err';
 
 export interface TransactionInterface {
     get<T>(rv: RecoilValue<T>): T;

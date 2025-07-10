@@ -1,9 +1,9 @@
 /**
- * Type guard to determine if a value is Promise-like.
+ * TypeScript port of Recoil_isPromise.js
  */
 
-function isPromise<T = unknown>(p: unknown): p is Promise<T> {
-    return !!p && typeof (p as any).then === 'function';
-}
+'use strict';
 
-export default isPromise; 
+export default function isPromise(p: unknown): p is Promise<unknown> {
+    return !!p && typeof (p as any).then === 'function';
+} 

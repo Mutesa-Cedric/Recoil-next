@@ -1,6 +1,8 @@
 /**
- * Placeholder stub for useComponentName – returns a static string in OSS builds.
+ * TypeScript port of Recoil_useComponentName.js
  */
+
+'use strict';
 
 export default function useComponentName(): string {
   return '<component name not available>';

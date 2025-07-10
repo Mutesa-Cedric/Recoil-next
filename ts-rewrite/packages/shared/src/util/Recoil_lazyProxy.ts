@@ -1,32 +1,31 @@
 /**
- * Return a proxy that lazily defines properties using provided factories.
+ * TypeScript port of Recoil_lazyProxy.js
  */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function lazyProxy<Base extends Record<string, any>, Factories extends Record<string, () => any>>(
+'use strict';
+
+export default function lazyProxy<Base extends { [key: string]: any }, Factories extends { [key: string]: () => any }>(
     base: Base,
     factories: Factories,
 ): Base & { [K in keyof Factories]: ReturnType<Factories[K]> } {
-    const proxy: any = new Proxy(base, {
-        get(target, prop: string) {
-            if (!(prop in target) && prop in factories) {
-                // Compute and cache
-                (target as any)[prop] = factories[prop as keyof Factories]();
+    const proxy = new Proxy(base, {
+        get: (target, prop) => {
+            if (typeof prop === 'string' && !(prop in target) && prop in factories) {
+                target[prop] = factories[prop]();
             }
-            return (target as any)[prop];
+
+            return target[prop as any];
         },
-        ownKeys(target) {
-            // Materialize lazy properties before reporting keys
+
+        ownKeys: target => {
             for (const lazyProp in factories) {
-                // Access to trigger getter side-effect
-                // @ts-ignore
-                proxy[lazyProp];
+                if (!(lazyProp in target)) {
+                    target[lazyProp] = factories[lazyProp]();
+                }
             }
-            return Reflect.ownKeys(target);
+            return Object.keys(target);
         },
     });
 
     return proxy as Base & { [K in keyof Factories]: ReturnType<Factories[K]> };
-}
-
-export default lazyProxy; 
+} 

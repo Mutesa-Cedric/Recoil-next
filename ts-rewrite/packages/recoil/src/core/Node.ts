@@ -9,11 +9,11 @@ import type { NodeKey } from './Keys';
 import type { RecoilValue } from './RecoilValue';
 import type { Store, TreeState } from './State';
 
-import gkx from 'recoil-shared/util/Recoil_gkx';
-import mapIterable from 'recoil-shared/util/Recoil_mapIterable';
-import nullthrows from 'recoil-shared/util/Recoil_nullthrows';
-import RecoilEnv from 'recoil-shared/util/Recoil_RecoilEnv';
-import recoverableViolation from 'recoil-shared/util/Recoil_recoverableViolation';
+import gkx from '../../../shared/src/util/Recoil_gkx';
+import mapIterable from '../../../shared/src/util/Recoil_mapIterable';
+import nullthrows from '../../../shared/src/util/Recoil_nullthrows';
+import RecoilEnv from '../../../shared/src/util/Recoil_RecoilEnv';
+import recoverableViolation from '../../../shared/src/util/Recoil_recoverableViolation';
 
 import * as RecoilValueClasses from './RecoilValue';
 

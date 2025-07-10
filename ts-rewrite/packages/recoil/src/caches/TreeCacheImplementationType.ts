@@ -1,7 +1,14 @@
-/** TreeCache type definitions ported from Flow version */
+/**
+ * TypeScript port of Recoil_TreeCacheImplementationType.js
+ */
 
-export type NodeKey = string;
+'use strict';
+
+import { NodeKey } from '../core/Keys';
+
 export type NodeCacheRoute = Array<[NodeKey, unknown]>;
+
+export type TreeCacheNode<T> = TreeCacheLeaf<T> | TreeCacheBranch<T>;
 
 export type TreeCacheLeaf<T> = {
     type: 'leaf';
@@ -18,17 +25,17 @@ export type TreeCacheBranch<T> = {
     parent: TreeCacheBranch<T> | null;
 };
 
-export type TreeCacheNode<T> = TreeCacheLeaf<T> | TreeCacheBranch<T>;
-
 export type NodeValueGet = (nodeKey: NodeKey) => unknown;
-export type NodeVisitHandler<T> = (node: TreeCacheNode<T>) => void;
 
-export interface GetHandlers<T> {
-    onNodeVisit(node: TreeCacheNode<T>): void;
-}
-export interface SetHandlers<T> {
-    onNodeVisit(node: TreeCacheNode<T>): void;
-}
+type NodeVisitHandler<T> = (node: TreeCacheNode<T>) => void;
+
+export type GetHandlers<T> = {
+    onNodeVisit: NodeVisitHandler<T>;
+};
+
+export type SetHandlers<T> = {
+    onNodeVisit: NodeVisitHandler<T>;
+};
 
 export interface TreeCacheImplementation<T> {
     get(getNodeValue: NodeValueGet, handlers?: GetHandlers<T>): T | undefined;

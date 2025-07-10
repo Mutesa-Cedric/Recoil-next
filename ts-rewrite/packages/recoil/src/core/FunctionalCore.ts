@@ -11,11 +11,11 @@ import type { RecoilValue } from './RecoilValue';
 import type { DefaultValue, Trigger } from './Node';
 
 import { getNode, getNodeMaybe, recoilValuesForKeys } from './Node';
-import { setByAddingToSet } from 'recoil-shared/util/Recoil_CopyOnWrite';
-import filterIterable from 'recoil-shared/util/Recoil_filterIterable';
-import gkx from 'recoil-shared/util/Recoil_gkx';
-import lazyProxy from 'recoil-shared/util/Recoil_lazyProxy';
-import mapIterable from 'recoil-shared/util/Recoil_mapIterable';
+import { setByAddingToSet } from '../../../shared/src/util/Recoil_CopyOnWrite';
+import filterIterable from '../../../shared/src/util/Recoil_filterIterable';
+import gkx from '../../../shared/src/util/Recoil_gkx';
+import lazyProxy from '../../../shared/src/util/Recoil_lazyProxy';
+import mapIterable from '../../../shared/src/util/Recoil_mapIterable';
 import { RetentionZone } from './RetentionZone';
 
 // -------------------------------------------------------------------------------------

@@ -9,7 +9,7 @@ import { makeEmptyStoreState, getNextTreeStateVersion } from './State';
 import { getRecoilValueAsLoadable } from './RecoilValueInterface';
 import { setInvalidateMemoizedSnapshot } from './SnapshotCache';
 
-import nullthrows from 'recoil-shared/util/Recoil_nullthrows';
+import nullthrows from '../../../shared/src/util/Recoil_nullthrows';
 
 export type SnapshotID = StateID;
 

@@ -1,8 +1,10 @@
 /**
- * invariant() utility – throws if the condition is false.
+ * TypeScript port of invariant.js
  */
 
-export default function invariant(condition: unknown, message: string): void {
+'use strict';
+
+export default function invariant(condition: boolean, message: string): void {
     if (!condition) {
         throw new Error(message);
     }

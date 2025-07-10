@@ -1,16 +1,19 @@
 /**
- * MapCache – simple in-memory cache wrapping Map with custom key-mapper.
+ * TypeScript port of Recoil_MapCache.js
  */
 
-export interface MapCacheOptions<K> {
-    mapKey?: (key: K) => unknown;
-}
+'use strict';
+
+type Options<K> = {
+    mapKey: (key: K) => unknown;
+};
 
 export class MapCache<K, V> {
-    private _map: Map<unknown, V> = new Map();
-    private _keyMapper: (key: K) => unknown;
+    _map: Map<unknown, V>;
+    _keyMapper: (key: K) => unknown;
 
-    constructor(options?: MapCacheOptions<K>) {
+    constructor(options?: Options<K>) {
+        this._map = new Map<unknown, V>();
         this._keyMapper = options?.mapKey ?? (v => v);
     }
 
@@ -37,6 +40,4 @@ export class MapCache<K, V> {
     clear(): void {
         this._map.clear();
     }
-}
-
-export default MapCache; 
+} 

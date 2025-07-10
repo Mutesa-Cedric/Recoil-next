@@ -1,52 +1,70 @@
 /**
- * Selects an appropriate cache implementation based on a CachePolicy.
+ * TypeScript port of Recoil_cacheFromPolicy.js
  */
 
-import { CacheImplementation } from './CacheImplementationType';
-import { CachePolicy, EqualityPolicy, EvictionPolicy } from './CachePolicy';
-import LRUCache from './LRUCache';
-import MapCache from './MapCache';
-import err from 'recoil-shared/util/Recoil_err';
-import nullthrows from 'recoil-shared/util/Recoil_nullthrows';
-import stableStringify from 'recoil-shared/util/Recoil_stableStringify';
+'use strict';
 
-const defaultPolicy = {
-    equality: 'reference' as const,
-    eviction: 'none' as const,
+import { CacheImplementation } from './CacheImplementationType';
+import {
+    CachePolicy,
+    EqualityPolicy,
+    EvictionPolicy,
+} from './CachePolicy';
+import { LRUCache } from './LRUCache';
+import { MapCache } from './MapCache';
+import err from '../../../shared/src/util/Recoil_err';
+import nullthrows from '../../../shared/src/util/Recoil_nullthrows';
+import stableStringify from '../../../shared/src/util/Recoil_stableStringify';
+
+const defaultPolicy: {
+    equality: 'reference';
+    eviction: 'keep-all';
+    maxSize: number;
+} = {
+    equality: 'reference',
+    eviction: 'keep-all',
     maxSize: Infinity,
 };
 
-function getValueMapper(equality: EqualityPolicy): (v: unknown) => unknown {
+export default function cacheFromPolicy<K, V>(
+    policy: CachePolicy = defaultPolicy as any,
+): CacheImplementation<K, V> {
+    const {
+        equality = defaultPolicy.equality,
+    } = policy;
+    const eviction = 'eviction' in policy ? policy.eviction : 'keep-all';
+    const maxSize = 'maxSize' in policy && policy.eviction === 'lru' ? policy.maxSize : defaultPolicy.maxSize;
+
+    const valueMapper = getValueMapper(equality);
+    const cache = getCache<K, V>(eviction, maxSize, valueMapper);
+
+    return cache;
+}
+
+function getValueMapper(equality: EqualityPolicy): (key: unknown) => unknown {
     switch (equality) {
         case 'reference':
-            return v => v;
+            return val => val;
         case 'value':
-            return v => stableStringify(v);
+            return val => stableStringify(val);
     }
+
     throw err(`Unrecognized equality policy ${equality}`);
 }
 
 function getCache<K, V>(
-    eviction: EvictionPolicy | 'none',
+    eviction: EvictionPolicy,
     maxSize: number | undefined,
-    mapKey: (v: unknown) => unknown,
+    mapKey: (key: unknown) => unknown,
 ): CacheImplementation<K, V> {
     switch (eviction) {
         case 'keep-all':
-            return new MapCache<K, V>({ mapKey });
+            return new MapCache<K, V>({ mapKey: mapKey as any });
         case 'lru':
-            return new LRUCache<K, V>({ mapKey, maxSize: nullthrows(maxSize) });
+            return new LRUCache<K, V>({ mapKey: mapKey as any, maxSize: nullthrows(maxSize) });
         case 'most-recent':
-            return new LRUCache<K, V>({ mapKey, maxSize: 1 });
-        case 'none':
-            return new MapCache<K, V>({ mapKey });
+            return new LRUCache<K, V>({ mapKey: mapKey as any, maxSize: 1 });
     }
-    throw err(`Unrecognized eviction policy ${eviction}`);
-}
 
-export default function cacheFromPolicy<K, V>(policy: CachePolicy = defaultPolicy): CacheImplementation<K, V> {
-    const { equality = defaultPolicy.equality, eviction = defaultPolicy.eviction, maxSize = defaultPolicy.maxSize } =
-        policy as any;
-    const mapKey = getValueMapper(equality as EqualityPolicy);
-    return getCache(eviction as any, maxSize, mapKey);
+    throw err(`Unrecognized eviction policy ${eviction}`);
 } 

@@ -1,4 +1,8 @@
-/** Cache policy definitions equivalent to Flow version */
+/**
+ * TypeScript port of Recoil_CachePolicy.js
+ */
+
+'use strict';
 
 export type EqualityPolicy = 'reference' | 'value';
 export type EvictionPolicy = 'lru' | 'keep-all' | 'most-recent';

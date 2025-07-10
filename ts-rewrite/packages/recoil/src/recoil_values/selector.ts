@@ -875,10 +875,7 @@ export function selector<T>(
     }
 }
 
-const selectorWithWrappedValue =
-    (selector as unknown) as typeof selector & {
-        value: <T>(value: T) => WrappedValue<T>;
-    };
+const selectorWithWrappedValue = selector as any;
 selectorWithWrappedValue.value = <T>(value: T) => new WrappedValue(value);
 
 export default selectorWithWrappedValue; 

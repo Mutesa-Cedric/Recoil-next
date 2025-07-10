@@ -1,29 +1,34 @@
 import typescript from '@rollup/plugin-typescript';
-import pkg from '@rollup/plugin-node-resolve';
-const { nodeResolve } = pkg;
+import nodeResolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import { terser } from 'rollup-plugin-terser';
 
 export default {
-    input: 'src/index.ts',
+    input: 'packages/recoil/src/index.ts',
     output: [
         {
             file: 'dist/index.esm.js',
-            format: 'esm',
+            format: 'es',
             sourcemap: true,
         },
         {
             file: 'dist/index.cjs.js',
             format: 'cjs',
             sourcemap: true,
-            exports: 'named',
         },
     ],
+    external: ['react', 'react-dom'],
     plugins: [
-        nodeResolve({ extensions: ['.js', '.ts', '.tsx'] }),
+        nodeResolve({
+            extensions: ['.js', '.jsx', '.ts', '.tsx'],
+            preferBuiltins: false,
+        }),
+        typescript({
+            tsconfig: './tsconfig.json',
+            declaration: true,
+            declarationDir: './dist',
+            include: ['packages/**/*'],
+            exclude: ['**/__tests__/**', '**/*.test.*'],
+        }),
         commonjs(),
-        typescript({ tsconfig: './tsconfig.json' }),
-        terser(),
     ],
-    external: ['react'],
 }; 
