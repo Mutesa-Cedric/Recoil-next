@@ -1,5 +1,6 @@
 import typescript from '@rollup/plugin-typescript';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
+import pkg from '@rollup/plugin-node-resolve';
+const { nodeResolve } = pkg;
 import commonjs from '@rollup/plugin-commonjs';
 import { terser } from 'rollup-plugin-terser';
 

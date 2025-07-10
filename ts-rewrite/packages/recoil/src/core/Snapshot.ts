@@ -50,6 +50,10 @@ export class Snapshot {
     getStore_INTERNAL(): Store {
         return this._store;
     }
+
+    retain(): () => void {
+        return () => { };
+    }
 }
 
 export class MutableSnapshot extends Snapshot {
@@ -68,8 +72,13 @@ export function freshSnapshot(init?: (snap: MutableSnapshot) => void): Snapshot 
     return snap;
 }
 
-export function cloneSnapshot(store: Store): Snapshot {
-    return new Snapshot(store.getState());
+export function cloneSnapshot(store: Store, version: 'latest' | 'previous' = 'latest'): Snapshot {
+    const storeState = store.getState();
+    const treeState =
+        version === 'latest'
+            ? storeState.nextTree ?? storeState.currentTree
+            : nullthrows(storeState.previousTree);
+    return new Snapshot(treeState, store.storeID);
 }
 
 // tie into cache helper

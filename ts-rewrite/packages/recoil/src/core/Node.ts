@@ -7,6 +7,7 @@ import type { Loadable } from '../adt/Loadable';
 import type { RetainedBy } from './RetainedBy';
 import type { NodeKey } from './Keys';
 import type { RecoilValue } from './RecoilValue';
+import type { Store, TreeState } from './State';
 
 import gkx from 'recoil-shared/util/Recoil_gkx';
 import mapIterable from 'recoil-shared/util/Recoil_mapIterable';
@@ -25,26 +26,33 @@ export const DEFAULT_VALUE = new DefaultValue();
 
 export type NodeType = 'atom' | 'selector';
 
+export type PersistenceType = 'url' | 'other' | 'none';
+
+export type PersistenceInfo = {
+    type: PersistenceType;
+    backButton?: boolean;
+};
+
 export interface ReadOnlyNodeOptions<T> {
     key: NodeKey;
     nodeType: NodeType;
     // Methods required by functional core (we keep them typed but not implemented here)
-    peek: (store: unknown, treeState: unknown) => Loadable<T> | undefined;
-    get: (store: unknown, treeState: unknown) => Loadable<T>;
-    init: (store: unknown, treeState: unknown, trigger: 'get' | 'set') => () => void;
-    invalidate: (treeState: unknown) => void;
-    clearCache?: (store: unknown, treeState: unknown) => void;
+    peek: (store: Store, treeState: TreeState) => Loadable<T> | undefined;
+    get: (store: Store, treeState: TreeState) => Loadable<T>;
+    init: (store: Store, treeState: TreeState, trigger: 'get' | 'set') => () => void;
+    invalidate: (treeState: TreeState) => void;
+    clearCache?: (store: Store, treeState: TreeState) => void;
     shouldRestoreFromSnapshots: boolean;
     dangerouslyAllowMutability?: boolean;
-    persistence_UNSTABLE?: { type: 'none' | 'url'; backButton?: boolean };
+    persistence_UNSTABLE?: PersistenceInfo;
     shouldDeleteConfigOnRelease?: () => boolean;
     retainedBy: RetainedBy;
 }
 
 export interface ReadWriteNodeOptions<T> extends ReadOnlyNodeOptions<T> {
     set: (
-        store: unknown,
-        state: unknown,
+        store: Store,
+        state: TreeState,
         newValue: T | DefaultValue,
     ) => Map<NodeKey, Loadable<unknown>>; // AtomWrites type simplified
 }

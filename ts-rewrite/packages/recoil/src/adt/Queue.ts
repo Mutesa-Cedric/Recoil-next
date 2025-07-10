@@ -1,7 +1,9 @@
 /**
- * Simple execution queue placeholder – immediate execution.
+ * TypeScript port of Recoil_Queue.js
  */
 
-export function enqueueExecution(_tag: string, fn: () => unknown): void {
-    fn();
+'use strict';
+
+export function enqueueExecution(s: string, f: () => unknown): void {
+    f();
 } 

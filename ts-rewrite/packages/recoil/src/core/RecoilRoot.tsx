@@ -4,10 +4,10 @@
 
 import React, { createContext, useContext, useRef } from 'react';
 import type { ReactNode } from 'react';
-import type { Store, StoreRef, TreeState } from './State';
+import type { Store, StoreRef, TreeState, StateID } from './State';
 import { makeEmptyStoreState } from './State';
 import { getNextStoreID } from './Keys';
-import { batchUpdates } from './Batching';
+import { graph as makeGraph } from './Graph';
 
 const defaultStore: Store = {
     storeID: getNextStoreID(),
@@ -27,23 +27,37 @@ export const useStoreRef = (): StoreRef => useContext(AppContext);
 
 export interface RecoilRootProps {
     children: ReactNode;
+    store?: Store;
 }
 
-export function RecoilRoot({ children }: RecoilRootProps): JSX.Element {
+export function RecoilRoot({ children, store }: RecoilRootProps): JSX.Element {
     const storeRef = useRef<Store | null>(null);
 
     if (storeRef.current === null) {
-        const storeState = makeEmptyStoreState();
-        storeRef.current = {
-            storeID: getNextStoreID(),
-            getState: () => storeState,
-            replaceState: (_cb: (t: TreeState) => TreeState) => {
-                storeState.currentTree = _cb(storeState.currentTree);
-            },
-            getGraph: () => ({ nodeDeps: new Map(), nodeToNodeSubscriptions: new Map() }),
-            subscribeToTransactions: () => ({ release: () => { } }),
-            addTransactionMetadata: () => { },
-        } as unknown as Store;
+        if (store) {
+            storeRef.current = store;
+        } else {
+            const storeState = makeEmptyStoreState();
+            storeRef.current = {
+                storeID: getNextStoreID(),
+                getState: () => storeState,
+                replaceState: (cb: (t: TreeState) => TreeState) => {
+                    storeState.currentTree = cb(storeState.currentTree);
+                },
+                getGraph: (version: StateID) => {
+                    const graph = storeState.graphsByVersion.get(version);
+                    if (graph) {
+                        return graph;
+                    }
+                    // Create a new graph for this version if it doesn't exist
+                    const newGraph = makeGraph();
+                    storeState.graphsByVersion.set(version, newGraph);
+                    return newGraph;
+                },
+                subscribeToTransactions: () => ({ release: () => { } }),
+                addTransactionMetadata: () => { },
+            } as unknown as Store;
+        }
     }
 
     return <AppContext.Provider value={{ current: storeRef.current }}>{children}</AppContext.Provider>;

@@ -1,57 +1,54 @@
 /**
- * TypeScript port of Recoil Loadable abstraction.
+ * TypeScript port of Recoil_Loadable.js
  */
 
-import err from 'recoil-shared/util/Recoil_err';
-import isPromise from 'recoil-shared/util/Recoil_isPromise';
-import nullthrows from 'recoil-shared/util/Recoil_nullthrows';
+'use strict';
 
-// Base class defines the required API but leaves implementation to subclasses.
-abstract class BaseLoadable<T> {
-    abstract readonly state: 'hasValue' | 'hasError' | 'loading';
-    abstract readonly contents: unknown;
+import err from '../../../shared/src/util/Recoil_err';
+import isPromise from '../../../shared/src/util/Recoil_isPromise';
+import nullthrows from '../../../shared/src/util/Recoil_nullthrows';
 
-    abstract getValue(): T;
-    abstract toPromise(): Promise<T>;
-
-    valueMaybe(): T | undefined {
-        return undefined;
-    }
-    valueOrThrow(): T {
-        throw err(`Loadable expected value, but in \"${(this as any).state}\" state`);
-    }
-
-    promiseMaybe(): Promise<T> | undefined {
-        return undefined;
-    }
-    promiseOrThrow(): Promise<T> {
-        throw err(`Loadable expected promise, but in \"${(this as any).state}\" state`);
-    }
-
-    errorMaybe(): unknown | undefined {
-        return undefined;
-    }
-    errorOrThrow(): unknown {
-        throw err(`Loadable expected error, but in \"${(this as any).state}\" state`);
-    }
-
-    is(other: Loadable<unknown>): boolean {
-        return other.state === this.state && other.contents === this.contents;
-    }
-
-    map<S>(fn: (value: T) => S | Loadable<S> | Promise<S>): Loadable<any> {
+export class BaseLoadable<T> {
+    getValue(): T {
         throw err('BaseLoadable');
     }
+    toPromise(): Promise<T> {
+        throw err('BaseLoadable');
+    }
+    valueMaybe(): T | undefined {
+        throw err('BaseLoadable');
+    }
+    valueOrThrow(): T {
+        throw err(`Loadable expected value, but in "${(this as any).state}" state`);
+    }
+    promiseMaybe(): Promise<T> | undefined {
+        throw err('BaseLoadable');
+    }
+    promiseOrThrow(): Promise<T> {
+        throw err(`Loadable expected promise, but in "${(this as any).state}" state`);
+    }
+    errorMaybe(): unknown | undefined {
+        throw err('BaseLoadable');
+    }
+    errorOrThrow(): unknown {
+        throw err(`Loadable expected error, but in "${(this as any).state}" state`);
+    }
+
+    is(other: Loadable<any>): boolean {
+        return (other as any).state === (this as any).state && (other as any).contents === (this as any).contents;
+    }
+
+    abstract map<S>(map: (value: T) => Promise<S> | Loadable<S> | S): Loadable<S>;
 }
 
-class ValueLoadable<T> extends BaseLoadable<T> {
-    readonly state = 'hasValue' as const;
-    readonly contents: T;
+export class ValueLoadable<T> extends BaseLoadable<T> {
+    state: 'hasValue' = 'hasValue';
+    contents: T;
+
     constructor(value: T) {
         super();
         this.contents = value;
     }
-
     getValue(): T {
         return this.contents;
     }
@@ -64,40 +61,47 @@ class ValueLoadable<T> extends BaseLoadable<T> {
     valueOrThrow(): T {
         return this.contents;
     }
-    map<S>(fn: (v: T) => S | Promise<S> | Loadable<S>): Loadable<S> {
+    promiseMaybe(): undefined {
+        return undefined;
+    }
+    errorMaybe(): undefined {
+        return undefined;
+    }
+    map<S>(map: (value: T) => Promise<S> | Loadable<S> | S): Loadable<S> {
         try {
-            const next = fn(this.contents);
-            if (isPromise(next)) {
-                return loadableWithPromise(next);
-            }
-            if (isLoadable(next)) {
-                return next as Loadable<S>;
-            }
-            return loadableWithValue(next as S);
+            const next = map(this.contents);
+            return isPromise(next)
+                ? loadableWithPromise(next)
+                : isLoadable(next)
+                    ? next
+                    : loadableWithValue(next);
         } catch (e) {
-            if (isPromise(e)) {
-                // retry once promise resolves
-                // @ts-ignore assume promise resolves to retry mapping
-                return loadableWithPromise(e.then(() => this.map(fn).contents));
-            }
-            return loadableWithError(e) as unknown as Loadable<S>;
+            return isPromise(e)
+                ? loadableWithPromise((e as Promise<any>).then(() => this.map(map).toPromise()) as Promise<S>)
+                : loadableWithError(e);
         }
     }
 }
 
-class ErrorLoadable<T> extends BaseLoadable<T> {
-    readonly state = 'hasError' as const;
-    readonly contents: unknown;
+export class ErrorLoadable<T> extends BaseLoadable<T> {
+    state: 'hasError' = 'hasError';
+    contents: unknown;
+
     constructor(error: unknown) {
         super();
         this.contents = error;
     }
-
     getValue(): T {
         throw this.contents;
     }
     toPromise(): Promise<T> {
         return Promise.reject(this.contents);
+    }
+    valueMaybe(): undefined {
+        return undefined;
+    }
+    promiseMaybe(): undefined {
+        return undefined;
     }
     errorMaybe(): unknown {
         return this.contents;
@@ -105,24 +109,27 @@ class ErrorLoadable<T> extends BaseLoadable<T> {
     errorOrThrow(): unknown {
         return this.contents;
     }
-    map<S>(): ErrorLoadable<S> {
-        return this as unknown as ErrorLoadable<S>; // safe – contents unchanged & always error
+    map<S>(_map: (value: T) => Promise<S> | Loadable<S> | S): Loadable<S> {
+        return this as unknown as Loadable<S>;
     }
 }
 
-class LoadingLoadable<T> extends BaseLoadable<T> {
-    readonly state = 'loading' as const;
-    readonly contents: Promise<T>;
+export class LoadingLoadable<T> extends BaseLoadable<T> {
+    state: 'loading' = 'loading';
+    contents: Promise<T>;
+
     constructor(promise: Promise<T>) {
         super();
         this.contents = promise;
     }
-
     getValue(): T {
         throw this.contents;
     }
     toPromise(): Promise<T> {
         return this.contents;
+    }
+    valueMaybe(): undefined {
+        return undefined;
     }
     promiseMaybe(): Promise<T> {
         return this.contents;
@@ -130,111 +137,121 @@ class LoadingLoadable<T> extends BaseLoadable<T> {
     promiseOrThrow(): Promise<T> {
         return this.contents;
     }
-    map<S>(fn: (v: T) => S | Promise<S> | Loadable<S>): Loadable<S> {
-        const nextPromise: Promise<S> = this.contents
-            .then(value => {
-                const next = fn(value);
-                if (isLoadable(next)) {
-                    switch (next.state) {
-                        case 'hasValue':
-                            return next.contents as S;
-                        case 'hasError':
-                            throw next.contents;
-                        case 'loading':
-                            return next.contents;
+    errorMaybe(): undefined {
+        return undefined;
+    }
+    map<S>(
+        map: (value: T) => Promise<S> | Loadable<S> | S,
+    ): Loadable<S> {
+        return loadableWithPromise(
+            this.contents
+                .then(value => {
+                    const next = map(value);
+                    if (isLoadable(next)) {
+                        const nextLoadable: Loadable<S> = next;
+                        switch (nextLoadable.state) {
+                            case 'hasValue':
+                                return nextLoadable.contents;
+                            case 'hasError':
+                                throw nextLoadable.contents;
+                            case 'loading':
+                                return nextLoadable.contents;
+                        }
                     }
-                }
-                return next;
-            })
-            .catch(e => {
-                if (isPromise(e)) {
-                    return e.then(() => this.map(fn).contents as unknown as S);
-                }
-                throw e;
-            });
-
-        return loadableWithPromise(nextPromise);
+                    return next;
+                })
+                .catch(e => {
+                    if (isPromise(e)) {
+                        return e.then(() => this.map(map).toPromise());
+                    }
+                    throw e;
+                }),
+        ) as Loadable<S>;
     }
 }
 
-export type Loadable<T> = Readonly<ValueLoadable<T>> | Readonly<ErrorLoadable<T>> | Readonly<LoadingLoadable<T>>;
+export type Loadable<T> =
+    | Readonly<ValueLoadable<T>>
+    | Readonly<ErrorLoadable<T>>
+    | Readonly<LoadingLoadable<T>>;
 
-function loadableWithValue<T>(value: T): Readonly<ValueLoadable<T>> {
+export function loadableWithValue<T>(value: T): Readonly<ValueLoadable<T>> {
     return Object.freeze(new ValueLoadable(value));
 }
-function loadableWithError<T>(error: unknown): Readonly<ErrorLoadable<T>> {
+
+export function loadableWithError<T>(error: unknown): Readonly<ErrorLoadable<T>> {
     return Object.freeze(new ErrorLoadable<T>(error));
 }
-function loadableWithPromise<T>(promise: Promise<T>): Readonly<LoadingLoadable<T>> {
+
+export function loadableWithPromise<T>(
+    promise: Promise<T>,
+): Readonly<LoadingLoadable<T>> {
     return Object.freeze(new LoadingLoadable(promise));
 }
-function loadableLoading<T>(): Readonly<LoadingLoadable<T>> {
-    return Object.freeze(new LoadingLoadable<T>(new Promise(() => { })));
+
+export function loadableLoading<T>(): Readonly<LoadingLoadable<T>> {
+    return Object.freeze(new LoadingLoadable(new Promise(() => { })));
 }
 
-// Utilities to work with collections of loadables / promises / raw values
-function isLoadable(x: unknown): x is Loadable<unknown> {
+type UnwrapLoadables<Loadables> = { [K in keyof Loadables]: Loadables[K] extends Loadable<infer V> ? V : never };
+
+function loadableAllArray<Inputs extends ReadonlyArray<Loadable<any>>>(
+    inputs: Inputs,
+): Loadable<UnwrapLoadables<Inputs>> {
+    return inputs.every(i => i.state === 'hasValue')
+        ? loadableWithValue(inputs.map(i => i.contents) as any)
+        : inputs.some(i => i.state === 'hasError')
+            ? loadableWithError(
+                nullthrows(
+                    inputs.find(i => i.state === 'hasError'),
+                    'Invalid loadable passed to loadableAll',
+                ).contents,
+            )
+            : loadableWithPromise(Promise.all(inputs.map(i => i.contents)) as any);
+}
+
+export function loadableAll<
+    Inputs extends
+    | ReadonlyArray<Loadable<any> | Promise<any> | any>
+    | Readonly<{ [key: string]: Loadable<any> | Promise<any> | any }>,
+>(
+    inputs: Inputs,
+): Loadable<any> {
+    const unwrapedInputs = Array.isArray(inputs)
+        ? inputs
+        : Object.getOwnPropertyNames(inputs).map(key => (inputs as any)[key]);
+    const normalizedInputs = unwrapedInputs.map(x =>
+        isLoadable(x)
+            ? x
+            : isPromise(x)
+                ? loadableWithPromise(x)
+                : loadableWithValue(x),
+    );
+    const output = loadableAllArray(normalizedInputs);
+    return Array.isArray(inputs)
+        ? output
+        : output.map(outputs =>
+            Object.getOwnPropertyNames(inputs).reduce(
+                (out, key, idx) => ({ ...out, [key]: (outputs as any)[idx] }),
+                {},
+            ),
+        );
+}
+
+export function isLoadable(x: unknown): x is Loadable<unknown> {
     return x instanceof BaseLoadable;
 }
 
-type UnwrapLoadables<T> = {
-    [K in keyof T]: T[K] extends Loadable<infer R>
-    ? R
-    : T[K] extends Promise<infer R>
-    ? R
-    : T[K];
-};
-
-function loadableAllArray(inputs: Loadable<unknown>[]): Loadable<unknown[]> {
-    if (inputs.every(i => i.state === 'hasValue')) {
-        return loadableWithValue(inputs.map(i => (i as ValueLoadable<unknown>).contents));
-    }
-    if (inputs.some(i => i.state === 'hasError')) {
-        const errorLoadable = inputs.find(i => i.state === 'hasError') as ErrorLoadable<unknown> | undefined;
-        return loadableWithError(errorLoadable?.contents);
-    }
-    return loadableWithPromise(Promise.all(inputs.map(i => (i as LoadingLoadable<unknown>).contents)));
-}
-
-function loadableAll<T extends readonly (Loadable<any> | Promise<any> | any)[]>(
-    inputs: T,
-): Loadable<UnwrapLoadables<T>>;
-function loadableAll<T extends { [K in keyof T]: Loadable<any> | Promise<any> | any }>(
-    inputs: T,
-): Loadable<UnwrapLoadables<T>>;
-function loadableAll(inputs: any): Loadable<any> {
-    const arr = Array.isArray(inputs) ? inputs : Object.values(inputs);
-    const normalized = arr.map(x => (isLoadable(x) ? x : isPromise(x) ? loadableWithPromise(x) : loadableWithValue(x)));
-    const output = loadableAllArray(normalized);
-    if (Array.isArray(inputs)) {
-        return output;
-    }
-    return output.map((results: any[]) => {
-        const keys = Object.keys(inputs);
-        return keys.reduce((acc, key, idx) => {
-            acc[key] = results[idx];
-            return acc;
-        }, {} as any);
-    });
-}
-
 export const RecoilLoadable = {
-    of<T>(value: T | Promise<T> | Loadable<T>): Loadable<T> {
-        if (isPromise(value)) return loadableWithPromise(value);
-        if (isLoadable(value)) return value;
-        return loadableWithValue(value);
-    },
-    error: loadableWithError,
-    loading: loadableLoading,
-    all: loadableAll as any,
-    isLoadable,
-};
-
-export {
-    loadableWithValue,
-    loadableWithError,
-    loadableWithPromise,
-    loadableLoading,
-    loadableAll,
+    of: <T>(value: Promise<T> | Loadable<T> | T): Loadable<T> =>
+        isPromise(value)
+            ? loadableWithPromise(value)
+            : isLoadable(value)
+                ? value
+                : loadableWithValue(value),
+    error: <T>(error: unknown): Readonly<ErrorLoadable<T>> =>
+        loadableWithError(error),
+    loading: <T>(): Readonly<LoadingLoadable<T>> => loadableLoading<T>(),
+    all: loadableAll,
     isLoadable,
 }; 

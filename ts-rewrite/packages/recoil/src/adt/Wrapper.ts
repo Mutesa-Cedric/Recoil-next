@@ -1,7 +1,12 @@
 /**
- * Wrapper used in Recoil to mark values that should bypass certain processing.
+ * TypeScript port of Recoil_Wrapper.js
  */
 
+'use strict';
+
 export class WrappedValue<T> {
-    constructor(public readonly value: T) { }
+    value: T;
+    constructor(value: T) {
+        this.value = value;
+    }
 } 

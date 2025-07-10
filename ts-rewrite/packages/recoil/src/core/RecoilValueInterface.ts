@@ -26,8 +26,14 @@ import {
 import err from 'recoil-shared/util/Recoil_err';
 import recoverableViolation from 'recoil-shared/util/Recoil_recoverableViolation';
 import nullthrows from 'recoil-shared/util/Recoil_nullthrows';
+import { batchStart as batchStartOriginal } from './Batching'; // Original from Batching.ts
+import { writeLoadableToTreeState as writeLoadableToTreeStateOriginal } from './FunctionalCore';
+import { invalidateDownstreams as invalidateDownstreamsOriginal } from './FunctionalCore';
+import { copyTreeState as copyTreeStateOriginal } from './FunctionalCore';
 
 type ValueOrUpdater<T> = T | ((curr: T) => T);
+
+export type ComponentSubscription = { release: () => void };
 
 // -----------------------------------------------------------------------------
 // Utility helpers (mostly simplified) – many adapted from original source
@@ -73,7 +79,11 @@ export function writeLoadableToTreeState(
     key: NodeKey,
     loadable: Loadable<unknown>,
 ): void {
-    state.atomValues.set(key, loadable);
+    if (loadable.state === 'hasValue' && loadable.contents instanceof DefaultValue) {
+        state.atomValues.delete(key);
+    } else {
+        state.atomValues.set(key, loadable);
+    }
     state.dirtyAtoms.add(key);
     state.nonvalidatedAtoms.delete(key);
 }
@@ -91,6 +101,20 @@ export function setRecoilValue<T>(
         const newState = copyTreeState(state);
         const writes = setNodeValue(store, newState, recoilValue.key, valueOrUpdater as any);
         writes.forEach((loadable, key) => writeLoadableToTreeState(newState, key, loadable));
+        invalidateDownstreams(store, newState);
+        return newState;
+    });
+}
+
+export function setUnvalidatedRecoilValue<T>(store: Store, recoilValue: AbstractRecoilValue<T>, unvalidatedValue: T): void {
+    const { key } = recoilValue;
+    store.replaceState(state => {
+        const newState = copyTreeState(state);
+        const node = getNodeMaybe(key);
+        node?.invalidate?.(newState);
+        newState.atomValues.delete(key);
+        newState.nonvalidatedAtoms.set(key, unvalidatedValue);
+        newState.dirtyAtoms.add(key);
         invalidateDownstreams(store, newState);
         return newState;
     });
@@ -119,6 +143,15 @@ export function subscribeToRecoilValue<T>(
             subs.get(key)?.delete(id);
         },
     };
+}
+
+export function refreshRecoilValue<T>(
+    store: Store,
+    { key }: AbstractRecoilValue<T>,
+): void {
+    const { currentTree } = store.getState();
+    const node = getNode(key);
+    node.clearCache?.(store, currentTree);
 }
 
 export { AbstractRecoilValue, RecoilValueReadOnly, RecoilState, isRecoilValue }; 
