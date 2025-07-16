@@ -1,34 +1,62 @@
 import typescript from '@rollup/plugin-typescript';
 import nodeResolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
+import { dts } from 'rollup-plugin-dts';
 
-export default {
+const external = ['react', 'react-dom'];
+
+const commonPlugins = [
+    nodeResolve({
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+        preferBuiltins: false,
+    }),
+    commonjs(),
+];
+
+// Main build configuration
+const mainBuild = {
     input: 'packages/recoil/src/index.ts',
     output: [
         {
-            file: 'dist/index.esm.js',
+            file: 'dist/index.mjs',
             format: 'es',
-            sourcemap: true,
         },
         {
-            file: 'dist/index.cjs.js',
+            file: 'dist/index.cjs',
             format: 'cjs',
-            sourcemap: true,
         },
     ],
-    external: ['react', 'react-dom'],
+    external,
     plugins: [
-        nodeResolve({
-            extensions: ['.js', '.jsx', '.ts', '.tsx'],
-            preferBuiltins: false,
-        }),
+        ...commonPlugins,
         typescript({
             tsconfig: './tsconfig.json',
-            declaration: true,
-            declarationDir: './dist',
+            declaration: false, // We'll handle declarations separately
             include: ['packages/**/*'],
             exclude: ['**/__tests__/**', '**/*.test.*'],
         }),
-        commonjs(),
     ],
-}; 
+};
+
+// TypeScript declarations build
+const dtsBuild = {
+    input: 'packages/recoil/src/index.ts',
+    output: [
+        {
+            file: 'dist/index.d.ts',
+            format: 'es',
+        },
+        {
+            file: 'dist/index.d.cts',
+            format: 'cjs',
+        },
+    ],
+    external,
+    plugins: [
+        dts({
+            tsconfig: './tsconfig.json',
+        }),
+    ],
+};
+
+export default [mainBuild, dtsBuild]; 
