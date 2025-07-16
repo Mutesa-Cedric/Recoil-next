@@ -26,7 +26,18 @@ import {
 import err from '../../../shared/src/util/Recoil_err';
 import recoverableViolation from '../../../shared/src/util/Recoil_recoverableViolation';
 import nullthrows from '../../../shared/src/util/Recoil_nullthrows';
-import { batchStart } from './Batching';
+
+const batchStack: Array<Array<() => void>> = [];
+
+export function batchStart(): () => void {
+    const callbacks: Array<() => void> = [];
+    batchStack.push(callbacks);
+    return () => {
+        callbacks.forEach(fn => fn());
+        batchStack.pop();
+    };
+}
+
 
 type ValueOrUpdater<T> = T | ((curr: T) => T);
 

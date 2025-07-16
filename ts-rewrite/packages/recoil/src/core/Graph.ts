@@ -1,10 +1,8 @@
-/*
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * Licensed under the MIT license.
- *
+/**
  * TypeScript port of Recoil_Graph.js
  */
+
+'use strict';
 
 import type { Graph } from './GraphTypes';
 import type { NodeKey, StateID } from './Keys';
@@ -75,7 +73,7 @@ function mergeDepsIntoGraph(
     }
 }
 
-export function saveDepsToStore(
+function saveDepsToStore(
     key: NodeKey,
     deps: ReadonlySet<NodeKey>,
     store: Store,
@@ -118,4 +116,4 @@ export function saveDepsToStore(
     }
 }
 
-export { cloneGraph, makeGraph as graph }; 
+export { cloneGraph, makeGraph as graph, saveDepsToStore }; 

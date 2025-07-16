@@ -37,8 +37,6 @@ export abstract class BaseLoadable<T> {
     is(other: Loadable<any>): boolean {
         return (other as any).state === (this as any).state && (other as any).contents === (this as any).contents;
     }
-
-    abstract map<S>(map: (value: T) => Promise<S> | Loadable<S> | S): Loadable<S>;
 }
 
 export class ValueLoadable<T> extends BaseLoadable<T> {
@@ -110,7 +108,7 @@ export class ErrorLoadable<T> extends BaseLoadable<T> {
         return this.contents;
     }
     map<S>(_map: (value: T) => Promise<S> | Loadable<S> | S): Loadable<S> {
-        return loadableWithError<S>(this.contents);
+        return this as unknown as Loadable<S>;
     }
 }
 
@@ -190,7 +188,7 @@ export function loadableWithPromise<T>(
 }
 
 export function loadableLoading<T>(): Readonly<LoadingLoadable<T>> {
-    return Object.freeze(new LoadingLoadable(new Promise(() => { })));
+    return Object.freeze(new LoadingLoadable(new Promise(() => { }) as Promise<T>));
 }
 
 type UnwrapLoadables<Loadables> = { [K in keyof Loadables]: Loadables[K] extends Loadable<infer V> ? V : never };

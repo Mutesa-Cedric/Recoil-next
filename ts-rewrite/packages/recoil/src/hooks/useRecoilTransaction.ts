@@ -22,4 +22,6 @@ export function useRecoilTransaction<Args extends ReadonlyArray<unknown>>(
             },
         deps != null ? [...deps, storeRef] : [storeRef],
     );
-} 
+}
+
+export default useRecoilTransaction; 

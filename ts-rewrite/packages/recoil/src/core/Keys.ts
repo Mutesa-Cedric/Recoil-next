@@ -1,6 +1,8 @@
 /**
- * ID generators and key types.
+ * TypeScript port of Recoil_Keys.js
  */
+
+'use strict';
 
 export type NodeKey = string;
 export type StateID = number & { readonly __state: unique symbol };

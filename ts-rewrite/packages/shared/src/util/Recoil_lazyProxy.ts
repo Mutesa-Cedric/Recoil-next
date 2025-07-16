@@ -11,16 +11,16 @@ export default function lazyProxy<Base extends { [key: string]: any }, Factories
     const proxy = new Proxy(base, {
         get: (target, prop) => {
             if (typeof prop === 'string' && !(prop in target) && prop in factories) {
-                target[prop] = factories[prop]();
+                (target as any)[prop] = factories[prop]();
             }
 
-            return target[prop as any];
+            return (target as any)[prop];
         },
 
         ownKeys: target => {
             for (const lazyProp in factories) {
                 if (!(lazyProp in target)) {
-                    target[lazyProp] = factories[lazyProp]();
+                    (target as any)[lazyProp] = factories[lazyProp]();
                 }
             }
             return Object.keys(target);

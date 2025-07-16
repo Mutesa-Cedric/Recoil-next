@@ -9,6 +9,7 @@
         "dist"
     ],
     "scripts": {
+        "prebuild": "echo \"declare module 'hamt_plus';\" > hamt_plus.d.ts",
         "build": "rollup -c",
         "test": "jest",
         "lint": "eslint \"src/**/*.{ts,tsx}\"",
@@ -33,7 +34,9 @@
         "jest": "^30.0.4",
         "jsdom": "^26.1.0",
         "react-test-renderer": "^19.1.0",
+        "rollup": "^4.0.0",
         "ts-jest": "^29.4.0",
+        "tslib": "^2.6.0",
         "typescript": "^5.4.2"
     },
     "dependencies": {

@@ -1,8 +1,8 @@
-/*
- * Full TypeScript port of Recoil_FunctionalCore.js
- * Implements node initialization, selector evaluation helpers, dependency
- * tracking and write utilities used throughout core.
+/**
+ * TypeScript port of Recoil_FunctionalCore.js
  */
+
+'use strict';
 
 import type { Loadable } from '../adt/Loadable';
 import type { RetainedBy } from './RetainedBy';
@@ -233,8 +233,8 @@ export function getDownstreamNodes(
     const visiting: NodeKey[] = Array.from(keys);
     const graph = store.getGraph(state.version);
 
-    while (visiting.length) {
-        const key = visiting.pop() as NodeKey;
+    let key;
+    while ((key = visiting.pop()) !== undefined) {
         if (visitedNodes.has(key)) continue;
 
         visitedNodes.add(key);

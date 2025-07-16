@@ -132,7 +132,7 @@ export function selectorFamily<T, Params extends Parameter>(
                 },
                 newValue: T | DefaultValue,
             ) => set(params)(callbacks, newValue);
-            newSelector = selector<T>({
+            newSelector = selector({
                 key: myKey,
                 get: myGet,
                 set: mySet,
@@ -141,7 +141,7 @@ export function selectorFamily<T, Params extends Parameter>(
                 retainedBy_UNSTABLE: retainedBy,
             });
         } else {
-            newSelector = selector<T>({
+            newSelector = selector({
                 key: myKey,
                 get: myGet,
                 cachePolicy_UNSTABLE: myCachePolicy,

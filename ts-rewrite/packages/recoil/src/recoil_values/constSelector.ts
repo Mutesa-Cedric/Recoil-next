@@ -21,4 +21,5 @@ function constSelector<T extends Parameter>(
     return constantSelector(constant);
 }
 
+export { constSelector };
 export default constSelector; 

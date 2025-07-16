@@ -208,13 +208,20 @@ export function gotoSnapshot(store: Store, snapshot: Snapshot): void {
             }
         }
         keysToUpdate.forEach(key => {
-            setRecoilValueLoadable(
-                store,
-                new AbstractRecoilValue(key),
-                next.atomValues.has(key)
-                    ? nullthrows(next.atomValues.get(key))
-                    : loadableWithValue(DEFAULT_VALUE),
-            );
+            const loadable = next.atomValues.get(key);
+            if (loadable) {
+                setRecoilValueLoadable(
+                    store,
+                    new AbstractRecoilValue(key),
+                    loadable,
+                );
+            } else {
+                setRecoilValueLoadable(
+                    store,
+                    new AbstractRecoilValue(key),
+                    loadableWithValue(DEFAULT_VALUE),
+                );
+            }
         });
         store.replaceState(state => ({ ...state, stateID: snapshot.getID() }));
     });

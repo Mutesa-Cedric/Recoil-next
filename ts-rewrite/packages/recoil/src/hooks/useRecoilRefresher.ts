@@ -14,4 +14,6 @@ export function useRecoilRefresher<T>(recoilValue: RecoilValue<T>): () => void {
         const store = storeRef.current;
         refreshRecoilValue(store, recoilValue);
     }, [recoilValue, storeRef]);
-} 
+}
+
+export default useRecoilRefresher; 

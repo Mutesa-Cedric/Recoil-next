@@ -4,7 +4,7 @@
 
 import React, { createContext, useContext, useRef } from 'react';
 import type { ReactNode } from 'react';
-import type { Store, StoreRef, TreeState, StateID } from './State';
+import type { Store, StoreRef, TreeState, StateID, StoreID } from './State';
 import { makeEmptyStoreState } from './State';
 import { getNextStoreID } from './Keys';
 import { graph as makeGraph } from './Graph';
@@ -24,6 +24,10 @@ const defaultStore: Store = {
 
 const AppContext = createContext<StoreRef>({ current: defaultStore });
 export const useStoreRef = (): StoreRef => useContext(AppContext);
+
+export function useRecoilStoreID(): StoreID {
+    return useStoreRef().current.storeID;
+}
 
 export interface RecoilRootProps {
     children: ReactNode;

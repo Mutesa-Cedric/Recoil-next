@@ -8,6 +8,7 @@ import type { RecoilValue } from './RecoilValue';
 import { makeEmptyStoreState, getNextTreeStateVersion } from './State';
 import { getRecoilValueAsLoadable } from './RecoilValueInterface';
 import { setInvalidateMemoizedSnapshot } from './SnapshotCache';
+import { StoreID } from './Keys';
 
 import nullthrows from '../../../shared/src/util/Recoil_nullthrows';
 
@@ -29,8 +30,8 @@ function makeStore(storeState: StoreState): Store {
 
 export class Snapshot {
     private _store: Store;
-    constructor(storeState?: StoreState) {
-        this._store = makeStore(storeState ?? makeEmptyStoreState());
+    constructor(storeState?: StoreState | TreeState, parentStoreID?: StoreID) {
+        this._store = makeStore(storeState as StoreState ?? makeEmptyStoreState());
     }
 
     getID(): SnapshotID {

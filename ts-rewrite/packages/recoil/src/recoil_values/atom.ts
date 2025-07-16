@@ -458,8 +458,8 @@ function baseAtom<T>(options: BaseAtomOptions<T>): RecoilState<T> {
         newValue: T | DefaultValue,
     ): AtomWrites {
         if (state.atomValues.has(key)) {
-            const existing = nullthrows(state.atomValues.get(key));
-            if (existing.state === 'hasValue' && newValue === existing.contents) {
+            const existing = state.atomValues.get(key);
+            if (existing && existing.state === 'hasValue' && newValue === existing.contents) {
                 return new Map();
             }
         } else if (
@@ -596,4 +596,5 @@ const atomWithWrappedValue = (atom as unknown) as typeof atom & {
 };
 atomWithWrappedValue.value = <T>(value: T) => new WrappedValue(value);
 
+export { atomWithWrappedValue as atom };
 export default atomWithWrappedValue; 

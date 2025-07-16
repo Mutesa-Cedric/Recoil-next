@@ -27,4 +27,5 @@ function errorSelector<T>(message: string): RecoilValueReadOnly<T> {
     return throwingSelector(message);
 }
 
+export { errorSelector };
 export default errorSelector; 

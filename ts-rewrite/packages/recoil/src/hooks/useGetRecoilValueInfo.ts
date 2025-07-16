@@ -18,4 +18,6 @@ export function useGetRecoilValueInfo(): (<T>(
             storeRef.current.getState().currentTree,
             recoilValue.key,
         );
-} 
+}
+
+export default useGetRecoilValueInfo; 

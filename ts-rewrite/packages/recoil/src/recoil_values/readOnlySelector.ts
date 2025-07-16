@@ -17,4 +17,5 @@ function readOnlySelector<T>(atom: RecoilValue<T>): RecoilValueReadOnly<T> {
     return atom as RecoilValueReadOnly<T>;
 }
 
+export { readOnlySelector };
 export default readOnlySelector; 

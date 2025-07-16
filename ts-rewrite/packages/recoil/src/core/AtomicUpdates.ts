@@ -1,10 +1,10 @@
-/*
- * Simplified TypeScript port of Recoil_AtomicUpdates.js – provides atomicUpdater helper.
+/**
+ * TypeScript port of Recoil_AtomicUpdates.js
  */
 
-// Simple local definition to avoid extra dependency
-type ValueOrUpdater<T> = T | ((curr: T) => T);
+'use strict';
 
+import { ValueOrUpdater } from '../recoil_values/callbackTypes';
 import type { RecoilState, RecoilValue } from './RecoilValue';
 import type { Store, TreeState, NodeKey } from './State';
 
@@ -63,7 +63,7 @@ class TransactionInterfaceImpl implements TransactionInterface {
     };
 
     reset = <T>(state: RecoilState<T>): void => {
-        this.set(state, DEFAULT_VALUE as unknown as T);
+        this.set(state, DEFAULT_VALUE as any);
     };
 
     newTreeState_INTERNAL(): TreeState {
