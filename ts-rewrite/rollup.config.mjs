@@ -6,6 +6,7 @@ import { dts } from 'rollup-plugin-dts';
 const external = ['react', 'react-dom'];
 const relayExternal = [...external, 'recoil', 'react-relay', 'relay-runtime'];
 const syncExternal = [...external, 'recoil', 'transit-js', '@recoiljs/refine'];
+const refineExternal = [];
 
 const commonPlugins = [
     nodeResolve({
@@ -169,4 +170,52 @@ const syncDtsBuild = {
     ],
 };
 
-export default [mainBuild, dtsBuild, relayBuild, relayDtsBuild, syncBuild, syncDtsBuild]; 
+// Refine build configuration
+const refineBuild = {
+    input: 'packages/refine/src/index.ts',
+    output: [
+        {
+            file: 'packages/refine/dist/index.mjs',
+            format: 'es',
+        },
+        {
+            file: 'packages/refine/dist/index.cjs',
+            format: 'cjs',
+        },
+    ],
+    external: refineExternal,
+    plugins: [
+        ...commonPlugins,
+        typescript({
+            tsconfig: 'packages/refine/tsconfig.json',
+            declaration: false,
+        }),
+    ],
+};
+
+// Refine TypeScript declarations build
+const refineDtsBuild = {
+    input: 'packages/refine/src/index.ts',
+    output: [
+        {
+            file: 'packages/refine/dist/index.d.ts',
+            format: 'es',
+        },
+        {
+            file: 'packages/refine/dist/index.d.cts',
+            format: 'cjs',
+        },
+    ],
+    external: refineExternal,
+    plugins: [
+        dts({
+            tsconfig: './tsconfig.json',
+            compilerOptions: {
+                outDir: 'packages/refine/dist',
+                rootDir: '.',
+            },
+        }),
+    ],
+};
+
+export default [mainBuild, dtsBuild, relayBuild, relayDtsBuild, syncBuild, syncDtsBuild, refineBuild, refineDtsBuild]; 
