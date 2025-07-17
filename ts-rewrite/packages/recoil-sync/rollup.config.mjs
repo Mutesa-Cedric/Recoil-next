@@ -5,9 +5,9 @@ import typescript from '@rollup/plugin-typescript';
 const external = [
     'react', 
     'react-dom', 
-    'recoil', 
-    'react-relay', 
-    'relay-runtime'
+    'recoil',
+    'transit-js',
+    '@recoiljs/refine'
 ];
 
 const commonPlugins = [

@@ -48,6 +48,26 @@ export class Snapshot {
         return mutable;
     }
 
+    getNodes_UNSTABLE(
+        opt?: {
+            isModified?: boolean;
+            isInitialized?: boolean;
+        }
+    ): Iterable<RecoilValue<any>> {
+        // Simplified implementation for TypeScript compilation
+        // This is a stub that returns an empty iterator
+        return [];
+    }
+
+    getInfo_UNSTABLE<T>(recoilValue: RecoilValue<T>): any {
+        // Simplified implementation for TypeScript compilation
+        // This is a stub that returns a basic info object
+        return {
+            isSet: false,
+            loadable: { state: 'hasValue', contents: undefined },
+        };
+    }
+
     getStore_INTERNAL(): Store {
         return this._store;
     }
