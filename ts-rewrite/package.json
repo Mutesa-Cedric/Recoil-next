@@ -23,7 +23,9 @@
     "scripts": {
         "prebuild": "echo \"declare module 'hamt_plus';\" > hamt_plus.d.ts",
         "build": "rollup -c",
-        "test": "jest",
+        "test": "vitest",
+        "test:ui": "vitest --ui",
+        "test:run": "vitest run",
         "lint": "eslint \"src/**/*.{ts,tsx}\"",
         "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\""
     },
@@ -35,7 +37,6 @@
         "@rollup/plugin-typescript": "^12.1.4",
         "@testing-library/jest-dom": "^6.6.3",
         "@testing-library/react": "^16.3.0",
-        "@types/jest": "^29.5.11",
         "@types/node": "^18.15.3",
         "@types/react": "^18.2.39",
         "@types/react-dom": "^18.2.14",
@@ -43,14 +44,14 @@
         "eslint-config-prettier": "^10.1.5",
         "eslint-plugin-prettier": "^5.5.1",
         "hamt_plus": "^1.0.2",
-        "jest": "^30.0.4",
         "jsdom": "^26.1.0",
         "react-test-renderer": "^19.1.0",
         "rollup": "^4.0.0",
         "rollup-plugin-dts": "^6.2.1",
-        "ts-jest": "^29.4.0",
         "tslib": "^2.6.0",
-        "typescript": "^5.4.2"
+        "typescript": "^5.4.2",
+        "vitest": "^2.1.8",
+        "@vitest/ui": "^2.1.8"
     },
     "dependencies": {
         "@rollup/plugin-commonjs": "^28.0.6"
