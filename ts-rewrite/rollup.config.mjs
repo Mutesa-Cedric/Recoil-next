@@ -34,7 +34,7 @@ const mainBuild = {
         ...commonPlugins,
         typescript({
             tsconfig: './tsconfig.json',
-            declaration: false, // We'll handle declarations separately
+            declaration: false, // declarations to be handled separately
             include: ['packages/**/*'],
             exclude: ['**/__tests__/**', '**/*.test.*'],
         }),

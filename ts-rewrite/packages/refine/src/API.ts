@@ -2,8 +2,8 @@
  * TypeScript port of Refine_API.js
  */
 
+import err from '../../shared/src/util/Recoil_err';
 import type { Checker, CheckFailure, CheckResult } from './Checkers';
-import err from 'recoil-shared/util/Recoil_err';
 
 /**
  * function to assert that a given value matches a checker
@@ -99,5 +99,5 @@ function coercion<T>(
 
 export {
   assertion,
-  coercion,
-}; 
+  coercion
+};
