@@ -21,8 +21,9 @@ import { graphQLMutationEffect } from './graphQLMutationEffect';
 import { graphQLQueryEffect } from './graphQLQueryEffect';
 import { graphQLSubscriptionEffect } from './graphQLSubscriptionEffect';
 
-// Define Parameter type locally based on Recoil's definition
-type Primitive = void | null | boolean | number | string;
+// Compatible parameter type that includes undefined but not void/null 
+// to satisfy SerializableParam constraint from older type definitions
+type Primitive = undefined | boolean | number | string;
 interface HasToJSON {
     toJSON(): Parameter;
 }
@@ -35,8 +36,8 @@ export type Parameter =
     | { [key: string]: Parameter };
 
 interface GraphQLSelectorFamilyOptions<
-    P extends Parameter, 
-    TVariables extends Variables, 
+    P extends Parameter,
+    TVariables extends Variables,
     TData extends Record<string, any>,
     T
 > {
@@ -55,7 +56,7 @@ interface GraphQLSelectorFamilyOptions<
     };
 }
 
-type InternalAtomData<P, TData, T> = 
+type InternalAtomData<P, TData, T> =
     | { source: 'local'; parameter: P; data: T }
     | { source: 'remote'; response: TData }
     | DefaultValue;
@@ -88,19 +89,19 @@ export function graphQLSelectorFamily<
                 // Check if it's a query or subscription based on operationKind
                 (query as any).params?.operationKind === 'query'
                     ? (graphQLQueryEffect({
-                          environment,
-                          variables: vars,
-                          query,
-                          mapResponse: (response: TData) => ({ source: 'remote', response } as const),
-                      }) as AtomEffect<InternalAtomData<P, TData, T>>)
+                        environment,
+                        variables: vars,
+                        query,
+                        mapResponse: (response: TData) => ({ source: 'remote', response } as const),
+                    }) as AtomEffect<InternalAtomData<P, TData, T>>)
                     : (graphQLSubscriptionEffect({
-                          environment,
-                          variables: vars,
-                          subscription: query,
-                          mapResponse: (response: TData) => ({ source: 'remote', response } as const),
-                      }) as AtomEffect<InternalAtomData<P, TData, T>>),
+                        environment,
+                        variables: vars,
+                        subscription: query,
+                        mapResponse: (response: TData) => ({ source: 'remote', response } as const),
+                    }) as AtomEffect<InternalAtomData<P, TData, T>>),
             ];
-            
+
             if (mutations) {
                 effects.push(
                     graphQLMutationEffect({
@@ -128,7 +129,7 @@ export function graphQLSelectorFamily<
                     }) as AtomEffect<InternalAtomData<P, TData, T>>
                 );
             }
-            
+
             return effects;
         }) as any,
     });
@@ -153,36 +154,36 @@ export function graphQLSelectorFamily<
         key: `${key}__Wrapper`,
         get:
             (parameter: P) =>
-            ({ get }) => {
-                const vars = getVariables(parameter, get);
-                const result = get(internalAtoms(vars));
-                if (result instanceof DefaultValue) {
-                    return 'default' in options
-                        ? defaultValue(parameter)
-                        : new Promise(() => {});
-                }
-                if (result.source === 'local') {
-                    return result.data;
-                }
-                const mapped = mapResponse(result.response, {
-                    get,
-                    variables: nullthrows(vars),
-                });
-                return typeof mapped === 'function'
-                    ? (mapped as (param: P) => T)(parameter)
-                    : mapped;
-            },
+                ({ get }) => {
+                    const vars = getVariables(parameter, get);
+                    const result = get(internalAtoms(vars));
+                    if (result instanceof DefaultValue) {
+                        return 'default' in options
+                            ? defaultValue(parameter)
+                            : new Promise(() => { });
+                    }
+                    if (result.source === 'local') {
+                        return result.data;
+                    }
+                    const mapped = mapResponse(result.response, {
+                        get,
+                        variables: nullthrows(vars),
+                    });
+                    return typeof mapped === 'function'
+                        ? (mapped as (param: P) => T)(parameter)
+                        : mapped;
+                },
         set:
             (parameter: P) =>
-            ({ set, get }: { set: SetRecoilState; get: GetRecoilValue; reset: ResetRecoilState }, newValue: T | DefaultValue) => {
-                set(
-                    internalAtoms(getVariables(parameter, get)),
-                    newValue instanceof DefaultValue
-                        ? 'default' in options
-                            ? { source: 'local', parameter, data: defaultValue(parameter) }
-                            : newValue
-                        : { source: 'local', parameter, data: newValue },
-                );
-            },
+                ({ set, get }: { set: SetRecoilState; get: GetRecoilValue; reset: ResetRecoilState }, newValue: T | DefaultValue) => {
+                    set(
+                        internalAtoms(getVariables(parameter, get)),
+                        newValue instanceof DefaultValue
+                            ? 'default' in options
+                                ? { source: 'local', parameter, data: defaultValue(parameter) }
+                                : newValue
+                            : { source: 'local', parameter, data: newValue },
+                    );
+                },
     });
 } 

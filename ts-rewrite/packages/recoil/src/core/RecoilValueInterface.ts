@@ -90,6 +90,30 @@ export function markRecoilValueModified<T>(_store: Store, _rv: AbstractRecoilVal
     /* TODO later */
 }
 
+function valueFromValueOrUpdater<T>(
+    store: Store,
+    state: TreeState,
+    recoilValue: AbstractRecoilValue<T>,
+    valueOrUpdater: T | ValueOrUpdater<T> | typeof DEFAULT_VALUE,
+): T | typeof DEFAULT_VALUE {
+    if (typeof valueOrUpdater === 'function' && valueOrUpdater !== DEFAULT_VALUE) {
+        // Updater form: pass in the current value
+        const current = getRecoilValueAsLoadable(store, recoilValue, state);
+        
+        if (current.state === 'loading') {
+            const msg = `Tried to set atom or selector "${recoilValue.key}" using an updater function while the current state is pending, this is not currently supported.`;
+            throw err(msg);
+        } else if (current.state === 'hasError') {
+            throw current.contents;
+        }
+        
+        // Call the updater function with the current value
+        return (valueOrUpdater as ValueOrUpdater<T>)(current.contents as T);
+    } else {
+        return valueOrUpdater as T | typeof DEFAULT_VALUE;
+    }
+}
+
 export function setRecoilValue<T>(
     store: Store,
     recoilValue: AbstractRecoilValue<T>,
@@ -97,7 +121,8 @@ export function setRecoilValue<T>(
 ): void {
     store.replaceState(state => {
         const newState = copyTreeState(state);
-        const writes = setNodeValue(store, newState, recoilValue.key, valueOrUpdater as any);
+        const newValue = valueFromValueOrUpdater(store, newState, recoilValue, valueOrUpdater);
+        const writes = setNodeValue(store, newState, recoilValue.key, newValue);
         writes.forEach((loadable, key) => writeLoadableToTreeState(newState, key, loadable));
         invalidateDownstreams(store, newState);
         return newState;

@@ -111,11 +111,11 @@ export class LRUCache<K = unknown, V = unknown> {
         }
     }
 
-    delete(key: K): void {
+    delete(key: K): boolean {
         const mappedKey = this._keyMapper(key);
 
         if (!this._size || !this._map.has(mappedKey)) {
-            return;
+            return false;
         }
 
         const node = nullthrows(this._map.get(mappedKey));
@@ -140,6 +140,7 @@ export class LRUCache<K = unknown, V = unknown> {
 
         this._map.delete(mappedKey);
         this._size--;
+        return true;
     }
 
     clear(): void {

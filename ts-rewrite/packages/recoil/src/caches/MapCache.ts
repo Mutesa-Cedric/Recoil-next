@@ -33,8 +33,8 @@ export class MapCache<K, V> {
         this._map.set(this._keyMapper(key), val);
     }
 
-    delete(key: K): void {
-        this._map.delete(this._keyMapper(key));
+    delete(key: K): boolean {
+        return this._map.delete(this._keyMapper(key));
     }
 
     clear(): void {
