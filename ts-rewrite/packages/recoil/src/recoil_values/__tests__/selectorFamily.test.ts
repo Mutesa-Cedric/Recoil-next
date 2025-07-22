@@ -2,11 +2,15 @@
  * TypeScript port of Recoil_selectorFamily tests
  */
 
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, beforeEach } from 'vitest';
 
 import type { RecoilState } from '../../core/RecoilValue';
+import type { Store } from '../../core/State';
+import type { Loadable } from '../../adt/Loadable';
 
 import { DefaultValue } from '../../core/Node';
+import { persistentMap } from '../../adt/PersistentMap';
+import { getNextStoreID, getNextTreeStateVersion } from '../../core/Keys';
 import {
     getRecoilValueAsLoadable,
     setRecoilValue,
@@ -14,19 +18,83 @@ import {
 import { atomFamily } from '../atomFamily';
 import { selectorFamily } from '../selectorFamily';
 
-// Mock store - simplified for testing
-const mockStore = {
-    getState: () => ({
-        currentTree: { version: 0 },
-    }),
-} as any;
+// Create a proper mock store for testing (same as selector.test.ts)
+function makeStore(): Store {
+  const storeState = {
+    currentTree: {
+      version: getNextTreeStateVersion(),
+      stateID: getNextTreeStateVersion(),
+      transactionMetadata: {},
+      dirtyAtoms: new Set<string>(),
+      atomValues: persistentMap(),
+      nonvalidatedAtoms: persistentMap(),
+    },
+    nextTree: null,
+    previousTree: null,
+    commitDepth: 0,
+    knownAtoms: new Set(),
+    knownSelectors: new Set(),
+    transactionSubscriptions: new Map(),
+    nodeTransactionSubscriptions: new Map(),
+    nodeToComponentSubscriptions: new Map(),
+    queuedComponentCallbacks_DEPRECATED: [],
+    suspendedComponentResolvers: new Set(),
+    graphsByVersion: new Map(),
+    retention: {
+      referenceCounts: new Map(),
+      nodesRetainedByZone: new Map(),
+      retainablesToCheckForRelease: new Set(),
+    },
+    nodeCleanupFunctions: new Map(),
+  } as any; // Cast to avoid complex type alignment for test mock
+
+  const store: Store = {
+    storeID: getNextStoreID(),
+    getState: () => storeState,
+    replaceState: (replacer) => {
+      const currentStoreState = store.getState();
+      currentStoreState.currentTree = replacer(currentStoreState.currentTree);
+    },
+    getGraph: (version) => {
+      const graphs = storeState.graphsByVersion;
+      if (graphs.has(version)) {
+        return graphs.get(version)!;
+      }
+      const newGraph = { nodeDeps: new Map(), nodeToNodeSubscriptions: new Map() };
+      graphs.set(version, newGraph);
+      return newGraph;
+    },
+    subscribeToTransactions: () => {
+      return { release: () => {} };
+    },
+    addTransactionMetadata: () => {
+      // no-op in test mock
+    },
+  };
+  
+  return store;
+}
+
+let store: Store;
+
+beforeEach(() => {
+  store = makeStore();
+});
+
+function getLoadable<T>(recoilValue: RecoilState<T>): Loadable<T> {
+  return getRecoilValueAsLoadable(store, recoilValue);
+}
 
 function get<T>(recoilValue: RecoilState<T>): T {
-    return getRecoilValueAsLoadable(mockStore, recoilValue).contents as T;
+    const loadable = getLoadable(recoilValue);
+    if (loadable.state === 'hasError') {
+      throw loadable.contents;
+    }
+    return loadable.contents as T;
 }
 
 function set<T>(recoilValue: RecoilState<T>, value: T): void {
-    setRecoilValue(mockStore, recoilValue, value);
+    setRecoilValue(store, recoilValue, value);
 }
 
 describe('selectorFamily', () => {
@@ -160,7 +228,7 @@ describe('selectorFamily', () => {
         });
 
         const async1 = asyncFam(1);
-        const loadable = getRecoilValueAsLoadable(mockStore, async1);
+        const loadable = getLoadable(async1);
 
         expect(loadable.state).toBe('loading');
     });

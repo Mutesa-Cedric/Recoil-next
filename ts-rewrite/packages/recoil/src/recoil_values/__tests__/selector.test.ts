@@ -6,8 +6,11 @@ import { describe, expect, test, beforeEach } from 'vitest';
 
 import type { Loadable } from '../../adt/Loadable';
 import type { RecoilState, RecoilValue } from '../../core/RecoilValue';
+import type { Store } from '../../core/State';
 
 import { DefaultValue } from '../../core/Node';
+import { persistentMap } from '../../adt/PersistentMap';
+import { getNextStoreID, getNextTreeStateVersion } from '../../core/Keys';
 import {
     getRecoilValueAsLoadable,
     setRecoilValue,
@@ -16,16 +19,16 @@ import { atom } from '../atom';
 import { constSelector } from '../constSelector';
 import { selector } from '../selector';
 
-// Create a simplified mock store for testing (reusing from atom.test.ts)
-function makeStore(): any {
+// Create a simplified mock store for testing (using same approach as atom.test.ts)
+function makeStore(): Store {
   const storeState = {
     currentTree: {
-      version: 0,
-      stateID: 0,
+      version: getNextTreeStateVersion(),
+      stateID: getNextTreeStateVersion(),
       transactionMetadata: {},
-      dirtyAtoms: new Set(),
-             atomValues: { clone: () => ({}), set: () => {}, get: () => undefined },
-       nonvalidatedAtoms: { clone: () => ({}), set: () => {}, get: () => undefined },
+      dirtyAtoms: new Set<string>(),
+      atomValues: persistentMap(),
+      nonvalidatedAtoms: persistentMap(),
     },
     nextTree: null,
     previousTree: null,
@@ -46,13 +49,14 @@ function makeStore(): any {
     nodeCleanupFunctions: new Map(),
   } as any; // Cast to avoid complex type alignment for test mock
 
-  const store = {
-    storeID: Date.now(),
+  const store: Store = {
+    storeID: getNextStoreID(),
     getState: () => storeState,
-    replaceState: (replacer: any) => {
-      storeState.currentTree = replacer(storeState.currentTree);
+    replaceState: (replacer) => {
+      const currentStoreState = store.getState();
+      currentStoreState.currentTree = replacer(currentStoreState.currentTree);
     },
-    getGraph: (version: any) => {
+    getGraph: (version) => {
       const graphs = storeState.graphsByVersion;
       if (graphs.has(version)) {
         return graphs.get(version)!;
@@ -61,14 +65,18 @@ function makeStore(): any {
       graphs.set(version, newGraph);
       return newGraph;
     },
-    subscribeToTransactions: () => ({ release: () => {} }),
-    addTransactionMetadata: () => {},
+    subscribeToTransactions: () => {
+      return { release: () => {} };
+    },
+    addTransactionMetadata: () => {
+      // no-op in test mock
+    },
   };
   
   return store;
 }
 
-let store: any;
+let store: Store;
 
 beforeEach(() => {
   store = makeStore();
@@ -79,7 +87,11 @@ function getLoadable<T>(recoilValue: RecoilValue<T>): Loadable<T> {
 }
 
 function getValue<T>(recoilValue: RecoilValue<T>): T {
-  return getLoadable(recoilValue).contents as any;
+  const loadable = getLoadable(recoilValue);
+  if (loadable.state === 'hasError') {
+    throw loadable.contents;
+  }
+  return loadable.contents as T;
 }
 
 function getPromise<T>(recoilValue: RecoilValue<T>): Promise<T> {

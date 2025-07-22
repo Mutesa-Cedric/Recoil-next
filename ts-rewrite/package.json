@@ -54,6 +54,7 @@
         "vitest": "^2.1.8"
     },
     "dependencies": {
-        "@rollup/plugin-commonjs": "^28.0.6"
+        "@rollup/plugin-commonjs": "^28.0.6",
+        "@types/hamt_plus": "file:../../DefinitelyTyped/types/hamt_plus/types-hamt_plus-1.0.9999.tgz"
     }
 }
