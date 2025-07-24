@@ -27,7 +27,8 @@
         "test:ui": "vitest --ui",
         "test:run": "vitest run",
         "lint": "eslint \"src/**/*.{ts,tsx}\"",
-        "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\""
+        "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
+        "typecheck": "tsc --noEmit"
     },
     "peerDependencies": {
         "react": ">=18"
