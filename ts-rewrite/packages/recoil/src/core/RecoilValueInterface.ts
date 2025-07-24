@@ -6,16 +6,16 @@
  */
 
 import type { Loadable } from '../adt/Loadable';
-import type { Store, TreeState, NodeKey, AtomWrites } from './State';
+import type { AtomWrites, NodeKey, Store, TreeState } from './State';
 
 import {
-    getNodeLoadable,
-    setNodeValue,
-    invalidateDownstreams,
     copyTreeState,
+    getNodeLoadable,
+    invalidateDownstreams,
+    setNodeValue,
 } from './FunctionalCore';
 import { getNextComponentID } from './Keys';
-import { getNode, getNodeMaybe, DEFAULT_VALUE, DefaultValue } from './Node';
+import { DEFAULT_VALUE, DefaultValue, getNode, getNodeMaybe } from './Node';
 import {
     AbstractRecoilValue,
     RecoilState,
@@ -24,7 +24,6 @@ import {
 } from './RecoilValue';
 
 import err from '../../../shared/src/util/Recoil_err';
-import recoverableViolation from '../../../shared/src/util/Recoil_recoverableViolation';
 import nullthrows from '../../../shared/src/util/Recoil_nullthrows';
 
 const batchStack: Array<Array<() => void>> = [];
@@ -86,8 +85,13 @@ export function writeLoadableToTreeState(
     state.nonvalidatedAtoms.delete(key);
 }
 
-export function markRecoilValueModified<T>(_store: Store, _rv: AbstractRecoilValue<T>): void {
-    /* TODO later */
+export function markRecoilValueModified<T>(store: Store, rv: AbstractRecoilValue<T>): void {
+    // Mark the node as dirty to trigger re-renders
+    store.replaceState(state => {
+        const newState = copyTreeState(state);
+        newState.dirtyAtoms.add(rv.key);
+        return newState;
+    });
 }
 
 function valueFromValueOrUpdater<T>(
@@ -108,7 +112,7 @@ function valueFromValueOrUpdater<T>(
         }
         
         // Call the updater function with the current value
-        return (valueOrUpdater as ValueOrUpdater<T>)(current.contents as T);
+        return (valueOrUpdater as (curr: T) => T)(current.contents as T);
     } else {
         return valueOrUpdater as T | typeof DEFAULT_VALUE;
     }
@@ -177,4 +181,4 @@ export function refreshRecoilValue<T>(
     node.clearCache?.(store, currentTree);
 }
 
-export { AbstractRecoilValue, RecoilValueReadOnly, RecoilState, isRecoilValue }; 
+export { AbstractRecoilValue, RecoilState, RecoilValueReadOnly, isRecoilValue };

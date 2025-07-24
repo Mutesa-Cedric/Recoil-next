@@ -115,14 +115,6 @@ type LoadingDepsState = {
     loadingDepPromise: Promise<unknown> | null;
 };
 
-const dependencyStack: Array<NodeKey> = [];
-const waitingStores: Map<ExecutionID, Set<Store>> = new Map();
-
-const getNewExecutionID: () => ExecutionID = (() => {
-    let executionID = 0;
-    return () => executionID++;
-})();
-
 export function selector<T>(
     options: ReadOnlySelectorOptions<T>,
 ): RecoilValueReadOnly<T>;
@@ -162,6 +154,12 @@ export function selector<T>(
     const retainedBy = retainedByOptionWithDefault(options.retainedBy_UNSTABLE);
 
     const executionInfoMap: Map<Store, ExecutionInfo<T>> = new Map();
+    const waitingStores: Map<ExecutionID, Set<Store>> = new Map();
+    const dependencyStack: Array<NodeKey> = [];
+    const getNewExecutionID: () => ExecutionID = (() => {
+        let executionID = 0;
+        return () => executionID++;
+    })();
     let liveStoresCount = 0;
 
     function selectorIsLive() {

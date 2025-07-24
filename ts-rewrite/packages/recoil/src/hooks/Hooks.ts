@@ -32,6 +32,7 @@ import {
     subscribeToRecoilValue,
 } from '../core/RecoilValueInterface';
 import { ComponentSubscription } from '../core/RecoilValueInterface';
+import { updateRetainCount } from '../core/Retention';
 import { NodeKey, StoreRef, StoreState, TreeState } from '../core/State';
 import useRetain from './useRetain';
 import { useSyncExternalStore } from 'react';
@@ -317,13 +318,26 @@ function useRecoilValueLoadable_SYNC_EXTERNAL_STORE<T>(
     const subscribe = useCallback(
         (notify: () => void): (() => void) => {
             const store = storeRef.current;
+            
+            // Add retention for the recoil value
+            if (gkx('recoil_memory_managament_2020')) {
+                updateRetainCount(store, recoilValue.key, 1);
+            }
+            
             const subscription = subscribeToRecoilValue(
                 store,
                 recoilValue,
                 notify,
                 componentName,
             );
-            return subscription.release;
+            
+            return () => {
+                // Release retention when subscription is released
+                if (gkx('recoil_memory_managament_2020')) {
+                    updateRetainCount(store, recoilValue.key, -1);
+                }
+                subscription.release();
+            };
         },
         [storeRef, recoilValue, componentName],
     );
