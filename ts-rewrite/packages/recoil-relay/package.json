@@ -17,25 +17,24 @@
   ],
   "scripts": {
     "build": "rollup -c",
-    "test": "jest"
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "peerDependencies": {
-    "recoil": ">=0.7.3",
     "react-relay": ">=13.2.0",
+    "recoil": "^0.7.7",
     "relay-runtime": ">=13.2.0"
   },
   "devDependencies": {
+    "@testing-library/react": "^16.3.0",
     "@types/react": "^18.2.39",
-    "@types/relay-runtime": "^17.0.0",
     "@types/react-relay": "^16.0.0",
-    "typescript": "^5.4.2"
+    "@types/relay-runtime": "^17.0.0",
+    "react-test-renderer": "^19.1.0",
+    "relay-test-utils": "^17.0.0",
+    "typescript": "^5.4.2",
+    "vitest": "^2.1.8"
   },
   "repository": "https://github.com/facebookexperimental/Recoil.git",
-  "license": "MIT",
-  "dependencies": {},
-  "peerDependencies": {
-    "recoil": ">=0.7.3",
-    "react-relay": ">=13.2.0",
-    "relay-runtime": ">=13.2.0"
-  }
-} 
+  "license": "MIT"
+}

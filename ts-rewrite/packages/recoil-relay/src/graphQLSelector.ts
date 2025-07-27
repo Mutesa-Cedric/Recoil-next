@@ -42,8 +42,8 @@ export function graphQLSelector<TVariables extends Variables, T>({
 }: GraphQLSelectorOptions<TVariables, T>): RecoilState<T> {
     return graphQLSelectorFamily({
         ...options,
-        variables: () => (cbs: { get: GetRecoilValue }) =>
-            typeof variables === 'function' ? variables(cbs) : variables,
+        variables: () => (param: any) =>
+            typeof variables === 'function' ? variables({ get: param.get }) : variables,
         mutations: mutations == null ? undefined : { ...mutations },
     })(undefined); // Pass undefined as the parameter
 } 
