@@ -21,11 +21,11 @@ export type TransitHandler<T, S> = {
 };
 
 export type RecoilURLSyncTransitOptions = Omit<
-  RecoilURLSyncOptions & {
-    handlers?: ReadonlyArray<TransitHandler<any, any>>;
-  },
+  RecoilURLSyncOptions,
   'serialize' | 'deserialize'
->;
+> & {
+  handlers?: ReadonlyArray<TransitHandler<any, any>>;
+};
 
 const BUILTIN_HANDLERS: ReadonlyArray<TransitHandler<any, any>> = [
   {
@@ -128,5 +128,6 @@ export function RecoilURLSyncTransit({
     ...options,
     serialize,
     deserialize,
+    children: options.children,
   });
 } 

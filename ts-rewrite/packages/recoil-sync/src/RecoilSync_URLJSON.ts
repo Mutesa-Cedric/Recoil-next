@@ -32,5 +32,6 @@ export function RecoilURLSyncJSON(options: RecoilURLSyncJSONOptions): React.Reac
     ...options,
     serialize,
     deserialize,
+    children: options.children,
   });
 } 
