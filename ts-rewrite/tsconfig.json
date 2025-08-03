@@ -17,6 +17,6 @@
     "declaration": true,
     "outDir": "dist"
   },
-  "include": ["packages/**/*", "src/**/*", "hamt_plus.d.ts"],
+  "include": ["packages/**/*", "src/**/*"],
   "exclude": ["**/__tests__/**"]
 }

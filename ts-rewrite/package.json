@@ -34,10 +34,12 @@
         "react": ">=18"
     },
     "devDependencies": {
+        "@rollup/plugin-commonjs": "^28.0.6",
         "@rollup/plugin-node-resolve": "^16.0.1",
         "@rollup/plugin-typescript": "^12.1.4",
         "@testing-library/jest-dom": "^6.6.3",
         "@testing-library/react": "^16.3.0",
+        "@types/hamt_plus": "^1.0.0",
         "@types/node": "^18.15.3",
         "@types/react": "^18.2.39",
         "@types/react-dom": "^18.2.14",
@@ -53,9 +55,5 @@
         "tslib": "^2.6.0",
         "typescript": "^5.4.2",
         "vitest": "^2.1.8"
-    },
-    "dependencies": {
-        "@rollup/plugin-commonjs": "^28.0.6",
-        "@types/hamt_plus": "file:../../DefinitelyTyped/types/hamt_plus/types-hamt_plus-1.0.9999.tgz"
     }
 }
