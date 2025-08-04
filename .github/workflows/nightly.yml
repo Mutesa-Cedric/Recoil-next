@@ -6,7 +6,7 @@ on:
 
 jobs:
   deploy-nightly:
-    if: github.repository_owner == 'facebookexperimental'
+    if: github.repository_owner == 'Mutesa-Cedric'
     runs-on: ubuntu-latest
 
     steps:
@@ -17,6 +17,6 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: 16.x
-    - run: npm i -g yarn
-    - run: yarn install --frozen-lockfile
-    - run: yarn deploy-nightly
+    - run: npm install
+    - run: npm run build
+    - run: npm run deploy-nightly

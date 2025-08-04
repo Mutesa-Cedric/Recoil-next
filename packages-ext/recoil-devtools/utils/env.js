@@ -1,12 +1,7 @@
 /**
- * (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
- *
+ * TypeScript port of env.js
  * Recoil DevTools browser extension.
- *
- * @format
- * @oncall recoil
  */
-'use strict';
 
 module.exports = {
   NODE_ENV: process.env.NODE_ENV || 'development',

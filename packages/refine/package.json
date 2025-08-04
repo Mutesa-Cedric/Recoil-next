@@ -1,14 +1,34 @@
 {
-  "name": "refine",
-  "description": "This is the internal package.json enabling CommonJS module",
-  "main": "Refine_index.js",
-  "haste_commonjs": true,
-  "files": [
-    "Refine_index.js"
-  ],
-  "directories": {
-    "": "./"
+  "name": "refine-next",
+  "version": "0.2.0",
+  "description": "Type checking and validation utilities for Recoil Next",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
   },
-  "repository": "https://github.com/facebookexperimental/Recoil.git",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.6",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.4",
+    "@types/react": "^18.2.39",
+    "rollup": "^4.0.0",
+    "rollup-plugin-dts": "^6.2.1",
+    "tslib": "^2.6.0",
+    "typescript": "^5.4.2"
+  },
+  "repository": "https://github.com/Mutesa-Cedric/Recoil-next.git",
   "license": "MIT"
-}
+} 

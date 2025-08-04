@@ -1,11 +1,11 @@
-# Contributing to Recoil
+# Contributing to Recoil Next
 
 We want to make contributing to this project as easy and transparent as
 possible.
 
 ## Our Development Process
 
-Some people will be working directly on GitHub. These changes will be public from the beginning. Other changesets will come via a bridge with Facebook's internal source control. This is a necessity as it allows engineers at Facebook outside of the core team to move fast and contribute from an environment they are comfortable in.
+All development happens directly on GitHub. Changes will be public from the beginning, allowing for transparent collaboration and community involvement.
 
 ## The `main` Branch is Unsafe
 
@@ -19,31 +19,21 @@ We actively welcome your pull requests.
 2. If you've added code that should be tested, add tests.
 3. If you've changed APIs, update the documentation.
 4. Ensure the test suite passes.
-5. Make sure your code lints and is formatted with `prettier`. Run `yarn format` to run `prettier` on all files.
-6. If you haven't already, complete the Contributor License Agreement ("CLA").
+5. Make sure your code lints and is formatted with `prettier`. Run `npm run format` to run `prettier` on all files.
 
 ## Getting in Touch
 
 Please file issues liberally. That's the easiest way to contact us in a way that
-ensures everyone working on Recoil can see it. We are eager for your questions, input, and to hear about your experience.
-
-## Contributor License Agreement ("CLA")
-
-In order to accept your pull request, we need you to submit a CLA. You only need
-to do this once to work on any of Facebook's open source projects.
-
-Complete your CLA here: <https://code.facebook.com/cla>
+ensures everyone working on Recoil Next can see it. We are eager for your questions, input, and to hear about your experience.
 
 ## Issues
 
 We use GitHub issues to track public bugs. Please ensure your description is
 clear and has sufficient instructions to be able to reproduce the issue.
 
-Facebook has a [bounty program](https://www.facebook.com/whitehat/) for the safe
-disclosure of security bugs. In those cases, please go through the process
-outlined on that page and do not file a public issue.
+For security issues, please contact the maintainer directly rather than filing a public issue.
 
 ## License
 
-By contributing to Recoil, you agree that your contributions will be licensed
+By contributing to Recoil Next, you agree that your contributions will be licensed
 under the LICENSE file in the root directory of this source tree.
