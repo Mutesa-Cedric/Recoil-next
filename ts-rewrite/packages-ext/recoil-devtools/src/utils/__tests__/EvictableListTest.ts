@@ -4,6 +4,7 @@
  */
 
 import EvictableList from '../EvictableList';
+import { describe, it, expect } from 'vitest';
 
 describe('EvictableList tests', () => {
   const list = new EvictableList<string>(3);

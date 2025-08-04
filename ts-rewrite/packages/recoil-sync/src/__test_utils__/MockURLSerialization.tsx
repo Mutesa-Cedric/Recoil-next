@@ -6,6 +6,7 @@ import React, { useCallback } from 'react';
 import { RecoilURLSync, LocationOption, BrowserInterface } from '../RecoilSync_URL';
 import { flushPromisesAndTimers } from '../../../shared/src/util/__tests__/TestUtils';
 import nullthrows from '../../../shared/src/util/Recoil_nullthrows';
+import { expect } from 'vitest';
 
 // ////////////////////////////
 // // Mock Serialization

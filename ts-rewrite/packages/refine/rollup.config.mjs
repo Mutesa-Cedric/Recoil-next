@@ -1,53 +1,65 @@
-import commonjs from '@rollup/plugin-commonjs';
-import resolve from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
-import dts from 'rollup-plugin-dts';
+import nodeResolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import { dts } from 'rollup-plugin-dts';
 
-const external = [
-  'recoil-shared/util/Recoil_err',
-  'recoil-shared/util/Recoil_nullthrows'
+const external = [];
+
+const commonPlugins = [
+    nodeResolve({
+        extensions: ['.js', '.jsx', '.ts', '.tsx'],
+        preferBuiltins: false,
+    }),
+    commonjs(),
 ];
 
-export default [
-  // ES modules and CommonJS build
-  {
+// Refine build configuration
+const mainBuild = {
     input: 'src/index.ts',
     output: [
-      {
-        file: 'dist/index.mjs',
-        format: 'es',
-        sourcemap: true,
-      },
-      {
-        file: 'dist/index.cjs',
-        format: 'cjs',
-        sourcemap: true,
-      },
+        {
+            file: 'dist/index.mjs',
+            format: 'es',
+        },
+        {
+            file: 'dist/index.cjs',
+            format: 'cjs',
+        },
     ],
+    external,
     plugins: [
-      resolve(),
-      commonjs(),
-      typescript({
-        tsconfig: './tsconfig.json',
-        declaration: false,
-      }),
+        ...commonPlugins,
+        typescript({
+            tsconfig: '../../tsconfig.json',
+            declaration: false,
+            include: ['src/**/*', '../shared/src/**/*'],
+            exclude: ['**/__tests__/**', '**/*.test.*'],
+            compilerOptions: {
+                outDir: undefined,
+            },
+        }),
     ],
-    external,
-  },
-  // TypeScript declarations
-  {
+};
+
+// Refine TypeScript declarations build
+const dtsBuild = {
     input: 'src/index.ts',
     output: [
-      {
-        file: 'dist/index.d.ts',
-        format: 'es',
-      },
-      {
-        file: 'dist/index.d.cts',
-        format: 'es',
-      },
+        {
+            file: 'dist/index.d.ts',
+            format: 'es',
+        },
+        {
+            file: 'dist/index.d.cts',
+            format: 'cjs',
+        },
     ],
-    plugins: [dts()],
     external,
-  },
-]; 
+    plugins: [
+        dts({
+            tsconfig: '../../tsconfig.json',
+        }),
+    ],
+};
+
+export default [mainBuild, dtsBuild]; 

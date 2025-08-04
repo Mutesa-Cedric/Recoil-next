@@ -9,16 +9,18 @@ import {
   serialize,
 } from '../Serialization';
 
+import { describe, it, expect } from 'vitest';
+
 describe('Preparing objects to be sent via postMessage', () => {
   it('string', () => {
     expect(serialize('test')).toEqual({
       t: SerializedValueType.primitive,
       v: 'test',
     });
-    expect(serialize('')).toEqual({t: SerializedValueType.primitive, v: ''});
+    expect(serialize('')).toEqual({ t: SerializedValueType.primitive, v: '' });
   });
   it('number', () => {
-    expect(serialize(90)).toEqual({t: SerializedValueType.primitive, v: 90});
+    expect(serialize(90)).toEqual({ t: SerializedValueType.primitive, v: 90 });
     expect(serialize(-90)).toEqual({
       t: SerializedValueType.primitive,
       v: -90,
@@ -46,33 +48,33 @@ describe('Preparing objects to be sent via postMessage', () => {
     expect(serialize([1, 2, 3])).toEqual({
       t: SerializedValueType.array,
       v: [
-        {t: SerializedValueType.primitive, v: 1},
-        {t: SerializedValueType.primitive, v: 2},
-        {t: SerializedValueType.primitive, v: 3},
+        { t: SerializedValueType.primitive, v: 1 },
+        { t: SerializedValueType.primitive, v: 2 },
+        { t: SerializedValueType.primitive, v: 3 },
       ],
     });
   });
   it('objects', () => {
-    expect(serialize({a: 3})).toEqual({
+    expect(serialize({ a: 3 })).toEqual({
       t: SerializedValueType.object,
       v: [
         [
-          {t: SerializedValueType.primitive, v: 'a'},
-          {t: SerializedValueType.primitive, v: 3},
+          { t: SerializedValueType.primitive, v: 'a' },
+          { t: SerializedValueType.primitive, v: 3 },
         ],
       ],
     });
 
-    expect(serialize({b: new Set([1, 2])})).toEqual({
+    expect(serialize({ b: new Set([1, 2]) })).toEqual({
       t: SerializedValueType.object,
       v: [
         [
-          {t: SerializedValueType.primitive, v: 'b'},
+          { t: SerializedValueType.primitive, v: 'b' },
           {
             t: SerializedValueType.set,
             v: [
-              {t: SerializedValueType.primitive, v: 1},
-              {t: SerializedValueType.primitive, v: 2},
+              { t: SerializedValueType.primitive, v: 1 },
+              { t: SerializedValueType.primitive, v: 2 },
             ],
           },
         ],
@@ -273,22 +275,22 @@ describe('Preparing objects to be sent via postMessage', () => {
 
 describe('Restore objects prepared with `serialze`', () => {
   it('string', () => {
-    expect(deserialize({t: SerializedValueType.primitive, v: 'test'})).toEqual(
+    expect(deserialize({ t: SerializedValueType.primitive, v: 'test' })).toEqual(
       'test',
     );
-    expect(deserialize({t: SerializedValueType.primitive, v: ''})).toEqual('');
+    expect(deserialize({ t: SerializedValueType.primitive, v: '' })).toEqual('');
   });
   it('number', () => {
-    expect(deserialize({t: SerializedValueType.primitive, v: 90})).toEqual(90);
-    expect(deserialize({t: SerializedValueType.primitive, v: -90})).toEqual(
+    expect(deserialize({ t: SerializedValueType.primitive, v: 90 })).toEqual(90);
+    expect(deserialize({ t: SerializedValueType.primitive, v: -90 })).toEqual(
       -90,
     );
   });
   it('boolean', () => {
-    expect(deserialize({t: SerializedValueType.primitive, v: true})).toEqual(
+    expect(deserialize({ t: SerializedValueType.primitive, v: true })).toEqual(
       true,
     );
-    expect(deserialize({t: SerializedValueType.primitive, v: false})).toEqual(
+    expect(deserialize({ t: SerializedValueType.primitive, v: false })).toEqual(
       false,
     );
   });
@@ -309,9 +311,9 @@ describe('Restore objects prepared with `serialze`', () => {
       deserialize({
         t: SerializedValueType.array,
         v: [
-          {t: SerializedValueType.primitive, v: 1},
-          {t: SerializedValueType.primitive, v: 2},
-          {t: SerializedValueType.primitive, v: 3},
+          { t: SerializedValueType.primitive, v: 1 },
+          { t: SerializedValueType.primitive, v: 2 },
+          { t: SerializedValueType.primitive, v: 3 },
         ],
       }),
     ).toEqual([1, 2, 3]);
@@ -322,29 +324,29 @@ describe('Restore objects prepared with `serialze`', () => {
         t: SerializedValueType.object,
         v: [
           [
-            {t: SerializedValueType.primitive, v: 'a'},
-            {t: SerializedValueType.primitive, v: 3},
+            { t: SerializedValueType.primitive, v: 'a' },
+            { t: SerializedValueType.primitive, v: 3 },
           ],
         ],
       }),
-    ).toEqual({a: 3});
+    ).toEqual({ a: 3 });
     expect(
       deserialize({
         t: SerializedValueType.object,
         v: [
           [
-            {t: SerializedValueType.primitive, v: 'b'},
+            { t: SerializedValueType.primitive, v: 'b' },
             {
               t: SerializedValueType.set,
               v: [
-                {t: SerializedValueType.primitive, v: 1},
-                {t: SerializedValueType.primitive, v: 2},
+                { t: SerializedValueType.primitive, v: 1 },
+                { t: SerializedValueType.primitive, v: 2 },
               ],
             },
           ],
         ],
       }),
-    ).toEqual({b: new Set([1, 2])});
+    ).toEqual({ b: new Set([1, 2]) });
   });
   it('dates', () => {
     expect(
@@ -544,19 +546,19 @@ describe('Restore objects prepared with `serialze`', () => {
 });
 
 describe('Serializing circular references', () => {
-  const data = {a: 2, c: {}};
+  const data = { a: 2, c: {} };
   data.c = data;
   it('avoid circular references in first level keys', () => {
     expect(serialize(data)).toEqual({
       t: SerializedValueType.object,
       v: [
         [
-          {t: SerializedValueType.primitive, v: 'a'},
-          {t: SerializedValueType.primitive, v: 2},
+          { t: SerializedValueType.primitive, v: 'a' },
+          { t: SerializedValueType.primitive, v: 2 },
         ],
         [
-          {t: SerializedValueType.primitive, v: 'c'},
-          {t: SerializedValueType.primitive, v: '[Circular Reference]'},
+          { t: SerializedValueType.primitive, v: 'c' },
+          { t: SerializedValueType.primitive, v: '[Circular Reference]' },
         ],
       ],
     });
@@ -564,29 +566,29 @@ describe('Serializing circular references', () => {
 });
 
 describe('Serializing nested circular references', () => {
-  const data = {a: 2, c: {}};
-  data.c = {a: 2, c: data};
+  const data = { a: 2, c: {} };
+  data.c = { a: 2, c: data };
 
   it('avoid circular references in nested objects (only by reference)', () => {
     expect(serialize(data)).toEqual({
       t: SerializedValueType.object,
       v: [
         [
-          {t: SerializedValueType.primitive, v: 'a'},
-          {t: SerializedValueType.primitive, v: 2},
+          { t: SerializedValueType.primitive, v: 'a' },
+          { t: SerializedValueType.primitive, v: 2 },
         ],
         [
-          {t: SerializedValueType.primitive, v: 'c'},
+          { t: SerializedValueType.primitive, v: 'c' },
           {
             t: SerializedValueType.object,
             v: [
               [
-                {t: SerializedValueType.primitive, v: 'a'},
-                {t: SerializedValueType.primitive, v: 2},
+                { t: SerializedValueType.primitive, v: 'a' },
+                { t: SerializedValueType.primitive, v: 2 },
               ],
               [
-                {t: SerializedValueType.primitive, v: 'c'},
-                {t: SerializedValueType.primitive, v: '[Circular Reference]'},
+                { t: SerializedValueType.primitive, v: 'c' },
+                { t: SerializedValueType.primitive, v: '[Circular Reference]' },
               ],
             ],
           },
@@ -607,7 +609,7 @@ describe('Serializing circular references within arrays and sets', () => {
       v: [
         {
           t: SerializedValueType.array,
-          v: [{t: SerializedValueType.primitive, v: '[Circular Reference]'}],
+          v: [{ t: SerializedValueType.primitive, v: '[Circular Reference]' }],
         },
       ],
     });
@@ -624,7 +626,7 @@ describe('Serializing circular references within arrays and sets', () => {
       v: [
         {
           t: SerializedValueType.set,
-          v: [{t: SerializedValueType.primitive, v: '[Circular Reference]'}],
+          v: [{ t: SerializedValueType.primitive, v: '[Circular Reference]' }],
         },
       ],
     });
@@ -639,7 +641,7 @@ describe('serialize object with depth greater than allowed', () => {
           '4': {
             '5': {
               '6': {
-                '7': {t: 2},
+                '7': { t: 2 },
               },
             },
           },

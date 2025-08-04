@@ -3,7 +3,7 @@ import nodeResolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import { dts } from 'rollup-plugin-dts';
 
-const external = ['react', 'react-dom', 'recoil', 'react-relay', 'relay-runtime'];
+const external = ['react', 'react-dom'];
 
 const commonPlugins = [
     nodeResolve({
@@ -13,7 +13,7 @@ const commonPlugins = [
     commonjs(),
 ];
 
-// Recoil-Relay build configuration
+// Shared build configuration
 const mainBuild = {
     input: 'src/index.ts',
     output: [
@@ -32,7 +32,7 @@ const mainBuild = {
         typescript({
             tsconfig: '../../tsconfig.json',
             declaration: false,
-            include: ['src/**/*', '../shared/src/**/*'],
+            include: ['src/**/*'],
             exclude: ['**/__tests__/**', '**/*.test.*'],
             compilerOptions: {
                 outDir: undefined,
@@ -41,7 +41,7 @@ const mainBuild = {
     ],
 };
 
-// Recoil-Relay TypeScript declarations build
+// Shared TypeScript declarations build
 const dtsBuild = {
     input: 'src/index.ts',
     output: [

@@ -1,14 +1,9 @@
-import commonjs from '@rollup/plugin-commonjs';
-import nodeResolve from '@rollup/plugin-node-resolve';
 import typescript from '@rollup/plugin-typescript';
+import nodeResolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import { dts } from 'rollup-plugin-dts';
 
-const external = [
-    'react', 
-    'react-dom', 
-    'recoil',
-    'transit-js',
-    '@recoiljs/refine'
-];
+const external = ['react', 'react-dom', 'recoil', 'transit-js', '@recoiljs/refine'];
 
 const commonPlugins = [
     nodeResolve({
@@ -18,7 +13,7 @@ const commonPlugins = [
     commonjs(),
 ];
 
-// Main build configuration
+// Recoil-Sync build configuration
 const mainBuild = {
     input: 'src/index.ts',
     output: [
@@ -35,13 +30,36 @@ const mainBuild = {
     plugins: [
         ...commonPlugins,
         typescript({
-            tsconfig: './tsconfig.json',
-            declaration: true,
-            declarationDir: './dist',
-            include: ['src/**/*'],
+            tsconfig: '../../tsconfig.json',
+            declaration: false,
+            include: ['src/**/*', '../shared/src/**/*'],
             exclude: ['**/__tests__/**', '**/*.test.*'],
+            compilerOptions: {
+                outDir: undefined,
+            },
         }),
     ],
 };
 
-export default mainBuild; 
+// Recoil-Sync TypeScript declarations build
+const dtsBuild = {
+    input: 'src/index.ts',
+    output: [
+        {
+            file: 'dist/index.d.ts',
+            format: 'es',
+        },
+        {
+            file: 'dist/index.d.cts',
+            format: 'cjs',
+        },
+    ],
+    external,
+    plugins: [
+        dts({
+            tsconfig: '../../tsconfig.json',
+        }),
+    ],
+};
+
+export default [mainBuild, dtsBuild]; 

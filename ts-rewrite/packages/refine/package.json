@@ -20,12 +20,13 @@
     "test": "jest"
   },
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^25.0.0",
-    "@rollup/plugin-node-resolve": "^15.0.0",
-    "@rollup/plugin-typescript": "^11.0.0",
+    "@rollup/plugin-commonjs": "^28.0.6",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.4",
     "@types/react": "^18.2.39",
     "rollup": "^4.0.0",
-    "rollup-plugin-dts": "^6.0.0",
+    "rollup-plugin-dts": "^6.2.1",
+    "tslib": "^2.6.0",
     "typescript": "^5.4.2"
   },
   "repository": "https://github.com/facebookexperimental/Recoil.git",
