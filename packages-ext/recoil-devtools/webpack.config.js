@@ -1,12 +1,6 @@
 /**
- * (c) Meta Platforms, Inc. and affiliates. Confidential and proprietary.
- *
- * Recoil DevTools browser extension.
- *
- * @format
- * @oncall recoil
+ * TypeScript webpack config for recoil-devtools
  */
-'use strict';
 
 const env = require('./utils/env');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
@@ -15,11 +9,10 @@ const fileSystem = require('fs-extra');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
-const WriteFilePlugin = require('write-file-webpack-plugin');
 
-// load the secrets
 var alias = {
-  'react-dom': '@hot-loader/react-dom',
+  'recoil': path.resolve(__dirname, '../../packages/recoil/src'),
+  'recoil-shared': path.resolve(__dirname, '../../packages/shared/src'),
 };
 
 var buildFolder = 'recoil_devtools_ext';
@@ -46,32 +39,29 @@ if (fileSystem.existsSync(secretsPath)) {
 var options = {
   mode: env.NODE_ENV || 'development',
   entry: {
-    popup: path.join(__dirname, 'src', 'pages', 'Popup', 'PopupScript.js'),
+    popup: path.join(__dirname, 'src', 'pages', 'Popup', 'PopupScript.ts'),
     devtools: path.join(
       __dirname,
       'src',
       'pages',
       'Devtools',
-      'DevtoolsScript.js',
+      'DevtoolsScript.ts',
     ),
     background: path.join(
       __dirname,
       'src',
       'pages',
       'Background',
-      'Background.js',
+      'Background.ts',
     ),
     contentScript: path.join(
       __dirname,
       'src',
       'pages',
       'Content',
-      'ContentScript.js',
+      'ContentScript.ts',
     ),
-    pageScript: path.join(__dirname, 'src', 'pages', 'Page', 'PageScript.js'),
-  },
-  chromeExtensionBoilerplate: {
-    notHotReload: ['contentScript'],
+    pageScript: path.join(__dirname, 'src', 'pages', 'Page', 'PageScript.ts'),
   },
   output: {
     path: path.resolve(__dirname, buildFolder),
@@ -81,11 +71,14 @@ var options = {
     rules: [
       {
         test: /\.css$/,
-        loader: 'style-loader!css-loader',
+        use: ['style-loader', 'css-loader'],
       },
       {
         test: new RegExp('.(' + fileExtensions.join('|') + ')$'),
-        loader: 'file-loader?name=[name].[ext]',
+        type: 'asset/resource',
+        generator: {
+          filename: '[name][ext]'
+        },
         exclude: /node_modules/,
       },
       {
@@ -94,8 +87,8 @@ var options = {
         exclude: /node_modules/,
       },
       {
-        test: /\.(js|jsx)$/,
-        loader: 'babel-loader',
+        test: /\.(ts|tsx)$/,
+        use: 'ts-loader',
         exclude: /node_modules/,
       },
     ],
@@ -104,7 +97,7 @@ var options = {
     alias,
     extensions: fileExtensions
       .map(extension => '.' + extension)
-      .concat(['.jsx', '.js', '.css']),
+      .concat(['.tsx', '.ts', '.jsx', '.js', '.css']),
   },
   plugins: [
     new webpack.ProgressPlugin(),
@@ -118,20 +111,16 @@ var options = {
     }),
     // expose and write the allowed env vars on the compiled bundle
     new webpack.EnvironmentPlugin(['NODE_ENV']),
-    new CopyWebpackPlugin([
-      {
-        from: path.join(__dirname, 'src', 'assets', 'img', 'icon-34.png'),
-        to: path.join(__dirname, buildFolder),
-      },
-    ]),
-    new CopyWebpackPlugin([
-      {
-        from: path.join(__dirname, 'src', 'assets', 'img', 'icon-128.png'),
-        to: path.join(__dirname, buildFolder),
-      },
-    ]),
-    new CopyWebpackPlugin(
-      [
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: path.join(__dirname, 'src', 'assets', 'img', 'icon-34.png'),
+          to: path.join(__dirname, buildFolder),
+        },
+        {
+          from: path.join(__dirname, 'src', 'assets', 'img', 'icon-128.png'),
+          to: path.join(__dirname, buildFolder),
+        },
         {
           from: 'src/manifest.json',
           to: path.join(__dirname, buildFolder),
@@ -148,11 +137,7 @@ var options = {
           },
         },
       ],
-      {
-        logLevel: 'info',
-        copyUnmodified: true,
-      },
-    ),
+    }),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, 'src', 'pages', 'Popup', 'index.html'),
       filename: 'popup.html',
@@ -179,12 +164,11 @@ var options = {
       filename: 'background.html',
       chunks: ['background'],
     }),
-    new WriteFilePlugin(),
   ],
 };
 
 if (env.NODE_ENV === 'development') {
-  options.devtool = 'cheap-module-eval-source-map';
+  options.devtool = 'eval-source-map';
 }
 
 module.exports = options;

@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "jsx": "react-jsx"
+  },
+  "references": [{ "path": "../shared" }],
+  "include": ["src/**/*"],
+  "exclude": ["**/__tests__/**"]
+}

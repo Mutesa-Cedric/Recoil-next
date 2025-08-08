@@ -1,6 +1,6 @@
-# Recoil Relay &middot; [![NPM Version](https://img.shields.io/npm/v/recoil-relay)](https://www.npmjs.com/package/recoil-relay) [![Node.js CI](https://github.com/facebookexperimental/Recoil/workflows/Node.js%20CI/badge.svg)](https://github.com/facebookexperimental/Recoil/actions) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/facebookexperimental/Recoil/blob/main/LICENSE) [![Follow on Twitter](https://img.shields.io/twitter/follow/recoiljs?label=Follow%20Recoil&style=social)](https://twitter.com/recoiljs)
+# Recoil Relay Next &middot; [![NPM Version](https://img.shields.io/npm/v/recoil-relay-next)](https://www.npmjs.com/package/recoil-relay-next) [![Node.js CI](https://github.com/Mutesa-Cedric/Recoil-next/workflows/Node.js%20CI/badge.svg)](https://github.com/Mutesa-Cedric/Recoil-next/actions) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Mutesa-Cedric/Recoil-next/blob/main/LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-The `recoil-relay` library helps [Recoil](https://recoiljs.org) perform type safe and efficient queries using [GraphQL](https://graphql.org/) with the [Relay](https://relay.dev) library.
+The `recoil-relay-next` library helps [Recoil Next](https://github.com/Mutesa-Cedric/Recoil-next) perform type safe and efficient queries using [GraphQL](https://graphql.org/) with the [Relay](https://relay.dev) library.
 
 Please see the [**Recoil Relay GraphQL Documentation**](https://recoiljs.org/docs/recoil-relay/introduction)
 
@@ -32,9 +32,41 @@ function MyComponent() {
 }
 ```
 
+## Migration from Recoil Relay
+
+`recoil-relay-next` is a drop-in replacement for the original `recoil-relay` library. You can migrate your existing Recoil Relay project with minimal changes:
+
+### 1. Update your dependencies
+
+Replace `recoil-relay` with `recoil-relay-next` in your `package.json`:
+
+```json
+{
+  "dependencies": {
+    "recoil-relay-next": "^0.2.0"
+  }
+}
+```
+
+### 2. Update your imports
+
+Simply change your import statements from `recoil-relay` to `recoil-relay-next`:
+
+```javascript
+// Before
+import { graphQLSelector, graphQLSelectorFamily } from 'recoil-relay';
+
+// After
+import { graphQLSelector, graphQLSelectorFamily } from 'recoil-relay-next';
+```
+
+### 3. That's it!
+
+Your existing Recoil Relay code will work exactly the same. All APIs, behavior, and functionality remain identical to the original Recoil Relay library.
+
 ## Installation
 
-Please see the [Recoil installation guide](https://recoiljs.org/docs/introduction/installation) for installing Recoil and the [Relay documentation](https://relay.dev/docs/getting-started/installation-and-setup/) for installing and setting up the Relay library, GraphQL compiler, Babel plugin, and ESLint plugin.  Then add `recoil-relay` as a dependency.
+Please see the [Recoil Next installation guide](https://github.com/Mutesa-Cedric/Recoil-next#installation) for installing Recoil Next and the [Relay documentation](https://relay.dev/docs/getting-started/installation-and-setup/) for installing and setting up the Relay library, GraphQL compiler, Babel plugin, and ESLint plugin. Then add `recoil-relay-next` as a dependency.
 
 ## Contributing
 

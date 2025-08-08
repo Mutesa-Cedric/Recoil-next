@@ -1,110 +1,63 @@
 {
-  "name": "recoil-next",
-  "version": "1.0.0",
-  "private": false,
-  "description": "Recoil-next (a fork of recoil) - A state management library for React",
-  "main": "cjs/index.js",
-  "module": "es/index.js",
-  "react-native": "native/index.js",
-  "unpkg": "umd/index.js",
-  "files": [
-    "umd",
-    "es",
-    "cjs",
-    "native",
-    "index.d.ts"
-  ],
-  "repository": "https://github.com/Mutesa-Cedric/Recoil-next.git",
-  "license": "MIT",
-  "scripts": {
-    "prepare": "install-peers",
-    "build": "node scripts/build.mjs",
-    "pack": "node scripts/pack.mjs",
-    "test": "yarn relay && jest packages/*",
-    "format": "prettier --write \"./**/*.{js,md,json}\"",
-    "flow": "flow --show-all-errors",
-    "flow:restart": "flow stop && npm run flow",
-    "test:typescript": "dtslint typescript",
-    "lint": "eslint .",
-    "relay": "relay-compiler",
-    "deploy-nightly": "yarn build && node scripts/deploy_nightly_build.js"
-  },
-  "dependencies": {
-    "hamt_plus": "1.0.2",
-    "transit-js": "^0.8.874"
-  },
-  "peerDependencies": {
-    "react": ">=18.3.1"
-  },
-  "peerDependenciesMeta": {
-    "react-dom": {
-      "optional": true
+    "name": "recoil-next",
+    "version": "0.2.0",
+    "description": "Continuation of Recoil - A state management library for React",
+    "main": "dist/index.cjs",
+    "module": "dist/index.mjs",
+    "types": "dist/index.d.ts",
+    "exports": {
+        ".": {
+            "import": {
+                "types": "./dist/index.d.ts",
+                "default": "./dist/index.mjs"
+            },
+            "require": {
+                "types": "./dist/index.d.cts",
+                "default": "./dist/index.cjs"
+            }
+        }
     },
-    "react-native": {
-      "optional": true
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "rollup -c",
+        "build:shared": "cd packages/shared && npm run build",
+        "build:recoil": "cd packages/recoil && npm run build",
+        "build:recoil-relay": "cd packages/recoil-relay && npm run build",
+        "build:recoil-sync": "cd packages/recoil-sync && npm run build",
+        "build:refine": "cd packages/refine && npm run build",
+        "test": "vitest",
+        "test:ui": "vitest --ui",
+        "test:run": "vitest run",
+        "lint": "eslint \"src/**/*.{ts,tsx}\"",
+        "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
+        "typecheck": "tsc --noEmit"
+    },
+    "peerDependencies": {
+        "react": ">=18"
+    },
+    "devDependencies": {
+        "@rollup/plugin-commonjs": "^28.0.6",
+        "@rollup/plugin-node-resolve": "^16.0.1",
+        "@rollup/plugin-typescript": "^12.1.4",
+        "@testing-library/jest-dom": "^6.6.3",
+        "@testing-library/react": "^16.3.0",
+        "@types/hamt_plus": "^1.0.0",
+        "@types/node": "^18.15.3",
+        "@types/react": "^18.2.39",
+        "@types/react-dom": "^18.2.14",
+        "@typescript-eslint/eslint-plugin": "^8.36.0",
+        "@vitest/ui": "^2.1.8",
+        "eslint-config-prettier": "^10.1.5",
+        "eslint-plugin-prettier": "^5.5.1",
+        "hamt_plus": "^1.0.2",
+        "jsdom": "^26.1.0",
+        "react-test-renderer": "^19.1.0",
+        "rollup": "^4.0.0",
+        "rollup-plugin-dts": "^6.2.1",
+        "tslib": "^2.6.0",
+        "typescript": "^5.4.2",
+        "vitest": "^2.1.8"
     }
-  },
-  "devDependencies": {
-    "@babel/core": "^7.16.0",
-    "@babel/plugin-proposal-class-properties": "^7.16.0",
-    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.16.0",
-    "@babel/plugin-proposal-optional-chaining": "^7.16.0",
-    "@babel/plugin-syntax-optional-chaining": "^7.8.3",
-    "@babel/plugin-transform-flow-strip-types": "^7.16.0",
-    "@babel/preset-flow": "^7.16.0",
-    "@babel/preset-react": "^7.16.0",
-    "@rollup/plugin-alias": "^3.1.5",
-    "@rollup/plugin-babel": "^5.0.0",
-    "@rollup/plugin-commonjs": "^11.1.0",
-    "@rollup/plugin-node-resolve": "^7.1.3",
-    "@rollup/plugin-replace": "^2.3.2",
-    "@types/react": ">=18.0.9",
-    "@types/react-relay": ">=13.0.2",
-    "@types/relay-runtime": ">=13.0.3",
-    "babel-jest": "^26.0.1",
-    "babel-plugin-module-resolver": "^4.0.0",
-    "babel-plugin-relay": "^13.2.0",
-    "babel-preset-fbjs": "^3.3.0",
-    "dtslint": "^4.2.0",
-    "eslint": "^8.2.0",
-    "eslint-plugin-fb-www": "^1.11.0",
-    "eslint-plugin-flowtype": "^8.0.3",
-    "eslint-plugin-jest": "^23.13.2",
-    "eslint-plugin-react": "^7.28.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-relay": "^1.8.3",
-    "eslint-plugin-rulesdir": "^0.2.0",
-    "eslint-plugin-unused-imports": "^2.0.0",
-    "flow-bin": "0.207.0",
-    "flow-copy-source": "^2.0.9",
-    "flow-interfaces-chrome": "^0.6.0",
-    "flow-typed": "^3.7.0",
-    "hermes-eslint": "^0.4.8",
-    "husky": ">=4",
-    "immutable": "^4.0.0-rc.12",
-    "install-peers-cli": "^2.2.0",
-    "jest-cli": "^26.0.1",
-    "lint-staged": ">=10",
-    "prettier": "^2.4.1",
-    "promise-polyfill": "^8.1.3",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-relay": "^13.2.0",
-    "relay-compiler": "^13.2.0",
-    "relay-runtime": "^13.2.0",
-    "relay-test-utils": "^13.2.0",
-    "rollup": "^2.10.0",
-    "rollup-plugin-includepaths": "^0.2.3",
-    "rollup-plugin-terser": "^5.3.0",
-    "typescript": "^3.9.5"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.{js,mjs,md,json}": "prettier --write",
-    "*.{js,mjs}": "eslint --fix"
-  }
 }

@@ -1,6 +1,6 @@
-# Recoil Sync &middot; [![NPM Version](https://img.shields.io/npm/v/recoil-sync)](https://www.npmjs.com/package/recoil-sync) [![Node.js CI](https://github.com/facebookexperimental/Recoil/workflows/Node.js%20CI/badge.svg)](https://github.com/facebookexperimental/Recoil/actions) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/facebookexperimental/Recoil/blob/main/LICENSE) [![Follow on Twitter](https://img.shields.io/twitter/follow/recoiljs?label=Follow%20Recoil&style=social)](https://twitter.com/recoiljs)
+# Recoil Sync Next &middot; [![NPM Version](https://img.shields.io/npm/v/recoil-sync-next)](https://www.npmjs.com/package/recoil-sync-next) [![Node.js CI](https://github.com/Mutesa-Cedric/Recoil-next/workflows/Node.js%20CI/badge.svg)](https://github.com/Mutesa-Cedric/Recoil-next/actions) [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/Mutesa-Cedric/Recoil-next/blob/main/LICENSE) [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
-The `recoil-sync` package provides an add-on library to help synchronize [Recoil](https://recoiljs.org/) state with external systems.
+The `recoil-sync-next` package provides an add-on library to help synchronize [Recoil Next](https://github.com/Mutesa-Cedric/Recoil-next) state with external systems.
 
 Please see the [**Recoil Sync Documentation**](https://recoiljs.org/docs/recoil-sync/introduction)
 
@@ -50,9 +50,41 @@ function MyApp() {
 
 That's it!  Now this atom will initialize its state based on the URL during initial load, any state mutations will update the URL, and changes in the URL (such as the back button) will update the atom.  See more examples in the [Sync Effect](https://recoiljs.org/docs/recoil-sync/sync-effect), [Store Implementation](https://recoiljs.org/docs/recoil-sync/implement-store), and [URL Persistence](https://recoiljs.org/docs/recoil-sync/url-persistence) guides.
 
+## Migration from Recoil Sync
+
+`recoil-sync-next` is a drop-in replacement for the original `recoil-sync` library. You can migrate your existing Recoil Sync project with minimal changes:
+
+### 1. Update your dependencies
+
+Replace `recoil-sync` with `recoil-sync-next` in your `package.json`:
+
+```json
+{
+  "dependencies": {
+    "recoil-sync-next": "^0.2.0"
+  }
+}
+```
+
+### 2. Update your imports
+
+Simply change your import statements from `recoil-sync` to `recoil-sync-next`:
+
+```javascript
+// Before
+import { syncEffect, RecoilSync, RecoilURLSyncJSON } from 'recoil-sync';
+
+// After
+import { syncEffect, RecoilSync, RecoilURLSyncJSON } from 'recoil-sync-next';
+```
+
+### 3. That's it!
+
+Your existing Recoil Sync code will work exactly the same. All APIs, behavior, and functionality remain identical to the original Recoil Sync library.
+
 ## Installation
 
-Please see the [Recoil installation guide](https://recoiljs.org/docs/introduction/installation) and add `recoil-sync` as an additional dependency.  `recoil-sync` also includes the [`refine`](https://recoiljs.org/docs/refine/introduction) library.
+Please see the [Recoil Next installation guide](https://github.com/Mutesa-Cedric/Recoil-next#installation) and add `recoil-sync-next` as an additional dependency. `recoil-sync-next` also includes the [`refine`](https://recoiljs.org/docs/refine/introduction) library.
 
 ## Contributing
 

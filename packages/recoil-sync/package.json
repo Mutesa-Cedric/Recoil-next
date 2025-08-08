@@ -1,14 +1,46 @@
 {
-  "name": "recoil-sync",
-  "description": "This is the internal package.json enabling CommonJS module",
-  "main": "RecoilSync_index.js",
-  "haste_commonjs": true,
-  "files": [
-    "RecoilSync_index.js"
-  ],
-  "directories": {
-    "": "./"
+  "name": "recoil-sync-next",
+  "version": "0.2.0",
+  "description": "recoil-sync-next provides an add-on library to help synchronize Recoil Next state with external systems",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
   },
-  "repository": "https://github.com/facebookexperimental/Recoil.git",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "test": "vitest",
+    "test:run": "vitest run"
+  },
+  "peerDependencies": {
+    "@recoiljs/refine": "^0.1.1",
+    "recoil-next": "^0.2.0"
+  },
+  "devDependencies": {
+    "@recoiljs/refine": "^0.1.1",
+    "@rollup/plugin-commonjs": "^28.0.6",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.4",
+    "@testing-library/react": "^16.3.0",
+    "@types/react": "^18.2.39",
+    "@types/react-test-renderer": "^19.1.0",
+    "@types/transit-js": "^0.8.3",
+    "recoil-next": "^0.2.0",
+    "rollup": "^4.0.0",
+    "rollup-plugin-dts": "^6.2.1",
+    "transit-js": "^0.8.874",
+    "tslib": "^2.6.0",
+    "typescript": "^5.4.2",
+    "vitest": "^2.1.8"
+  },
+  "repository": "https://github.com/Mutesa-Cedric/Recoil-next.git",
   "license": "MIT"
 }
