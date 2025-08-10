@@ -1,8 +1,6 @@
-// TypeScript port of App.js
-
 import './App.css';
 import { TodoList } from './components/Todo/TodoList';
-import { RecoilRoot } from 'recoil';
+import { RecoilRoot } from 'recoil-next';
 import React from 'react';
 
 function App(): React.ReactElement {

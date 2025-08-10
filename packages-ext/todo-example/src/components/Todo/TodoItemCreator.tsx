@@ -2,7 +2,7 @@
 
 import { todoListState } from './Todo_state';
 import React, { useState, ChangeEvent } from 'react';
-import { useSetRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil-next';
 
 export const TodoItemCreator: React.FC = () => {
   const [inputValue, setInputValue] = useState<string>('');

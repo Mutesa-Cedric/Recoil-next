@@ -6,7 +6,7 @@ import { TodoItemCreator } from './TodoItemCreator';
 import { TodoListFilters } from './TodoListFilters';
 import { TodoListStats } from './TodoListStats';
 import React from 'react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilValue } from 'recoil-next';
 
 export const TodoList: React.FC = () => {
   const todoList = useRecoilValue(filteredTodoListState);
