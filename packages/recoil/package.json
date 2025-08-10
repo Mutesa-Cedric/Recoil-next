@@ -1,7 +1,18 @@
 {
   "name": "recoil",
   "version": "0.1.0",
-  "description": "Recoil is an experimental state management library for React apps",
+  "description": "Continuation of Recoil - A state management library for React",
+  "author": {
+    "name": "Mutesa Cedric",
+    "email": "mutesacedric@gmail.com",
+    "url": "https://github.com/Mutesa-Cedric"
+  },
+  "keywords": [
+    "recoil",
+    "state-management",
+    "react",
+    "state-management-library"
+  ],
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -18,10 +29,15 @@
   "scripts": {
     "build": "rollup -c",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "release": "bumpp && npm publish"
   },
   "peerDependencies": {
     "react": ">=18"
+  },
+  "dependencies": {
+    "hamt_plus": "^1.0.2"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.6",
@@ -35,9 +51,9 @@
     "@types/react-dom": "^18.2.14",
     "@typescript-eslint/eslint-plugin": "^8.36.0",
     "@vitest/ui": "^2.1.8",
+    "bumpp": "^10.2.2",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-prettier": "^5.5.1",
-    "hamt_plus": "^1.0.2",
     "jsdom": "^26.1.0",
     "react-test-renderer": "^19.1.0",
     "rollup": "^4.0.0",
@@ -48,4 +64,4 @@
   },
   "repository": "https://github.com/Mutesa-Cedric/Recoil-next.git",
   "license": "MIT"
-} 
+}

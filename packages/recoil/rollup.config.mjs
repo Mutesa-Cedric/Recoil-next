@@ -3,7 +3,7 @@ import nodeResolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import { dts } from 'rollup-plugin-dts';
 
-const external = ['react', 'react-dom'];
+const external = ['react', 'react-dom', 'react/jsx-runtime'];
 
 const commonPlugins = [
     nodeResolve({
