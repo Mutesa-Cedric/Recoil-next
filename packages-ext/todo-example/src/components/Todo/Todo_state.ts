@@ -1,6 +1,4 @@
-// TypeScript port of Todo_state.js
-
-import { atom, selector } from 'recoil';
+import { atom, selector } from 'recoil-next';
 import { TodoItem, TodoFilterType, TodoStats } from './Todo_types';
 
 export const todoListState = atom<TodoItem[]>({

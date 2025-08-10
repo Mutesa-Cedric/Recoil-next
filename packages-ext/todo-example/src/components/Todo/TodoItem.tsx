@@ -3,7 +3,7 @@
 import { TodoItem as TodoItemType } from './Todo_types';
 import { todoListState } from './Todo_state';
 import React, { ChangeEvent } from 'react';
-import { useRecoilState } from 'recoil';
+import { useRecoilState } from 'recoil-next';
 
 interface TodoItemProps {
   item: TodoItemType;

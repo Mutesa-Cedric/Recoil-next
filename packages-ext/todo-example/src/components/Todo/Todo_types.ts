@@ -1,5 +1,3 @@
-// TypeScript port of Todo_types.js
-
 export interface TodoItem {
   id: number;
   text: string;

@@ -1,8 +1,6 @@
-// TypeScript port of TodoListStats.jsx
-
-import { todoListStatsState } from './Todo_state';
 import React from 'react';
-import { useRecoilValue } from 'recoil';
+import { useRecoilValue } from 'recoil-next';
+import { todoListStatsState } from './Todo_state';
 
 export const TodoListStats: React.FC = () => {
   const { totalNum, totalCompletedNum, totalUncompletedNum, percentCompleted } =
