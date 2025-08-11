@@ -2,21 +2,21 @@
  * TypeScript port of Recoil_RecoilValueInterface-test.js
  */
 
-import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { act } from 'react';
+import { beforeEach, expect, test, vi } from 'vitest';
 
 import { persistentMap } from '../../adt/PersistentMap';
-import { getNextStoreID, getNextTreeStateVersion } from '../Keys';
-import type { Store } from '../State';
 import { atom } from '../../recoil_values/atom';
 import { selector } from '../../recoil_values/selector';
+import { getNextStoreID, getNextTreeStateVersion } from '../Keys';
 import {
     getRecoilValueAsLoadable,
+    refreshRecoilValue,
     setRecoilValue,
     setUnvalidatedRecoilValue,
     subscribeToRecoilValue,
-    refreshRecoilValue,
 } from '../RecoilValueInterface';
+import type { Store } from '../State';
 
 // Create a simplified mock store for testing
 function makeStore(): Store {
@@ -97,20 +97,23 @@ let dependsOnA: any;
 let dependsOnDependsOnA: any;
 let b: any;
 
+let testId = 0;
+
 beforeEach(() => {
     store = makeStore();
+    testId++;
 
-    a = atom<number>({ key: 'a', default: 0 });
+    a = atom<number>({ key: `a_${testId}`, default: 0 });
 
     dependsOnAFn = vi.fn(x => x + 1);
 
     dependsOnA = selector({
-        key: 'dependsOnA',
+        key: `dependsOnA_${testId}`,
         get: ({ get }) => dependsOnAFn(get(a)),
     });
 
     dependsOnDependsOnA = selector({
-        key: 'dependsOnDependsOnA',
+        key: `dependsOnDependsOnA_${testId}`,
         get: ({ get }) => {
             const value = get(dependsOnA);
             if (typeof value !== 'number') {
@@ -121,7 +124,7 @@ beforeEach(() => {
     });
 
     b = atom<number>({
-        key: 'b',
+        key: `b_${testId}`,
         default: 0,
         persistence_UNSTABLE: {
             type: 'url',

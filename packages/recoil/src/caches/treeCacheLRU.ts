@@ -30,7 +30,7 @@ export default function treeCacheLRU<T>({
 
       lruCache.set(node, true);
 
-      if (lruNode && cache.size() > maxSize) {
+      if (lruNode && lruCache.size() > maxSize) {
         cache.delete(lruNode.key);
       }
     },

@@ -2,9 +2,9 @@
  * TypeScript port of useSelectionHooks.tsx
  * Recoil DevTools browser extension.
  */
-import type {SetterOrUpdater} from 'recoil';
+import type {SetterOrUpdater} from 'recoil-next';
 
-import {atom, useRecoilState} from 'recoil';
+import {atom, useRecoilState} from 'recoil-next';
 
 const FilterAtom = atom({
   key: 'filter-atom',

@@ -2,7 +2,7 @@
 
 import type {SerializedValue} from '../utils/Serialization';
 import type Store from '../utils/Store';
-import type {Snapshot} from 'recoil';
+import type {Snapshot} from 'recoil-next';
 import {RecoilDevToolsActions} from '../constants/Constants';
 
 export type RecoilSnapshot = Snapshot;

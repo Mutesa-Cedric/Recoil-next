@@ -80,7 +80,8 @@ export default class TreeCache<T = unknown> {
     set(route: NodeCacheRoute, value: T, handlers?: SetHandlers<T>): void {
         const addLeaf = () => {
             let node: TreeCacheBranch<T> | null = this._root as TreeCacheBranch<T> | null;
-            let branchKey: unknown;
+            let branchKey: unknown = undefined;
+            
             for (const [nodeKey, nodeValue] of route) {
                 const root = this._root;
                 if (root?.type === 'leaf') {
@@ -89,6 +90,7 @@ export default class TreeCache<T = unknown> {
 
                 const parent: TreeCacheBranch<T> | null = node;
                 let current: TreeCacheNode<T> | null = parent ? parent.branches.get(branchKey) ?? null : root;
+                
                 if (!current) {
                     current = {
                         type: 'branch',

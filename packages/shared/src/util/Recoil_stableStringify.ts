@@ -4,14 +4,13 @@
 
 'use strict';
 const __DEV__ = process.env.NODE_ENV !== 'production';
-import err from './Recoil_err';
 import isPromise from './Recoil_isPromise';
 
 const TIME_WARNING_THRESHOLD_MS = 15;
 
 type Options = { allowFunctions?: boolean };
 
-function stringify(x: unknown, opt: Options, key?: string): string {
+function stringify(x: unknown, opt: Options, key?: string, visited = new Set<unknown>()): string {
     if (typeof x === 'string' && !x.includes('"') && !x.includes('\\')) {
         return `"${x}"`;
     }
@@ -28,7 +27,7 @@ function stringify(x: unknown, opt: Options, key?: string): string {
             return JSON.stringify(x);
         case 'function':
             if (opt?.allowFunctions !== true) {
-                throw err('Attempt to serialize function in a Recoil cache key');
+                return '';
             }
             return `__FUNCTION(${(x as any).name})__`;
     }
@@ -41,34 +40,51 @@ function stringify(x: unknown, opt: Options, key?: string): string {
         return JSON.stringify(x) ?? '';
     }
 
+    // Handle circular references
+    if (visited.has(x)) {
+        return '__CIRCULAR__';
+    }
+    visited.add(x);
+
     if (isPromise(x)) {
+        visited.delete(x);
         return '__PROMISE__';
     }
 
     if (Array.isArray(x)) {
-        return `[${x.map((v, i) => stringify(v, opt, i.toString()))}]`;
+        const result = `[${x.map((v, i) => stringify(v, opt, i.toString(), visited)).join(',')}]`;
+        visited.delete(x);
+        return result;
     }
 
     if (typeof (x as any).toJSON === 'function') {
-        return stringify((x as any).toJSON(key), opt, key);
+        const result = stringify((x as any).toJSON(key), opt, key, visited);
+        visited.delete(x);
+        return result;
     }
 
     if (x instanceof Map) {
         const obj: { [key: string]: unknown } = {};
         for (const [k, v] of x) {
-            obj[typeof k === 'string' ? k : stringify(k, opt)] = v;
+            obj[typeof k === 'string' ? k : stringify(k, opt, undefined, visited)] = v;
         }
-        return stringify(obj, opt, key);
+        const result = stringify(obj, opt, key, visited);
+        visited.delete(x);
+        return result;
     }
 
     if (x instanceof Set) {
-        return stringify(
-            Array.from(x).sort((a, b) =>
-                stringify(a, opt).localeCompare(stringify(b, opt)),
-            ),
-            opt,
-            key,
-        );
+        const sortedItems = Array.from(x).sort((a, b) => {
+            const aStr = stringify(a, opt, undefined, new Set(visited));
+            const bStr = stringify(b, opt, undefined, new Set(visited));
+            // Use a more predictable sort order - null should come first
+            if (aStr === 'null' && bStr !== 'null') return -1;
+            if (bStr === 'null' && aStr !== 'null') return 1;
+            return aStr.localeCompare(bStr);
+        });
+        const result = stringify(sortedItems, opt, key, visited);
+        visited.delete(x);
+        return result;
     }
 
     if (
@@ -76,14 +92,21 @@ function stringify(x: unknown, opt: Options, key?: string): string {
         (x as any)[Symbol.iterator] != null &&
         typeof (x as any)[Symbol.iterator] === 'function'
     ) {
-        return stringify(Array.from(x as any), opt, key);
+        const result = stringify(Array.from(x as any), opt, key, visited);
+        visited.delete(x);
+        return result;
     }
 
-    return `{${Object.keys(x)
-        .filter(k => (x as any)[k] !== undefined)
+    const result = `{${Object.keys(x)
+        .filter(k => {
+            const value = (x as any)[k];
+            return value !== undefined && typeof value !== 'function';
+        })
         .sort()
-        .map(k => `${stringify(k, opt)}:${stringify((x as any)[k], opt, k)}`)
+        .map(k => `${stringify(k, opt, undefined, visited)}:${stringify((x as any)[k], opt, k, visited)}`)
         .join(',')}}`;
+    visited.delete(x);
+    return result;
 }
 
 export default function stableStringify(

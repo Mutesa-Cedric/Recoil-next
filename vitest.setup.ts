@@ -34,4 +34,13 @@ beforeAll(() => {
   const { TextEncoder, TextDecoder } = require('util');
   global.TextEncoder = TextEncoder;
   global.TextDecoder = TextDecoder;
+
+  // Jest globals for compatibility with libraries that expect them
+  global.jest = {
+    fn: vi.fn,
+    spyOn: vi.spyOn,
+    clearAllMocks: vi.clearAllMocks,
+    resetAllMocks: vi.resetAllMocks,
+    restoreAllMocks: vi.restoreAllMocks,
+  };
 }); 

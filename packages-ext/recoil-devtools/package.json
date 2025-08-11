@@ -30,7 +30,7 @@
     "jsondiffpatch-for-react": "^1.0.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "recoil": "^0.7.7"
+    "recoil-next": "^0.2.0"
   },
   "devDependencies": {
     "@types/d3": "^7.4.3",
@@ -53,6 +53,7 @@
     "html-loader": "^5.1.0",
     "html-webpack-plugin": "^5.6.3",
     "jsdom": "^26.1.0",
+    "nullthrows": "^1.1.1",
     "prettier": "^3.4.2",
     "style-loader": "^4.0.0",
     "ts-loader": "^9.5.1",

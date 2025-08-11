@@ -38,17 +38,26 @@ describe('TreeCache', () => {
     cache.set(route2, loadable2);
     cache.set(route3, loadable3);
 
-    expect(
-      cache.get(nodeKey => route1.find(([key]) => key === nodeKey)?.[1]),
-    ).toBe(loadable1);
+    // Test route1: [['a', 2], ['b', 3]]
+    const getRouteValue1 = (nodeKey: string) => {
+      const result = route1.find(([key]) => key === nodeKey)?.[1];
+      return result;
+    };
+    
+    const result1 = cache.get(getRouteValue1);
+    expect(result1).toBe(loadable1);
 
-    expect(
-      cache.get(nodeKey => route2.find(([key]) => key === nodeKey)?.[1]),
-    ).toBe(loadable2);
+    // Test route2: [['a', 3], ['b', 4]]  
+    const getRouteValue2 = (nodeKey: string) => {
+      const result = route2.find(([key]) => key === nodeKey)?.[1];
+      return result;
+    };
+    
+    const result2 = cache.get(getRouteValue2);
+    expect(result2).toBe(loadable2);
 
-    expect(
-      cache.get(nodeKey => route3.find(([key]) => key === nodeKey)?.[1]),
-    ).toBe(loadable3);
+    const result3 = cache.get(nodeKey => route3.find(([key]) => key === nodeKey)?.[1]);
+    expect(result3).toBe(loadable3);
 
     expect(cache.size()).toBe(3);
   });

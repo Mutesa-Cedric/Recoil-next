@@ -1,6 +1,6 @@
 {
-  "name": "recoil",
-  "version": "0.1.0",
+  "name": "recoil-next",
+  "version": "0.2.0",
   "description": "Continuation of Recoil - A state management library for React",
   "author": {
     "name": "Mutesa Cedric",

@@ -3,7 +3,7 @@
  * Recoil DevTools browser extension.
  */
 
-import type {SetterOrUpdater} from 'recoil';
+import type {SetterOrUpdater} from 'recoil-next';
 
 import React from 'react';
 

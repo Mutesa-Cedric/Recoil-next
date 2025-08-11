@@ -3,10 +3,9 @@
  * Recoil DevTools browser extension.
  */
 
-import React from 'react';
 import { render } from 'react-dom';
-import { RecoilRoot } from 'recoil';
-import type {BackgroundPage} from '../../types/DevtoolsTypes';
+import { RecoilRoot } from 'recoil-next';
+import type { BackgroundPage } from '../../types/DevtoolsTypes';
 import PopupApp from './PopupApp';
 
 chrome.runtime.getBackgroundPage((backgroundPage?: Window) => {

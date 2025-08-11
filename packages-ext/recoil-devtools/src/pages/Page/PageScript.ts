@@ -9,7 +9,7 @@ import type {
   RecoilDevToolsActionsType,
   RecoilSnapshot,
 } from '../../types/DevtoolsTypes';
-import type {RecoilValue} from 'recoil';
+import type {RecoilValue} from 'recoil-next';
 
 import {
   ExtensionSource,
