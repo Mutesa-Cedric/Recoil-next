@@ -2,21 +2,23 @@
  * TypeScript port of RecoilSync_URLInterface-test.js
  */
 
-import React, { act } from 'react';
-import { atom } from 'recoil';
+import { act } from '@testing-library/react';
+import React from 'react';
+import { atom } from 'recoil-next';
+import { string } from 'refine-next';
 import { expect, test } from 'vitest';
 import {
   TestURLSync,
-  expectURL: testExpectURL,
+  expectURL as testExpectURL,
 } from '../__test_utils__/MockURLSerialization';
-import { urlSyncEffect } from '../RecoilSync_URL';
 import {
   ComponentThatReadsAndWritesAtom,
+  flushPromisesAndTimers,
   renderElements,
 } from '../__test_utils__/TestUtils';
-import { string } from 'refine';
+import { urlSyncEffect } from '../RecoilSync_URL';
 
-const urls: Array<string> = [];
+const urls: Array<string> = ['http://localhost/'];
 const subscriptions: Set<() => void> = new Set();
 const currentURL = () => urls[urls.length - 1];
 const link = window.document.createElement('a');
@@ -60,23 +62,27 @@ test('Push URLs in mock history', async () => {
     effects: [urlSyncEffect({ refine: string(), history: 'push' })],
   });
 
-  const [AtomA, setA, resetA] = ComponentThatReadsAndWritesAtom(atomA);
-  const [AtomB, setB, resetB] = ComponentThatReadsAndWritesAtom(atomB);
-  const [AtomC, setC, resetC] = ComponentThatReadsAndWritesAtom(atomC);
+  const [AtomA, atomAControls] = ComponentThatReadsAndWritesAtom(atomA);
+  const [AtomB, atomBControls] = ComponentThatReadsAndWritesAtom(atomB);
+  const [AtomC, atomCControls] = ComponentThatReadsAndWritesAtom(atomC);
   const container = renderElements(
     React.createElement(TestURLSync, {
-      location: loc,
+      location: { part: 'queryParams' as const },
       browserInterface: mockBrowserURL,
-      children: [AtomA, AtomB, AtomC],
+      children: [
+        React.createElement(AtomA, { key: 'A' }),
+        React.createElement(AtomB, { key: 'B' }),
+        React.createElement(AtomC, { key: 'C' }),
+      ],
     })
   );
 
   expect(container.textContent).toBe('"DEFAULT""DEFAULT""DEFAULT"');
-  const baseHistory = history.length;
+  const baseHistory = urls.length;
 
   // Replace A
   // 1: A__
-  act(() => setA('A'));
+  act(() => atomAControls.setValue('A'));
   expect(container.textContent).toBe('"A""DEFAULT""DEFAULT"');
   expectURL([
     [
@@ -86,12 +92,12 @@ test('Push URLs in mock history', async () => {
       },
     ],
   ]);
-  expect(history.length).toBe(baseHistory);
+  expect(urls.length).toBe(baseHistory);
 
   // Push B
   // 1: A__
   // 2: AB_
-  act(() => setB('B'));
+  act(() => atomBControls.setValue('B'));
   expect(container.textContent).toBe('"A""B""DEFAULT"');
   expectURL([
     [
@@ -102,13 +108,13 @@ test('Push URLs in mock history', async () => {
       },
     ],
   ]);
-  expect(history.length).toBe(baseHistory + 1);
+  expect(urls.length).toBe(baseHistory + 1);
 
   // Push C
   // 1: A__
   // 2: AB_
   // 3: ABC
-  act(() => setC('C'));
+  act(() => atomCControls.setValue('C'));
   expect(container.textContent).toBe('"A""B""C"');
   expectURL([
     [
@@ -120,12 +126,15 @@ test('Push URLs in mock history', async () => {
       },
     ],
   ]);
-  expect(history.length).toBe(baseHistory + 2);
+  expect(urls.length).toBe(baseHistory + 2);
 
   // Go back
   // 1: A__
   // 2: AB_
-  goBack();
+  act(() => {
+    goBack();
+  });
+  await flushPromisesAndTimers();
   expect(container.textContent).toBe('"A""B""DEFAULT"');
   expectURL([
     [
@@ -136,11 +145,14 @@ test('Push URLs in mock history', async () => {
       },
     ],
   ]);
-  expect(history.length).toBe(baseHistory + 1);
+  expect(urls.length).toBe(baseHistory + 1);
 
   // Go back
   // 1: A__
-  goBack();
+  act(() => {
+    goBack();
+  });
+  await flushPromisesAndTimers();
   expect(container.textContent).toBe('"A""DEFAULT""DEFAULT"');
   expectURL([
     [
@@ -150,5 +162,5 @@ test('Push URLs in mock history', async () => {
       },
     ],
   ]);
-  expect(history.length).toBe(baseHistory);
+  expect(urls.length).toBe(baseHistory);
 }); 

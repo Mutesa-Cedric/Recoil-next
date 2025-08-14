@@ -3,27 +3,48 @@
  */
 
 import React from 'react';
-import { act } from 'react';
-import { atom, useRecoilValue, useSetRecoilState, useResetRecoilState, RecoilRoot } from 'recoil';
+import { act } from '@testing-library/react';
+import { atom, useRecoilValue, useSetRecoilState, useResetRecoilState, RecoilRoot } from 'recoil-next';
 import { render } from '@testing-library/react';
+
+// Simple stringify that handles Set and Map like the original stableStringify
+function simpleStringify(value: any): string {
+  if (value instanceof Set) {
+    return JSON.stringify(Array.from(value).sort());
+  }
+  if (value instanceof Map) {
+    const obj: any = {};
+    for (const [k, v] of value) {
+      obj[typeof k === 'string' ? k : String(k)] = v;
+    }
+    return JSON.stringify(obj);
+  }
+  return JSON.stringify(value);
+}
 
 // Component that reads an atom
 export function ReadsAtom({ atom }: { atom: any }) {
   const value = useRecoilValue(atom);
-  return React.createElement('div', null, JSON.stringify(value));
+  return React.createElement('div', null, simpleStringify(value));
 }
 
-// Component that reads and writes an atom
-export function ComponentThatReadsAndWritesAtom(atom: any) {
-  const value = useRecoilValue(atom);
-  const setValue = useSetRecoilState(atom);
-  const resetValue = useResetRecoilState(atom);
+// Component that reads and writes an atom - returns component and reference objects for setters
+export function ComponentThatReadsAndWritesAtom(atom: any): [React.ComponentType, { setValue: any; resetValue: any }] {
+  const refs: { setValue: any; resetValue: any } = { setValue: null, resetValue: null };
   
-  return [
-    React.createElement('div', { key: 'read' }, JSON.stringify(value)),
-    setValue,
-    resetValue,
-  ] as const;
+  const Component = () => {
+    const value = useRecoilValue(atom);
+    const setValue = useSetRecoilState(atom);
+    const resetValue = useResetRecoilState(atom);
+    
+    // Assign immediately during render
+    refs.setValue = setValue;
+    refs.resetValue = resetValue;
+    
+    return <div>{JSON.stringify(value)}</div>;
+  };
+  
+  return [Component, refs];
 }
 
 // Utility to flush promises and timers
@@ -37,7 +58,9 @@ export async function flushPromisesAndTimers() {
 export function renderElements(elements: React.ReactNode) {
   const div = document.createElement('div');
   const { container } = render(
-    React.createElement(RecoilRoot, null, elements),
+    React.createElement(RecoilRoot, { 
+      override: false  // Disable strict mode effects that might cause snapshot issues
+    }, elements),
     { container: div }
   );
   return container;

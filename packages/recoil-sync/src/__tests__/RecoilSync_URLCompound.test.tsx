@@ -2,24 +2,24 @@
  * TypeScript port of RecoilSync_URLCompound-test.js
  */
 
-import React, { act } from 'react';
-import { atom, atomFamily, DefaultValue } from 'recoil';
+import { act } from '@testing-library/react';
+import React from 'react';
+import { atom, atomFamily, DefaultValue } from 'recoil-next';
+import { dict, nullable, number, string } from 'refine-next';
 import { expect, test } from 'vitest';
 import {
   encodeURL,
-  expectURL,
-  gotoURL,
+  expectURL
 } from '../__test_utils__/MockURLSerialization';
-import { syncEffect } from '../RecoilSync';
-import { RecoilURLSyncJSON } from '../RecoilSync_URLJSON';
 import {
   ComponentThatReadsAndWritesAtom,
   renderElements,
 } from '../__test_utils__/TestUtils';
-import { assertion, dict, nullable, number, string } from 'refine';
+import { syncEffect } from '../RecoilSync';
+import { RecoilURLSyncJSON } from '../RecoilSync_URLJSON';
 
 test('Upgrade item ID', async () => {
-  const loc = { part: 'queryParams' };
+  const loc = { part: 'queryParams' } as const;
 
   const myAtom = atom({
     key: 'recoil-url-sync upgrade itemID',
@@ -33,13 +33,13 @@ test('Upgrade item ID', async () => {
     ],
   });
 
-  history.replaceState(null, '', encodeURL([[loc, { old_key: 'OLD' }]]));
+  history.replaceState(null, '', encodeURL([[{ part: 'queryParams' }, { old_key: 'OLD' }]]));
 
-  const [Atom, setAtom, resetAtom] = ComponentThatReadsAndWritesAtom(myAtom);
+  const [Atom, atomControls] = ComponentThatReadsAndWritesAtom(myAtom);
   const container = renderElements(
     React.createElement(RecoilURLSyncJSON, {
       location: loc,
-      children: Atom,
+      children: React.createElement(Atom),
     })
   );
 
@@ -47,18 +47,18 @@ test('Upgrade item ID', async () => {
   expect(container.textContent).toEqual('"OLD"');
 
   // Test that we can save to the new key
-  act(() => setAtom('NEW'));
+  act(() => atomControls.setValue('NEW'));
   expect(container.textContent).toEqual('"NEW"');
   expectURL([[loc, { new_key: 'NEW' }]]);
 
   // Test that we can reset the atom and get the default instead of the old key's value
-  act(resetAtom);
+  act(() => atomControls.resetValue());
   expect(container.textContent).toEqual('"DEFAULT"');
   expectURL([[loc, {}]]);
 });
 
 test('Many items to one atom', async () => {
-  const loc = { part: 'queryParams' };
+  const loc = { part: 'queryParams' } as const;
 
   const manyToOneSyncEffect = () =>
     syncEffect({
@@ -71,7 +71,7 @@ test('Many items to one atom', async () => {
           bar: bar instanceof DefaultValue ? undefined : bar,
         };
       },
-      write: ({ write, reset }, newValue) => {
+      write: ({ write, reset, read }, newValue: any) => {
         if (newValue instanceof DefaultValue) {
           reset('foo');
           reset('bar');
@@ -90,27 +90,27 @@ test('Many items to one atom', async () => {
 
   history.replaceState(null, '', encodeURL([[loc, { foo: 123, bar: 456 }]]));
 
-  const [Atom, setAtom, resetAtom] = ComponentThatReadsAndWritesAtom(myAtom);
+  const [Atom, atomControls] = ComponentThatReadsAndWritesAtom(myAtom);
   const container = renderElements(
     React.createElement(RecoilURLSyncJSON, {
       location: loc,
-      children: Atom,
+      children: React.createElement(Atom),
     })
   );
 
   expect(container.textContent).toEqual('{"foo":123,"bar":456}');
 
-  act(() => setAtom({ foo: 789, bar: undefined }));
-  expect(container.textContent).toEqual('{"foo":789,"bar":undefined}');
+  act(() => atomControls.setValue({ foo: 789, bar: undefined }));
+  expect(container.textContent).toEqual('{"foo":789}');
   expectURL([[loc, { foo: 789 }]]);
 
-  act(resetAtom);
-  expect(container.textContent).toEqual('{"foo":undefined,"bar":undefined}');
+  act(() => atomControls.resetValue());
+  expect(container.textContent).toEqual('{}');
   expectURL([[loc, {}]]);
 });
 
 test('One atom to many items', async () => {
-  const loc = { part: 'queryParams' };
+  const loc = { part: 'queryParams' } as const;
 
   const oneToManySyncEffect = (prop: string) =>
     syncEffect({
@@ -120,7 +120,7 @@ test('One atom to many items', async () => {
         const obj = read('obj');
         return obj instanceof DefaultValue ? undefined : obj?.[prop];
       },
-      write: ({ write, reset }, newValue) => {
+      write: ({ write, reset, read }, newValue: any) => {
         const obj = read('obj');
         if (newValue instanceof DefaultValue) {
           reset('obj');
@@ -145,28 +145,31 @@ test('One atom to many items', async () => {
 
   history.replaceState(null, '', encodeURL([[loc, { obj: { foo: 123, bar: 456 } }]]));
 
-  const [AtomFoo, setFoo, resetFoo] = ComponentThatReadsAndWritesAtom(atomFoo);
-  const [AtomBar, setBar, resetBar] = ComponentThatReadsAndWritesAtom(atomBar);
+  const [AtomFoo, atomFooControls] = ComponentThatReadsAndWritesAtom(atomFoo);
+  const [AtomBar, atomBarControls] = ComponentThatReadsAndWritesAtom(atomBar);
   const container = renderElements(
     React.createElement(RecoilURLSyncJSON, {
       location: loc,
-      children: [AtomFoo, AtomBar],
+      children: [
+        React.createElement(AtomFoo, { key: 'Foo' }),
+        React.createElement(AtomBar, { key: 'Bar' }),
+      ],
     })
   );
 
   expect(container.textContent).toEqual('123456');
 
-  act(() => setFoo(789));
+  act(() => atomFooControls.setValue(789));
   expect(container.textContent).toEqual('789456');
   expectURL([[loc, { obj: { foo: 789, bar: 456 } }]]);
 
-  act(resetFoo);
-  expect(container.textContent).toEqual('undefined456');
+  act(() => atomFooControls.resetValue());
+  expect(container.textContent).toEqual('456');
   expectURL([[loc, { obj: { bar: 456 } }]]);
 });
 
 test('One atom to atom family', async () => {
-  const loc = { part: 'queryParams' };
+  const loc = { part: 'queryParams' } as const;
 
   const oneToFamilyEffect = (prop: string) =>
     syncEffect({
@@ -176,7 +179,7 @@ test('One atom to atom family', async () => {
         const obj = read('obj');
         return obj instanceof DefaultValue ? undefined : obj?.[prop];
       },
-      write: ({ write, reset }, newValue) => {
+      write: ({ write, reset, read }, newValue) => {
         const obj = read('obj');
         if (newValue instanceof DefaultValue) {
           reset('obj');
@@ -191,27 +194,31 @@ test('One atom to atom family', async () => {
   const atomFamilyFoo = atomFamily({
     key: 'recoil-url-sync one to family foo',
     default: undefined,
+    // @ts-expect-error
     effects: (param: string) => [oneToFamilyEffect(param)],
   });
 
   history.replaceState(null, '', encodeURL([[loc, { obj: { foo: 123, bar: 456 } }]]));
 
-  const [AtomFoo, setFoo, resetFoo] = ComponentThatReadsAndWritesAtom(atomFamilyFoo('foo'));
-  const [AtomBar, setBar, resetBar] = ComponentThatReadsAndWritesAtom(atomFamilyFoo('bar'));
+  const [AtomFoo, atomFooControls] = ComponentThatReadsAndWritesAtom(atomFamilyFoo('foo'));
+  const [AtomBar, atomBarControls] = ComponentThatReadsAndWritesAtom(atomFamilyFoo('bar'));
   const container = renderElements(
     React.createElement(RecoilURLSyncJSON, {
       location: loc,
-      children: [AtomFoo, AtomBar],
+      children: [
+        React.createElement(AtomFoo, { key: 'Foo' }),
+        React.createElement(AtomBar, { key: 'Bar' }),
+      ],
     })
   );
 
   expect(container.textContent).toEqual('123456');
 
-  act(() => setFoo(789));
+  act(() => atomFooControls.setValue(789));
   expect(container.textContent).toEqual('789456');
   expectURL([[loc, { obj: { foo: 789, bar: 456 } }]]);
 
-  act(resetFoo);
-  expect(container.textContent).toEqual('undefined456');
+  act(() => atomFooControls.resetValue());
+  expect(container.textContent).toEqual('456');
   expectURL([[loc, { obj: { bar: 456 } }]]);
 }); 

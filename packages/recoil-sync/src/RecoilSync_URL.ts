@@ -2,22 +2,22 @@
  * TypeScript port of RecoilSync_URL.js
  */
 
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import type { AtomEffect } from 'recoil-next';
+import { DefaultValue, RecoilLoadable } from 'recoil-next';
+import type { CheckerReturnType } from 'refine-next';
+import { assertion, mixed, writableDict } from 'refine-next';
+import err from '../../shared/src/util/Recoil_err';
 import type {
   ItemKey,
   ItemSnapshot,
+  ListenInterface,
   ReadItem,
   StoreKey,
   SyncEffectOptions,
-  ListenInterface,
   WriteInterface,
 } from './RecoilSync';
-import type { AtomEffect } from 'recoil';
-import type { CheckerReturnType } from '@recoiljs/refine';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { DefaultValue, RecoilLoadable } from 'recoil';
 import { syncEffect, useRecoilSync } from './RecoilSync';
-import err from '../../shared/src/util/Recoil_err';
-import { assertion, mixed, writableDict } from '@recoiljs/refine';
 
 type NodeKey = string;
 type ItemState = CheckerReturnType<typeof itemStateChecker>;
@@ -201,7 +201,9 @@ export function RecoilURLSync({
                 .filter(
                   ([, { history, itemKeys }]) =>
                     history === 'push' &&
-                    Array.from(itemKeys).some(key => diff.has(key)),
+                    Array.from(itemKeys).some(key => 
+                      diff.has(key) && !(diff.get(key) instanceof DefaultValue)
+                    ),
                 )
                 .map(([, { itemKeys }]) => itemKeys)
                 .reduce(

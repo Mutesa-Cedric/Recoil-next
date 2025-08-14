@@ -3,16 +3,7 @@
  */
 
 import React from 'react';
-import { atom } from 'recoil';
-import { expect, test, describe } from 'vitest';
-import { LocationOption } from '../RecoilSync_URL';
-import { syncEffect } from '../RecoilSync';
-import { RecoilURLSyncJSON } from '../RecoilSync_URLJSON';
-import {
-  ReadsAtom,
-  flushPromisesAndTimers,
-  renderElements,
-} from '../__test_utils__/TestUtils';
+import { atom } from 'recoil-next';
 import {
   array,
   bool,
@@ -22,7 +13,16 @@ import {
   object,
   string,
   tuple,
-} from 'refine';
+} from 'refine-next';
+import { describe, expect, test } from 'vitest';
+import { syncEffect } from '../RecoilSync';
+import { LocationOption } from '../RecoilSync_URL';
+import { RecoilURLSyncJSON } from '../RecoilSync_URLJSON';
+import {
+  ReadsAtom,
+  flushPromisesAndTimers,
+  renderElements,
+} from '../__test_utils__/TestUtils';
 
 const atomUndefined = atom({
   key: 'void',
@@ -52,7 +52,7 @@ const atomString = atom({
 const atomArray = atom({
   key: 'array',
   default: [1, 'a'],
-  effects: [syncEffect({ refine: tuple(number(), string()), syncDefault: true })],
+  effects: [syncEffect({ refine: tuple([number(), string()]), syncDefault: true })],
 });
 const atomObject = atom({
   key: 'object',

@@ -3,7 +3,8 @@
  */
 
 import React from 'react';
-import { atom } from 'recoil';
+import { atom } from 'recoil-next';
+import { array, bool, number, object, string, tuple } from 'refine-next';
 import { expect, test } from 'vitest';
 import { syncEffect } from '../RecoilSync';
 import { RecoilURLSyncJSON } from '../RecoilSync_URLJSON';
@@ -13,7 +14,6 @@ import {
   flushPromisesAndTimers,
   renderElements,
 } from '../__test_utils__/TestUtils';
-import { array, bool, number, object, string, tuple } from 'refine';
 
 const atomBoolean = atom({
   key: 'boolean',
@@ -40,7 +40,7 @@ const atomArray = atom({
   effects: [
     syncEffect({
       storeKey: 'transit',
-      refine: tuple(number(), string()),
+      refine: tuple([number(), string()]),
       syncDefault: true,
     }),
   ],

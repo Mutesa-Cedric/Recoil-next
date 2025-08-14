@@ -17,10 +17,13 @@ export default defineConfig({
       ],
     },
   },
+  define: {
+    __DEV__: 'process.env.NODE_ENV !== "production"',
+  },
   resolve: {
     alias: {
       'recoil-shared': new URL('../../../packages/shared/src', import.meta.url).pathname,
-      'refine': '@recoiljs/refine',
+      'refine': 'refine-next',
     },
   },
 }); 

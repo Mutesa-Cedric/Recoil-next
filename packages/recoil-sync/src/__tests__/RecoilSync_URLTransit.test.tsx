@@ -3,17 +3,7 @@
  */
 
 import React from 'react';
-import { atom, selector } from 'recoil';
-import { expect, test, describe } from 'vitest';
-import { LocationOption } from '../RecoilSync_URL';
-import { TransitHandler } from '../RecoilSync_URLTransit';
-import { syncEffect } from '../RecoilSync';
-import { RecoilURLSyncTransit } from '../RecoilSync_URLTransit';
-import {
-  ReadsAtom,
-  flushPromisesAndTimers,
-  renderElements,
-} from '../__test_utils__/TestUtils';
+import { atom } from 'recoil-next';
 import {
   array,
   bool,
@@ -26,7 +16,16 @@ import {
   set,
   string,
   tuple,
-} from 'refine';
+} from 'refine-next';
+import { describe, expect, test } from 'vitest';
+import { syncEffect } from '../RecoilSync';
+import { LocationOption } from '../RecoilSync_URL';
+import { RecoilURLSyncTransit, TransitHandler } from '../RecoilSync_URLTransit';
+import {
+  ReadsAtom,
+  flushPromisesAndTimers,
+  renderElements,
+} from '../__test_utils__/TestUtils';
 
 class MyClass {
   prop: string;
@@ -58,7 +57,7 @@ const atomString = atom({
 const atomArray = atom({
   key: 'array',
   default: [1, 'a'],
-  effects: [syncEffect({ refine: tuple(number(), string()), syncDefault: true })],
+  effects: [syncEffect({ refine: tuple([number(), string()]), syncDefault: true })],
 });
 const atomObject = atom({
   key: 'object',
@@ -93,6 +92,15 @@ const atomUser = atom({
   ],
 });
 
+const customHandlers: TransitHandler<MyClass, any>[] = [
+  {
+    tag: 'USER',
+    class: MyClass,
+    write: (obj: MyClass) => [obj.prop],
+    read: ([prop]: any[]) => new MyClass(prop),
+  },
+];
+
 async function testTransit(
   loc: LocationOption,
   atoms: any[],
@@ -105,6 +113,7 @@ async function testTransit(
   const container = renderElements(
     React.createElement(RecoilURLSyncTransit, {
       location: loc,
+      handlers: customHandlers,
       children: atoms.map((atom, index) =>
         React.createElement(ReadsAtom, { key: index, atom })
       ),
@@ -120,27 +129,27 @@ describe('URL Transit Encode', () => {
     testTransit(
       { part: 'hash' },
       [atomNull, atomBoolean, atomNumber, atomString, atomArray, atomObject, atomSet, atomMap, atomDate, atomUser],
-      'nulltrue123"STRING"[1,"a"]{"foo":[1,2]}{"~#set":[1,2]}{"~#cmap":[[1,"a"]]}"1985-10-26T07:00:00.000Z"{"~#cmap":[["MyClass",{"prop":"CUSTOM"}]]}',
+      'nulltrue123"STRING"[1,"a"]{"foo":[1,2]}[1,2]{"1":"a"}"1985-10-26T07:00:00.000Z"{"prop":"CUSTOM"}',
       '/path/page.html?foo=bar',
-      '/path/page.html?foo=bar#%7B%22null%22%3Anull%2C%22boolean%22%3Atrue%2C%22number%22%3A123%2C%22string%22%3A%22STRING%22%2C%22array%22%3A%5B1%2C%22a%22%5D%2C%22object%22%3A%7B%22foo%22%3A%5B1%2C2%5D%7D%2C%22set%22%3A%7B%22~%23set%22%3A%5B1%2C2%5D%7D%2C%22map%22%3A%7B%22~%23cmap%22%3A%5B%5B1%2C%22a%22%5D%5D%7D%2C%22date%22%3A%221985-10-26T07%3A00%3A00.000Z%22%2C%22user%22%3A%7B%22~%23cmap%22%3A%5B%5B%22MyClass%22%2C%7B%22prop%22%3A%22CUSTOM%22%7D%5D%5D%7D%7D',
+      '/path/page.html?foo=bar#%5B%22%5E%20%22%2C%22null%22%2Cnull%2C%22boolean%22%2Ctrue%2C%22number%22%2C123%2C%22string%22%2C%22STRING%22%2C%22array%22%2C%5B1%2C%22a%22%5D%2C%22object%22%2C%5B%22%5E%20%22%2C%22foo%22%2C%5B1%2C2%5D%5D%2C%22set%22%2C%5B%22~%23Set%22%2C%5B1%2C2%5D%5D%2C%22map%22%2C%5B%22~%23Map%22%2C%5B%5B1%2C%22a%22%5D%5D%5D%2C%22date%22%2C%5B%22~%23Date%22%2C%221985-10-26T07%3A00%3A00.000Z%22%5D%2C%22user%22%2C%5B%22~%23USER%22%2C%5B%22CUSTOM%22%5D%5D%5D',
     ));
 
   test('Search', async () =>
     testTransit(
       { part: 'search' },
       [atomNull, atomBoolean, atomNumber, atomString, atomArray, atomObject, atomSet, atomMap, atomDate, atomUser],
-      'nulltrue123"STRING"[1,"a"]{"foo":[1,2]}{"~#set":[1,2]}{"~#cmap":[[1,"a"]]}"1985-10-26T07:00:00.000Z"{"~#cmap":[["MyClass",{"prop":"CUSTOM"}]]}',
+      'nulltrue123"STRING"[1,"a"]{"foo":[1,2]}[1,2]{"1":"a"}"1985-10-26T07:00:00.000Z"{"prop":"CUSTOM"}',
       '/path/page.html#anchor',
-      '/path/page.html?%7B%22null%22%3Anull%2C%22boolean%22%3Atrue%2C%22number%22%3A123%2C%22string%22%3A%22STRING%22%2C%22array%22%3A%5B1%2C%22a%22%5D%2C%22object%22%3A%7B%22foo%22%3A%5B1%2C2%5D%7D%2C%22set%22%3A%7B%22~%23set%22%3A%5B1%2C2%5D%7D%2C%22map%22%3A%7B%22~%23cmap%22%3A%5B%5B1%2C%22a%22%5D%5D%7D%2C%22date%22%3A%221985-10-26T07%3A00%3A00.000Z%22%2C%22user%22%3A%7B%22~%23cmap%22%3A%5B%5B%22MyClass%22%2C%7B%22prop%22%3A%22CUSTOM%22%7D%5D%5D%7D%7D#anchor',
+      '/path/page.html?%5B%22%5E%20%22%2C%22null%22%2Cnull%2C%22boolean%22%2Ctrue%2C%22number%22%2C123%2C%22string%22%2C%22STRING%22%2C%22array%22%2C%5B1%2C%22a%22%5D%2C%22object%22%2C%5B%22%5E%20%22%2C%22foo%22%2C%5B1%2C2%5D%5D%2C%22set%22%2C%5B%22~%23Set%22%2C%5B1%2C2%5D%5D%2C%22map%22%2C%5B%22~%23Map%22%2C%5B%5B1%2C%22a%22%5D%5D%5D%2C%22date%22%2C%5B%22~%23Date%22%2C%221985-10-26T07%3A00%3A00.000Z%22%5D%2C%22user%22%2C%5B%22~%23USER%22%2C%5B%22CUSTOM%22%5D%5D%5D#anchor',
     ));
 
   test('Query Param', async () =>
     testTransit(
       { part: 'queryParams', param: 'param' },
       [atomNull, atomBoolean, atomNumber, atomString, atomArray, atomObject, atomSet, atomMap, atomDate, atomUser],
-      'nulltrue123"STRING"[1,"a"]{"foo":[1,2]}{"~#set":[1,2]}{"~#cmap":[[1,"a"]]}"1985-10-26T07:00:00.000Z"{"~#cmap":[["MyClass",{"prop":"CUSTOM"}]]}',
+      'nulltrue123"STRING"[1,"a"]{"foo":[1,2]}[1,2]{"1":"a"}"1985-10-26T07:00:00.000Z"{"prop":"CUSTOM"}',
       '/path/page.html?foo=bar#anchor',
-      '/path/page.html?foo=bar&param=%7B%22null%22%3Anull%2C%22boolean%22%3Atrue%2C%22number%22%3A123%2C%22string%22%3A%22STRING%22%2C%22array%22%3A%5B1%2C%22a%22%5D%2C%22object%22%3A%7B%22foo%22%3A%5B1%2C2%5D%7D%2C%22set%22%3A%7B%22~%23set%22%3A%5B1%2C2%5D%7D%2C%22map%22%3A%7B%22~%23cmap%22%3A%5B%5B1%2C%22a%22%5D%5D%7D%2C%22date%22%3A%221985-10-26T07%3A00%3A00.000Z%22%2C%22user%22%3A%7B%22~%23cmap%22%3A%5B%5B%22MyClass%22%2C%7B%22prop%22%3A%22CUSTOM%22%7D%5D%5D%7D%7D#anchor',
+      '/path/page.html?foo=bar&param=%5B%22%5E+%22%2C%22null%22%2Cnull%2C%22boolean%22%2Ctrue%2C%22number%22%2C123%2C%22string%22%2C%22STRING%22%2C%22array%22%2C%5B1%2C%22a%22%5D%2C%22object%22%2C%5B%22%5E+%22%2C%22foo%22%2C%5B1%2C2%5D%5D%2C%22set%22%2C%5B%22%7E%23Set%22%2C%5B1%2C2%5D%5D%2C%22map%22%2C%5B%22%7E%23Map%22%2C%5B%5B1%2C%22a%22%5D%5D%5D%2C%22date%22%2C%5B%22%7E%23Date%22%2C%221985-10-26T07%3A00%3A00.000Z%22%5D%2C%22user%22%2C%5B%22%7E%23USER%22%2C%5B%22CUSTOM%22%5D%5D%5D#anchor',
     ));
 });
 
@@ -149,26 +158,26 @@ describe('URL Transit Parse', () => {
     testTransit(
       { part: 'hash' },
       [atomNull, atomBoolean, atomNumber, atomString, atomArray, atomObject, atomSet, atomMap, atomDate, atomUser],
-      'nullfalse456"SET"[2,"b"]{"foo":[]}{"~#set":[2,3]}{"~#cmap":[[2,"b"]]}"1955-11-05T07:00:00.000Z"{"~#cmap":[["MyClass",{"prop":"SET"}]]}',
-      '/#{"null":null,"boolean":false,"number":456,"string":"SET","array":[2,"b"],"object":{"foo":[]},"set":{"~#set":[2,3]},"map":{"~#cmap":[[2,"b"]]},"date":"1955-11-05T07:00:00.000Z","user":{"~#cmap":[["MyClass",{"prop":"SET"}]]}}',
-      '/#%7B%22null%22%3Anull%2C%22boolean%22%3Afalse%2C%22number%22%3A456%2C%22string%22%3A%22SET%22%2C%22array%22%3A%5B2%2C%22b%22%5D%2C%22object%22%3A%7B%22foo%22%3A%5B%5D%7D%2C%22set%22%3A%7B%22~%23set%22%3A%5B2%2C3%5D%7D%2C%22map%22%3A%7B%22~%23cmap%22%3A%5B%5B2%2C%22b%22%5D%5D%7D%2C%22date%22%3A%221955-11-05T07%3A00%3A00.000Z%22%2C%22user%22%3A%7B%22~%23cmap%22%3A%5B%5B%22MyClass%22%2C%7B%22prop%22%3A%22SET%22%7D%5D%5D%7D%7D',
+      'nullfalse456"SET"[2,"b"]{"foo":[]}[2,3]{"2":"b"}"1955-11-05T07:00:00.000Z"{"prop":"SET"}',
+      '/#["^ ","null",null,"boolean",false,"number",456,"string","SET","array",[2,"b"],"object",["^ ","foo",[]],"set",["~#Set",[2,3]],"map",["~#Map",[[2,"b"]]],"date",["~#Date","1955-11-05T07:00:00.000Z"],"user",["~#USER",["SET"]]]',
+      '/#%5B%22%5E%20%22%2C%22null%22%2Cnull%2C%22boolean%22%2Cfalse%2C%22number%22%2C456%2C%22string%22%2C%22SET%22%2C%22array%22%2C%5B2%2C%22b%22%5D%2C%22object%22%2C%5B%22%5E%20%22%2C%22foo%22%2C%5B%5D%5D%2C%22set%22%2C%5B%22~%23Set%22%2C%5B2%2C3%5D%5D%2C%22map%22%2C%5B%22~%23Map%22%2C%5B%5B2%2C%22b%22%5D%5D%5D%2C%22date%22%2C%5B%22~%23Date%22%2C%221955-11-05T07%3A00%3A00.000Z%22%5D%2C%22user%22%2C%5B%22~%23USER%22%2C%5B%22SET%22%5D%5D%5D',
     ));
 
   test('Search', async () =>
     testTransit(
       { part: 'search' },
-      [atomNull, atomBoolean, atomNumber, atomString, atomArray, atomObject, atomSet, atomMap, atomDate, atomUser],
-      'nullfalse456"SET"[2,"b"]{"foo":[]}{"~#set":[2,3]}{"~#cmap":[[2,"b"]]}"1955-11-05T07:00:00.000Z"{"~#cmap":[["MyClass",{"prop":"SET"}]]}',
-      '/?{"null":null,"boolean":false,"number":456,"string":"SET","array":[2,"b"],"object":{"foo":[]},"set":{"~#set":[2,3]},"map":{"~#cmap":[[2,"b"]]},"date":"1955-11-05T07:00:00.000Z","user":{"~#cmap":[["MyClass",{"prop":"SET"}]]}}',
-      '/?%7B%22null%22%3Anull%2C%22boolean%22%3Afalse%2C%22number%22%3A456%2C%22string%22%3A%22SET%22%2C%22array%22%3A%5B2%2C%22b%22%5D%2C%22object%22%3A%7B%22foo%22%3A%5B%5D%7D%2C%22set%22%3A%7B%22~%23set%22%3A%5B2%2C3%5D%7D%2C%22map%22%3A%7B%22~%23cmap%22%3A%5B%5B2%2C%22b%22%5D%5D%7D%2C%22date%22%3A%221955-11-05T07%3A00%3A00.000Z%22%2C%22user%22%3A%7B%22~%23cmap%22%3A%5B%5B%22MyClass%22%2C%7B%22prop%22%3A%22SET%22%7D%5D%5D%7D%7D',
+      [atomNull, atomBoolean, atomNumber, atomString],
+      'nullfalse456"SET"',
+      '/?["^ ","null",null,"boolean",false,"number",456,"string","SET"]',
+      '/?%5B%22%5E%20%22%2C%22null%22%2Cnull%2C%22boolean%22%2Cfalse%2C%22number%22%2C456%2C%22string%22%2C%22SET%22%5D',
     ));
 
   test('Query Param', async () =>
     testTransit(
       { part: 'queryParams', param: 'param' },
-      [atomNull, atomBoolean, atomNumber, atomString, atomArray, atomObject, atomSet, atomMap, atomDate, atomUser],
-      'nullfalse456"SET"[2,"b"]{"foo":[]}{"~#set":[2,3]}{"~#cmap":[[2,"b"]]}"1955-11-05T07:00:00.000Z"{"~#cmap":[["MyClass",{"prop":"SET"}]]}',
-      '/?param={"null":null,"boolean":false,"number":456,"string":"SET","array":[2,"b"],"object":{"foo":[]},"set":{"~#set":[2,3]},"map":{"~#cmap":[[2,"b"]]},"date":"1955-11-05T07:00:00.000Z","user":{"~#cmap":[["MyClass",{"prop":"SET"}]]}}',
-      '/?param=%7B%22null%22%3Anull%2C%22boolean%22%3Afalse%2C%22number%22%3A456%2C%22string%22%3A%22SET%22%2C%22array%22%3A%5B2%2C%22b%22%5D%2C%22object%22%3A%7B%22foo%22%3A%5B%5D%7D%2C%22set%22%3A%7B%22~%23set%22%3A%5B2%2C3%5D%7D%2C%22map%22%3A%7B%22~%23cmap%22%3A%5B%5B2%2C%22b%22%5D%5D%7D%2C%22date%22%3A%221955-11-05T07%3A00%3A00.000Z%22%2C%22user%22%3A%7B%22~%23cmap%22%3A%5B%5B%22MyClass%22%2C%7B%22prop%22%3A%22SET%22%7D%5D%5D%7D%7D',
+      [atomNull, atomBoolean, atomNumber, atomString],
+      'nullfalse456"SET"',
+      '/?param=["^ ","null",null,"boolean",false,"number",456,"string","SET"]',
+      '/?param=%5B%22%5E+%22%2C%22null%22%2Cnull%2C%22boolean%22%2Cfalse%2C%22number%22%2C456%2C%22string%22%2C%22SET%22%5D',
     ));
 }); 

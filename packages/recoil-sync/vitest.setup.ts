@@ -1,4 +1,13 @@
-import { beforeAll, vi } from 'vitest';
+import { beforeAll, afterEach, vi } from 'vitest';
+import { cleanup } from '@testing-library/react';
+
+// Declare __DEV__ globally for TypeScript
+declare global {
+  var __DEV__: boolean;
+}
+
+// Define __DEV__ immediately
+globalThis.__DEV__ = process.env.NODE_ENV !== 'production';
 
 // Set up DOM environment
 beforeAll(() => {
@@ -34,4 +43,23 @@ beforeAll(() => {
   const { TextEncoder, TextDecoder } = require('util');
   global.TextEncoder = TextEncoder;
   global.TextDecoder = TextDecoder;
+
+  // React test environment with concurrent features disabled
+  global.IS_REACT_ACT_ENVIRONMENT = true;
+  
+  // Disable React concurrent features that might cause snapshot issues
+  if (typeof React !== 'undefined' && React.unstable_act) {
+    global.React = React;
+  }
+
+  // Define __DEV__ for React development checks
+  global.__DEV__ = process.env.NODE_ENV !== 'production';
+});
+
+// Clean up after each test
+afterEach(() => {
+  cleanup();
+  vi.clearAllTimers();
+  vi.useRealTimers();
+  vi.clearAllMocks();
 }); 

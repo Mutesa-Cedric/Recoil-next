@@ -2,18 +2,18 @@
  * TypeScript port of RecoilSync.js
  */
 
-import type { AtomEffect, Loadable, RecoilState, StoreID } from 'recoil';
-import type { RecoilValueInfo } from '../../recoil/src/core/FunctionalCore';
-import type { RecoilValue } from '../../recoil/src/core/RecoilValue';
-import type { Checker } from '@recoiljs/refine';
 import React, { useCallback, useEffect, useRef } from 'react';
+import type { AtomEffect, Loadable, RecoilState, StoreID } from 'recoil-next';
 import {
   DefaultValue,
   RecoilLoadable,
   useRecoilSnapshot,
   useRecoilStoreID,
-  useRecoilTransaction_UNSTABLE,
-} from 'recoil';
+  useRecoilTransaction_UNSTABLE
+} from 'recoil-next';
+import type { Checker } from 'refine-next';
+import type { RecoilValueInfo } from '../../recoil/src/core/FunctionalCore';
+import type { RecoilValue } from '../../recoil/src/core/RecoilValue';
 import err from '../../shared/src/util/Recoil_err';
 import lazyProxy from '../../shared/src/util/Recoil_lazyProxy';
 
@@ -224,7 +224,9 @@ function readAtomItems<T>(
   } catch (error) {
     return RecoilLoadable.error(error);
   }
-  return value instanceof DefaultValue ? null : validateLoadable(value, options);
+  return value instanceof DefaultValue 
+    ? RecoilLoadable.of(value) 
+    : validateLoadable(value, options);
 }
 
 function writeAtomItemsToDiff<T>(
@@ -313,52 +315,92 @@ export function useRecoilSync({
 }: RecoilSyncOptions): void {
   const recoilStoreID = useRecoilStoreID();
 
-  // Subscribe to Recoil state changes
+  // Subscribe to Recoil state changes  
   const snapshot = useRecoilSnapshot();
   const previousSnapshotRef = useRef(snapshot);
+  const isMountedRef = useRef(true);
+  
   useEffect(() => {
-    if (write != null && snapshot !== previousSnapshotRef.current) {
-      previousSnapshotRef.current = snapshot;
-      const diff: ItemDiff = new Map();
-      const atomRegistry = registries.getAtomRegistry(recoilStoreID, storeKey);
-      const modifiedAtoms = snapshot.getNodes_UNSTABLE({ isModified: true });
-      for (const atom of modifiedAtoms) {
-        const registration = atomRegistry.get(atom.key);
-        if (registration != null) {
-          const atomInfo = snapshot.getInfo_UNSTABLE(registration.atom);
-          // Avoid feedback loops:
-          // Don't write to storage updates that came from listening to storage
-          if (
-            (atomInfo.isSet &&
-              atomInfo.loadable?.contents !==
-                registration.pendingUpdate?.value) ||
-            (!atomInfo.isSet &&
-              !(registration.pendingUpdate?.value instanceof DefaultValue))
-          ) {
-            for (const [, { options }] of registration.effects) {
-              writeAtomItemsToDiff(
-                diff,
-                options,
-                read,
-                atomInfo.isSet || options.syncDefault === true
-                  ? atomInfo.loadable
-                  : null,
-              );
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+  
+  useEffect(() => {
+    if (!isMountedRef.current) return;
+    
+    // Check if snapshot is still valid before using it
+    try {
+      if (write != null && snapshot !== previousSnapshotRef.current) {
+        previousSnapshotRef.current = snapshot;
+        const diff: ItemDiff = new Map();
+        const atomRegistry = registries.getAtomRegistry(recoilStoreID, storeKey);
+        
+        // Get modified nodes with error handling
+        let modifiedNodes;
+        try {
+          modifiedNodes = snapshot.getNodes_UNSTABLE({ isModified: true });
+        } catch (error) {
+          // Snapshot was released, skip this update
+          console.warn('Snapshot already released, skipping sync:', error);
+          return;
+        }
+        
+        for (const atom of modifiedNodes) {
+          if (!isMountedRef.current) return; // Exit early if unmounted
+          const registration = atomRegistry.get(atom.key);
+          if (registration != null) {
+            let atomInfo;
+            try {
+              atomInfo = snapshot.getInfo_UNSTABLE(registration.atom);
+            } catch (error) {
+              // Snapshot was released, skip this atom
+              console.warn('Snapshot already released for atom, skipping:', error);
+              continue;
             }
+            
+            // Avoid feedback loops:
+            // Don't write to storage updates that came from listening to storage
+            if (
+              (atomInfo.isSet &&
+                atomInfo.loadable?.contents !==
+                  registration.pendingUpdate?.value) ||
+              (!atomInfo.isSet &&
+                !(registration.pendingUpdate?.value instanceof DefaultValue))
+            ) {
+              for (const [, { options }] of registration.effects) {
+                writeAtomItemsToDiff(
+                  diff,
+                  options,
+                  read,
+                  atomInfo.isSet || options.syncDefault === true
+                    ? atomInfo.loadable
+                    : null,
+                );
+              }
+            }
+            delete registration.pendingUpdate;
           }
-          delete registration.pendingUpdate;
+        }
+        if (diff.size && isMountedRef.current) {
+          try {
+            write(
+              getWriteInterface(
+                recoilStoreID,
+                storeKey,
+                diff,
+                snapshot.getInfo_UNSTABLE as any,
+            ),
+            );
+          } catch (error) {
+            // Snapshot was released during write, log and continue
+            console.warn('Snapshot already released during write, skipping:', error);
+          }
         }
       }
-      if (diff.size) {
-        write(
-          getWriteInterface(
-            recoilStoreID,
-            storeKey,
-            diff,
-            snapshot.getInfo_UNSTABLE as any,
-          ),
-        );
-      }
+    } catch (error) {
+      // General snapshot error handling
+      console.warn('Error in snapshot effect, skipping sync:', error);
     }
   }, [read, recoilStoreID, snapshot, storeKey, write]);
 

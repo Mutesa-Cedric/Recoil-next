@@ -2,24 +2,22 @@
  * TypeScript port of RecoilSync_URL-test.js
  */
 
-import React, { act } from 'react';
-import { atom } from 'recoil';
-import { expect, test, describe, beforeEach } from 'vitest';
-import { LocationOption } from '../RecoilSync_URL';
-import { syncEffect } from '../RecoilSync';
-import { urlSyncEffect } from '../RecoilSync_URL';
-import { asType, match, number, string } from 'refine';
+import { act } from '@testing-library/react';
+import React from 'react';
+import { atom } from 'recoil-next';
+import { string } from 'refine-next';
+import { beforeEach, describe, expect, test } from 'vitest';
 import {
   TestURLSync,
-  encodeURL,
-  expectURL,
+  expectURL
 } from '../__test_utils__/MockURLSerialization';
 import {
-  ReadsAtom,
   ComponentThatReadsAndWritesAtom,
+  ReadsAtom,
   flushPromisesAndTimers,
   renderElements,
 } from '../__test_utils__/TestUtils';
+import { LocationOption, urlSyncEffect } from '../RecoilSync_URL';
 
 let atomIndex = 0;
 const nextKey = () => `recoil-url-sync/${atomIndex++}`;
@@ -45,30 +43,30 @@ describe('Test URL Persistence', () => {
       default: 'DEFAULT',
     });
 
-    const [AtomA, setA, resetA] = ComponentThatReadsAndWritesAtom(atomA);
-    const [AtomB, setB] = ComponentThatReadsAndWritesAtom(atomB);
-    const [IgnoreAtom, setIgnore] = ComponentThatReadsAndWritesAtom(ignoreAtom);
+    const [AtomA, atomAControls] = ComponentThatReadsAndWritesAtom(atomA);
+    const [AtomB, atomBControls] = ComponentThatReadsAndWritesAtom(atomB);
+    const [IgnoreAtom, ignoreControls] = ComponentThatReadsAndWritesAtom(ignoreAtom);
     const container = renderElements(
       React.createElement(TestURLSync, {
         location: loc,
         children: [
-          AtomA,
-          AtomB,
-          IgnoreAtom,
+          React.createElement(AtomA, { key: 'A' }),
+          React.createElement(AtomB, { key: 'B' }),
+          React.createElement(IgnoreAtom, { key: 'Ignore' }),
         ],
       })
     );
 
     expect(container.textContent).toBe('"DEFAULT""DEFAULT""DEFAULT"');
 
-    act(() => setA('A'));
-    act(() => setB('B'));
-    act(() => setIgnore('IGNORE'));
+    act(() => atomAControls.setValue('A'));
+    act(() => atomBControls.setValue('B'));
+    act(() => ignoreControls.setValue('IGNORE'));
     expect(container.textContent).toBe('"A""B""IGNORE"');
     expectURL([[loc, { a: 'A', b: 'B' }]]);
 
-    act(() => resetA());
-    act(() => setB('BB'));
+    act(() => atomAControls.resetValue());
+    act(() => atomBControls.setValue('BB'));
     expect(container.textContent).toBe('"DEFAULT""BB""IGNORE"');
     expectURL([[loc, { b: 'BB' }]]);
 
@@ -129,7 +127,10 @@ describe('Test URL Persistence', () => {
 
     expect(container.textContent).toBe('"DEFAULT""DEFAULT"');
 
-    history.replaceState(null, '', '/TEST#' + encodeURIComponent(JSON.stringify({ a: 'A', b: 'B' })));
+    act(() => {
+      history.replaceState(null, '', '/TEST#' + encodeURIComponent(JSON.stringify({ a: 'A', b: 'B' })));
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
     await flushPromisesAndTimers();
 
     expect(container.textContent).toBe('"A""B"');
@@ -151,7 +152,10 @@ describe('Test URL Persistence', () => {
 
     expect(container.textContent).toBe('"DEFAULT"');
 
-    history.replaceState(null, '', '/path/page.html?foo=bar#' + encodeURIComponent(JSON.stringify({ a: 'A' })));
+    act(() => {
+      history.replaceState(null, '', '/path/page.html?foo=bar#' + encodeURIComponent(JSON.stringify({ a: 'A' })));
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
     await flushPromisesAndTimers();
 
     expect(container.textContent).toBe('"A"');
@@ -173,7 +177,10 @@ describe('Test URL Persistence', () => {
 
     expect(container.textContent).toBe('"DEFAULT"');
 
-    history.replaceState(null, '', '/path/page.html?' + encodeURIComponent(JSON.stringify({ a: 'A' })) + '#anchor');
+    act(() => {
+      history.replaceState(null, '', '/path/page.html?' + encodeURIComponent(JSON.stringify({ a: 'A' })) + '#anchor');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
     await flushPromisesAndTimers();
 
     expect(container.textContent).toBe('"A"');
@@ -195,10 +202,13 @@ describe('Test URL Persistence', () => {
 
     expect(container.textContent).toBe('"DEFAULT"');
 
-    const url = new URL(location.href);
-    url.searchParams.set('a', JSON.stringify('A'));
-    url.searchParams.set('foo', 'bar');
-    history.replaceState(null, '', url.href);
+    act(() => {
+      const url = new URL(location.href);
+      url.searchParams.set('a', JSON.stringify('A'));
+      url.searchParams.set('foo', 'bar');
+      history.replaceState(null, '', url.href);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
     await flushPromisesAndTimers();
 
     expect(container.textContent).toBe('"A"');
@@ -220,10 +230,13 @@ describe('Test URL Persistence', () => {
 
     expect(container.textContent).toBe('"DEFAULT"');
 
-    const url = new URL(location.href);
-    url.searchParams.set('state', JSON.stringify({ a: 'A' }));
-    url.searchParams.set('foo', 'bar');
-    history.replaceState(null, '', url.href);
+    act(() => {
+      const url = new URL(location.href);
+      url.searchParams.set('state', JSON.stringify({ a: 'A' }));
+      url.searchParams.set('foo', 'bar');
+      history.replaceState(null, '', url.href);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
     await flushPromisesAndTimers();
 
     expect(container.textContent).toBe('"A"');
