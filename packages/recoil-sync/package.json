@@ -21,11 +21,11 @@
     "test:run": "vitest run"
   },
   "peerDependencies": {
-    "@recoiljs/refine": "^0.1.1",
-    "recoil-next": "^0.2.0"
+    "refine-next": "workspace:*",
+    "recoil-next": "workspace:*"
   },
   "devDependencies": {
-    "@recoiljs/refine": "^0.1.1",
+    "refine-next": "workspace:*",
     "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-typescript": "^12.1.4",
@@ -33,7 +33,7 @@
     "@types/react": "^18.2.39",
     "@types/react-test-renderer": "^19.1.0",
     "@types/transit-js": "^0.8.3",
-    "recoil-next": "^0.2.0",
+    "recoil-next": "workspace:*",
     "rollup": "^4.0.0",
     "rollup-plugin-dts": "^6.2.1",
     "transit-js": "^0.8.874",
