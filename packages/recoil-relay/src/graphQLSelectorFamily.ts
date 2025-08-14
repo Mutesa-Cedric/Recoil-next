@@ -13,7 +13,7 @@ import {
     SetRecoilState,
     atomFamily,
     selectorFamily
-} from 'recoil';
+} from 'recoil-next';
 import { GraphQLTaggedNode, IEnvironment } from 'relay-runtime';
 import nullthrows from '../../shared/src/util/Recoil_nullthrows';
 import { EnvironmentKey } from './Environments';

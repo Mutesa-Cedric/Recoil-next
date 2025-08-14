@@ -1,7 +1,8 @@
-import { beforeAll, vi } from 'vitest';
+import { cleanup } from '@testing-library/react';
+import { afterEach, beforeAll, vi } from 'vitest';
 
 // Mock jest for relay-test-utils
-global.jest = vi;
+(globalThis as any).jest = vi;
 
 // Set up DOM environment
 beforeAll(() => {
@@ -37,4 +38,15 @@ beforeAll(() => {
   const { TextEncoder, TextDecoder } = require('util');
   global.TextEncoder = TextEncoder;
   global.TextDecoder = TextDecoder;
+
+  // React test environment
+  (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+});
+
+// Clean up after each test
+afterEach(() => {
+  cleanup();
+  vi.clearAllTimers();
+  vi.useRealTimers();
+  vi.clearAllMocks();
 }); 

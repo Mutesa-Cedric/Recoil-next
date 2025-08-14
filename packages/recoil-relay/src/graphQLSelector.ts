@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { GetRecoilValue, RecoilState } from 'recoil';
+import { GetRecoilValue, RecoilState } from 'recoil-next';
 import { Variables } from 'react-relay';
 import { IEnvironment, GraphQLTaggedNode } from 'relay-runtime';
 import { EnvironmentKey } from './Environments';
@@ -36,9 +36,7 @@ interface GraphQLSelectorOptions<TVariables extends Variables, T> {
  * write-through cache for updates to commit to the server.
  */
 export function graphQLSelector<TVariables extends Variables, T>({
-    variables,
-    mutations,
-    ...options
+    variables, mutations, ...options
 }: GraphQLSelectorOptions<TVariables, T>): RecoilState<T> {
     return graphQLSelectorFamily({
         ...options,

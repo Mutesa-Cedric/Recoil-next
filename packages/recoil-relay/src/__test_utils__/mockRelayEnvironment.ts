@@ -2,7 +2,7 @@
  * TypeScript port of RecoilRelay_mockRelayEnvironment.js
  */
 
-import { snapshot_UNSTABLE } from 'recoil';
+import { snapshot_UNSTABLE } from 'recoil-next';
 import { createMockEnvironment } from 'relay-test-utils';
 import React from 'react';
 import {
@@ -24,8 +24,10 @@ interface MockRelayEnvironmentReturn {
 
 
 export function mockRelayEnvironment(): MockRelayEnvironmentReturn {
+  // Create mock environment without auto-resolution
   const environment = createMockEnvironment();
   const mockEnvironmentKey = new EnvironmentKey('Mock');
+  
   
   function renderElements(elements: React.ReactNode) {
     return renderRecoilElements(

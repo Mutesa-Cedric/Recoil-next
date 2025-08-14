@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { AtomEffect, RecoilState } from 'recoil';
+import { AtomEffect, RecoilState } from 'recoil-next';
 import { Variables } from 'react-relay';
 import { IEnvironment, GraphQLTaggedNode } from 'relay-runtime';
 import { EnvironmentKey, getRelayEnvironment } from './Environments';
@@ -74,27 +74,33 @@ export function graphQLSubscriptionEffect<
         }
 
         // Subscribe to remote changes to update atom state
-        const graphQLSubscriptionDisposable = requestSubscription(environment, {
-            subscription,
-            variables,
-            onNext: (response: unknown) => {
-                const typedResponse = response as TData | null;
-                if (typedResponse != null) {
-                    const data = mapResponse(typedResponse);
-                    initialResolve?.(data);
-                    setSelf(data);
-                }
-            },
-            // TODO use Async atom support to set atom to error state on
-            // subsequent errors during incremental updates.
-            onError: (error: Error) => {
-                initialReject?.(error);
-                logError(node, error.message ?? 'Error');
-            },
-        });
+        let graphQLSubscriptionDisposable: any;
+        try {
+            graphQLSubscriptionDisposable = requestSubscription(environment, {
+                subscription,
+                variables,
+                onNext: (response: unknown) => {
+                    const typedResponse = response as TData | null;
+                    if (typedResponse != null) {
+                        const data = mapResponse(typedResponse);
+                        initialResolve?.(data);
+                        setSelf(data);
+                    }
+                },
+                // TODO use Async atom support to set atom to error state on
+                // subsequent errors during incremental updates.
+                onError: (error: Error) => {
+                    initialReject?.(error);
+                    logError(node, error.message ?? 'Error');
+                },
+            });
+        } catch (error: any) {
+            initialReject?.(error);
+            logError(node, error.message ?? 'Subscription Error');
+        }
 
         return () => {
-            graphQLSubscriptionDisposable.dispose();
+            graphQLSubscriptionDisposable?.dispose();
         };
     };
 } 

@@ -2,9 +2,8 @@
  * TypeScript port of RecoilRelay_graphQLMutationEffect-test.js
  */
 
-import { act } from 'react';
-import { atom } from 'recoil';
-import { MockPayloadGenerator } from 'relay-test-utils';
+import React, { act } from 'react';
+import { atom } from 'recoil-next';
 import { expect, test, vi } from 'vitest';
 import { testFeedbackMutation } from '../__test_utils__/MockQueries';
 import { mockRelayEnvironment } from '../__test_utils__/mockRelayEnvironment';
@@ -21,14 +20,14 @@ test('Atom Mutation', async () => {
     effects: [
       graphQLMutationEffect({
         environment,
-        mutation: testFeedbackMutation,
+        mutation: testFeedbackMutation as any,
         variables: (actor_id: string) => ({ data: { feedback_id: 'ID', actor_id } }),
       }),
     ],
   });
 
   const [ReadAtom, setAtom, resetAtom] = ComponentThatReadsAndWritesAtom(myAtom);
-  const c = renderElements(ReadAtom);
+  const c = renderElements(React.createElement(ReadAtom));
   await flushPromisesAndTimers();
   expect(c.textContent).toBe('"DEFAULT"');
 
@@ -96,14 +95,15 @@ test('Updaters', async () => {
     effects: [
       graphQLMutationEffect({
         environment,
-        mutation: testFeedbackMutation,
+        mutation: testFeedbackMutation as any,
         variables: (actor_id: string) => ({ data: { feedback_id: 'ID', actor_id } }),
         updater_UNSTABLE: updater,
         optimisticUpdater_UNSTABLE: optimisticUpdater,
         optimisticResponse_UNSTABLE: (actor_id: string) => ({
           feedback_like: {
-            feedback: { id: 'ID' },
-            liker: { id: 'OPTIMISTIC_' + actor_id, __typename: 'Actor' },
+            __typename: 'FeedbackLike',
+            feedback: { __typename: 'Feedback', id: 'ID' },
+            liker: { __typename: 'Actor', id: 'OPTIMISTIC_' + actor_id },
           },
         }),
       }),
@@ -111,7 +111,7 @@ test('Updaters', async () => {
   });
 
   const [ReadAtom, setAtom] = ComponentThatReadsAndWritesAtom(myAtom);
-  const c = renderElements(ReadAtom);
+  const c = renderElements(React.createElement(ReadAtom));
   await flushPromisesAndTimers();
   expect(c.textContent).toBe('"DEFAULT"');
 
@@ -123,12 +123,15 @@ test('Updaters', async () => {
   ).toEqual({ feedback_id: 'ID', actor_id: 'SET' });
 
   act(() =>
-    environment.mock.resolveMostRecentOperation(operation =>
-      MockPayloadGenerator.generate(operation, {
-        Feedback: () => ({ id: 'ID' }),
-        Actor: () => ({ id: 'ACTOR' }),
-      }),
-    ),
+    environment.mock.resolveMostRecentOperation(operation => ({
+      data: {
+        feedback_like: {
+          __typename: 'FeedbackLike',
+          feedback: { __typename: 'Feedback', id: 'ID' },
+          liker: { __typename: 'Actor', id: 'ACTOR' }
+        }
+      }
+    })),
   );
   expect(c.textContent).toBe('"SET"'); // Errors in updaters will revert value
   expect(optimisticUpdater).toHaveBeenCalledTimes(1);
@@ -144,14 +147,14 @@ test('Aborted mutation', async () => {
     effects: [
       graphQLMutationEffect({
         environment,
-        mutation: testFeedbackMutation,
+        mutation: testFeedbackMutation as any,
         variables: () => null,
       }),
     ],
   });
 
   const [ReadAtom, setAtom] = ComponentThatReadsAndWritesAtom(myAtom);
-  const c = renderElements(ReadAtom);
+  const c = renderElements(React.createElement(ReadAtom));
   await flushPromisesAndTimers();
   expect(c.textContent).toBe('"DEFAULT"');
 

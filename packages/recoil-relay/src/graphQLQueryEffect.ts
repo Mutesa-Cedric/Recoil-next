@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { AtomEffect, RecoilState } from 'recoil';
+import { AtomEffect, RecoilState } from 'recoil-next';
 import { Variables } from 'react-relay';
 import { IEnvironment, GraphQLTaggedNode } from 'relay-runtime';
 import { EnvironmentKey, getRelayEnvironment } from './Environments';
@@ -33,9 +33,9 @@ function subscribeToLocalRelayCache<TVariables extends Variables, TData extends 
 ): () => void {
     const request = getRequest(query);
     const operation = createOperationDescriptor(request, variables);
-    const operationDisposable = environment.retain(operation);
-    const snapshot = environment.lookup(operation.fragment);
-    const subscriptionDisposable = environment.subscribe(
+    const operationDisposable = typeof environment.retain === 'function' ? environment.retain(operation) : null;
+    const snapshot = typeof environment.lookup === 'function' ? environment.lookup(operation.fragment) : null;
+    const subscriptionDisposable = snapshot && typeof environment.subscribe === 'function' ? environment.subscribe(
         snapshot,
         newSnapshot => {
             // Handle Relay snapshot types properly
@@ -49,7 +49,7 @@ function subscribeToLocalRelayCache<TVariables extends Variables, TData extends 
                 onNext(newSnapshot.data as TData);
             }
         },
-    );
+    ) : null;
 
     return () => {
         operationDisposable?.dispose();
@@ -114,27 +114,37 @@ export function graphQLQueryEffect<
                 }),
             );
 
-            fetchQuery(environment, query, variables, {
-                fetchPolicy: 'store-or-network',
-            }).toPromise().then((response: unknown) => {
-                const data = mapResponse(response as TData);
-                initialResolve?.(data);
-                setSelf(data);
-            }).catch((error: Error) => {
+            try {
+                const queryObservable = fetchQuery(environment, query, variables, {
+                    fetchPolicy: 'network-only', // Force network request, don't use cached empty data
+                });
+                queryObservable.toPromise().then((response: unknown) => {
+                    const data = mapResponse(response as TData);
+                    initialResolve?.(data);
+                    setSelf(data);
+                }).catch((error: Error) => {
+                    initialReject?.(error);
+                    logError(node, error.message ?? 'Error');
+                });
+            } catch (error: any) {
                 initialReject?.(error);
                 logError(node, error.message ?? 'Error');
-            });
+            }
         }
 
         // Subscribe to local changes to update atom state.
         // To get remote mutations please use graphQLSubscriptionEffect()
         if (subscribeToLocalMutations_UNSTABLE) {
-            localSubscriptionCleanup = subscribeToLocalRelayCache(
-                environment,
-                query,
-                variables,
-                (data: TData) => setSelf(mapResponse(data)),
-            );
+            try {
+                localSubscriptionCleanup = subscribeToLocalRelayCache(
+                    environment,
+                    query,
+                    variables,
+                    (data: TData) => setSelf(mapResponse(data)),
+                );
+            } catch (error: any) {
+                logError(node, error.message ?? 'Subscription error');
+            }
         }
 
         return () => {

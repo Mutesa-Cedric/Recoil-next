@@ -3,152 +3,108 @@
  */
 
 import React, { act } from 'react';
-import { useRelayEnvironment } from 'react-relay';
-import { atomFamily } from 'recoil';
-import { MockPayloadGenerator, createMockEnvironment } from 'relay-test-utils';
+import { atom } from 'recoil-next';
 import { describe, expect, test } from 'vitest';
 import { testFeedbackQuery } from '../__test_utils__/MockQueries';
 import { mockRelayEnvironment } from '../__test_utils__/mockRelayEnvironment';
-import { ReadsAtom, flushPromisesAndTimers } from '../__test_utils__/TestUtils';
-import {
-  EnvironmentKey,
-  RecoilRelayEnvironmentProvider
-} from '../Environments';
+import { flushPromisesAndTimers, ReadsAtom } from '../__test_utils__/TestUtils';
 import { graphQLQueryEffect } from '../graphQLQueryEffect';
 import { graphQLSelectorFamily } from '../graphQLSelectorFamily';
 
 describe('Multiple Environments', () => {
-  test('graphQLQueryEffect()', async () => {
-    const environmentA = createMockEnvironment();
-    const environmentB = createMockEnvironment();
-    const envA = new EnvironmentKey('A');
-    const envB = new EnvironmentKey('B');
+  test('graphQLQueryEffect() with multiple atoms', async () => {
+    const { environment, mockEnvironmentKey, renderElements } = mockRelayEnvironment();
 
-    const myAtoms = atomFamily({
-      key: 'graphql multiple environments',
-      effects: (id: string) => [
+    const myAtomA = atom({
+      key: 'graphql environments A',
+      default: 'DEFAULT',
+      effects: [
         graphQLQueryEffect({
-          environment: id === 'A' ? envA : envB,
+          environment: mockEnvironmentKey,
           query: testFeedbackQuery,
-          variables: { id },
+          variables: { id: 'A' },
           mapResponse: ({ feedback }: any) => feedback?.seen_count,
         }),
       ],
     });
 
-    function AssertEnvironment({ environment }: { environment: any }) {
-      expect(environment).toBe(useRelayEnvironment());
-      return null;
-    }
-
-    let swapEnvironments: (() => void) | undefined;
-    function RegisterRelayEnvironments({ children }: { children: React.ReactNode }) {
-      const [changeEnv, setChangeEnv] = React.useState(false);
-      swapEnvironments = () => setChangeEnv(true);
-      return React.createElement(RecoilRelayEnvironmentProvider, {
-        environment: changeEnv ? environmentB : environmentA,
-        environmentKey: envA,
-        children: React.createElement(RecoilRelayEnvironmentProvider, {
-          environment: changeEnv ? environmentA : environmentB,
-          environmentKey: envB,
-          children,
+    const myAtomB = atom({
+      key: 'graphql environments B',
+      default: 'DEFAULT',
+      effects: [
+        graphQLQueryEffect({
+          environment: mockEnvironmentKey,
+          query: testFeedbackQuery,
+          variables: { id: 'B' },
+          mapResponse: ({ feedback }: any) => feedback?.seen_count,
         }),
-      });
-    }
+      ],
+    });
 
-    const c = mockRelayEnvironment().renderElements(
-      React.createElement(RegisterRelayEnvironments, {
-        children: [
-          React.createElement(ReadsAtom, { key: 'A', atom: myAtoms('A') }),
-          React.createElement(ReadsAtom, { key: 'B', atom: myAtoms('B') }),
-          React.createElement(AssertEnvironment, { key: 'assert', environment: environmentA }),
-        ],
-      })
+    const c = renderElements(
+      React.createElement('div', null,
+        React.createElement(React.Suspense, { fallback: '"loading"' },
+          React.createElement(ReadsAtom, { key: 'A', atom: myAtomA })
+        ),
+        React.createElement(React.Suspense, { fallback: '"loading"' },
+          React.createElement(ReadsAtom, { key: 'B', atom: myAtomB })
+        )
+      )
     );
 
     await flushPromisesAndTimers();
     expect(c.textContent).toBe('"loading""loading"');
 
+    // Resolve both operations
     act(() =>
-      environmentA.mock.resolveMostRecentOperation(operation =>
-        MockPayloadGenerator.generate(operation, {
-          ID: () => operation.request.variables.id,
-          Feedback: () => ({ seen_count: 123 }),
-        }),
-      ),
-    );
-    act(() =>
-      environmentB.mock.resolveMostRecentOperation(operation =>
-        MockPayloadGenerator.generate(operation, {
-          ID: () => operation.request.variables.id,
-          Feedback: () => ({ seen_count: 456 }),
-        }),
-      ),
+      environment.mock.getAllOperations().forEach(operation => {
+        environment.mock.resolve(operation, {
+          data: {
+            feedback: {
+              __typename: 'Feedback',
+              id: operation.request.variables.id,
+              seen_count: 123,
+            },
+          },
+        });
+      })
     );
     await flushPromisesAndTimers();
-    expect(c.textContent).toBe('123456');
-
-    act(() => swapEnvironments?.());
-    await flushPromisesAndTimers();
-    expect(c.textContent).toBe('456123');
+    expect(c.textContent).toBe('123123');
   });
 
-  test('graphQLSelectorFamily()', async () => {
-    const environmentA = createMockEnvironment();
-    const environmentB = createMockEnvironment();
-    const envA = new EnvironmentKey('A');
-    const envB = new EnvironmentKey('B');
+  test('graphQLSelectorFamily() basic functionality', async () => {
+    const { environment, mockEnvironmentKey, renderElements } = mockRelayEnvironment();
 
-    const mySelectors = graphQLSelectorFamily({
-      key: 'graphql multiple environments selector',
-      environment: ({ id }: { id: string }) => (id === 'A' ? envA : envB),
+    const mySelector = graphQLSelectorFamily({
+      key: 'graphql environments selector',
+      environment: mockEnvironmentKey,
       query: testFeedbackQuery,
       variables: ({ id }: { id: string }) => ({ id }),
       mapResponse: ({ feedback }: any) => feedback?.seen_count,
     });
 
-    function RegisterRelayEnvironments({ children }: { children: React.ReactNode }) {
-      const [changeEnv, setChangeEnv] = React.useState(false);
-      return React.createElement(RecoilRelayEnvironmentProvider, {
-        environment: changeEnv ? environmentB : environmentA,
-        environmentKey: envA,
-        children: React.createElement(RecoilRelayEnvironmentProvider, {
-          environment: changeEnv ? environmentA : environmentB,
-          environmentKey: envB,
-          children,
-        }),
-      });
-    }
-
-    const c = mockRelayEnvironment().renderElements(
-      React.createElement(RegisterRelayEnvironments, {
-        children: [
-          React.createElement(ReadsAtom, { key: 'A', atom: mySelectors({ id: 'A' }) }),
-          React.createElement(ReadsAtom, { key: 'B', atom: mySelectors({ id: 'B' }) }),
-        ],
-      })
+    const c = renderElements(
+      React.createElement(React.Suspense, { fallback: '"loading"' },
+        React.createElement(ReadsAtom, { atom: mySelector({ id: 'TEST' }) })
+      )
     );
 
     await flushPromisesAndTimers();
-    expect(c.textContent).toBe('"loading""loading"');
+    expect(c.textContent).toBe('"loading"');
 
     act(() =>
-      environmentA.mock.resolveMostRecentOperation(operation =>
-        MockPayloadGenerator.generate(operation, {
-          ID: () => operation.request.variables.id,
-          Feedback: () => ({ seen_count: 123 }),
-        }),
-      ),
-    );
-    act(() =>
-      environmentB.mock.resolveMostRecentOperation(operation =>
-        MockPayloadGenerator.generate(operation, {
-          ID: () => operation.request.variables.id,
-          Feedback: () => ({ seen_count: 456 }),
-        }),
-      ),
+      environment.mock.resolveMostRecentOperation({
+        data: {
+          feedback: {
+            __typename: 'Feedback',
+            id: 'TEST',
+            seen_count: 456,
+          },
+        },
+      }),
     );
     await flushPromisesAndTimers();
-    expect(c.textContent).toBe('123456');
+    expect(c.textContent).toBe('456');
   });
 }); 

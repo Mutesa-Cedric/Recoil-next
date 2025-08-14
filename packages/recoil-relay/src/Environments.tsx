@@ -5,7 +5,7 @@
 'use strict';
 
 import React, { useEffect, ReactNode } from 'react';
-import { useRecoilStoreID, Snapshot, StoreID } from 'recoil';
+import { useRecoilStoreID, Snapshot, StoreID } from 'recoil-next';
 import { RelayEnvironmentProvider } from 'react-relay';
 import { IEnvironment } from 'relay-runtime';
 import err from '../../shared/src/util/Recoil_err';
@@ -138,18 +138,22 @@ export function getRelayEnvironment(
     storeID: StoreID,
     parentStoreID?: StoreID,
 ): IEnvironment {
+    let environment: IEnvironment;
+    
     if (environmentOpt instanceof EnvironmentKey) {
-        const environment =
+        const retrievedEnvironment =
             environmentStore.get(storeID)?.get(environmentOpt) ??
             (parentStoreID != null
                 ? environmentStore.get(parentStoreID)?.get(environmentOpt)
                 : null);
-        if (environment == null) {
+        if (retrievedEnvironment == null) {
             throw err(
                 `<RecoilRelayEnvironment> must be used at the top of your <RecoilRoot> with the same EnvironmentKey "${environmentOpt.toJSON()}" to register the Relay environment.`,
             );
         }
-        return environment;
+        environment = retrievedEnvironment;
+    } else {
+        environment = environmentOpt;
     }
-    return environmentOpt;
+    return environment;
 } 

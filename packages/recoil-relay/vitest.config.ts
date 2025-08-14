@@ -1,5 +1,5 @@
+import { resolve } from 'path';
 import { defineConfig } from 'vitest/config';
-
 export default defineConfig({
   test: {
     environment: 'jsdom',
@@ -17,9 +17,13 @@ export default defineConfig({
       ],
     },
   },
+  define: {
+    __DEV__: 'process.env.NODE_ENV !== "production"',
+  },
   resolve: {
     alias: {
       'recoil-shared': new URL('../../../packages/shared/src', import.meta.url).pathname,
+      'recoil-next': resolve(__dirname, '../recoil/src')
     },
   },
 }); 

@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { AtomEffect, RecoilState, DefaultValue } from 'recoil';
+import { AtomEffect, RecoilState, DefaultValue } from 'recoil-next';
 import { Variables } from 'react-relay';
 import { 
     IEnvironment, 

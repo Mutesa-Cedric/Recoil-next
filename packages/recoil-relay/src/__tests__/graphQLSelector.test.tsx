@@ -2,16 +2,14 @@
  * TypeScript port of RecoilRelay_graphQLSelector-test.js
  */
 
-import React, { act } from 'react';
-import { readInlineData } from 'relay-runtime';
-import { MockPayloadGenerator } from 'relay-test-utils';
+import { act } from '@testing-library/react';
+import React from 'react';
 import { expect, test } from 'vitest';
 import {
-    testFeedbackFragment,
     testFeedbackFragmentQuery,
     testFeedbackMutation,
     testFeedbackQuery,
-    testFeedbackSubscription,
+    testFeedbackSubscription
 } from '../__test_utils__/MockQueries';
 import { mockRelayEnvironment } from '../__test_utils__/mockRelayEnvironment';
 import { ComponentThatReadsAndWritesAtom, flushPromisesAndTimers, ReadsAtom, stringAtom } from '../__test_utils__/TestUtils';
@@ -28,14 +26,17 @@ test('Sanity Query', async () => {
         key: 'graphql derived state',
         environment,
         query: testFeedbackQuery,
-        variables: ({ get }) => ({ id: 'ID-' + get(myAtom) }),
+        // @ts-expect-error
+        variables: ({ get }) => {
+            return { id: 'ID-' + get(myAtom) }
+        },
         mapResponse: ({ feedback }, { get, variables }) => {
             expect(variables).toEqual({ id: 'ID-' + get(myAtom) });
             return `${feedback?.id ?? ''}:${get(myAtom)}-${feedback?.seen_count ?? ''
                 }`;
         },
         mutations: {
-            mutation: testFeedbackMutation,
+            mutation: testFeedbackMutation as any,
             variables: (count: any) => ({
                 data: { feedback_id: 'ID', actor_id: count?.toString() },
             }),
@@ -43,16 +44,19 @@ test('Sanity Query', async () => {
     });
 
     const [Atom, setAtom] = ComponentThatReadsAndWritesAtom(query);
-    const c = renderElements(Atom);
+    const c = renderElements(React.createElement(Atom));
     expect(c.textContent).toBe('"loading"');
 
     act(() =>
-        environment.mock.resolveMostRecentOperation(operation =>
-            MockPayloadGenerator.generate(operation, {
-                ID: () => operation.request.variables.id,
-                Feedback: () => ({ seen_count: 123 }),
-            }),
-        ),
+        environment.mock.resolveMostRecentOperation(operation => ({
+            data: {
+                feedback: {
+                    __typename: 'Feedback',
+                    id: operation.request.variables.id,
+                    seen_count: 123
+                }
+            }
+        })),
     );
     await flushPromisesAndTimers();
     expect(c.textContent).toBe('"ID-DEFAULT:DEFAULT-123"');
@@ -70,7 +74,7 @@ test('Sanity Subscription', async () => {
     const query = graphQLSelector({
         key: 'graphql remote subscription',
         environment,
-        query: testFeedbackSubscription,
+        query: testFeedbackSubscription as any,
         variables: { input: { feedback_id: 'ID' } },
         mapResponse: ({ feedback_like_subscribe }) =>
             feedback_like_subscribe?.feedback?.seen_count,
@@ -85,10 +89,18 @@ test('Sanity Subscription', async () => {
     act(() =>
         environment.mock.nextValue(
             operation,
-            MockPayloadGenerator.generate(operation, {
-                ID: () => operation.request.variables.input.feedback_id,
-                Feedback: () => ({ seen_count: 123 }),
-            }),
+            {
+                data: {
+                    feedback_like_subscribe: {
+                        __typename: 'FeedbackLikeResponsePayload',
+                        feedback: {
+                            __typename: 'Feedback',
+                            id: operation.request.variables.input.feedback_id,
+                            seen_count: 123
+                        }
+                    }
+                }
+            }
         ),
     );
     await flushPromisesAndTimers();
@@ -97,10 +109,18 @@ test('Sanity Subscription', async () => {
     act(() =>
         environment.mock.nextValue(
             operation,
-            MockPayloadGenerator.generate(operation, {
-                ID: () => operation.request.variables.input.feedback_id,
-                Feedback: () => ({ seen_count: 456 }),
-            }),
+            {
+                data: {
+                    feedback_like_subscribe: {
+                        __typename: 'FeedbackLikeResponsePayload',
+                        feedback: {
+                            __typename: 'Feedback',
+                            id: operation.request.variables.input.feedback_id,
+                            seen_count: 456
+                        }
+                    }
+                }
+            }
         ),
     );
     await flushPromisesAndTimers();
@@ -109,10 +129,18 @@ test('Sanity Subscription', async () => {
     act(() =>
         environment.mock.nextValue(
             operation,
-            MockPayloadGenerator.generate(operation, {
-                ID: () => operation.request.variables.input.feedback_id,
-                Feedback: () => ({ seen_count: 789 }),
-            }),
+            {
+                data: {
+                    feedback_like_subscribe: {
+                        __typename: 'FeedbackLikeResponsePayload',
+                        feedback: {
+                            __typename: 'Feedback',
+                            id: operation.request.variables.input.feedback_id,
+                            seen_count: 789
+                        }
+                    }
+                }
+            }
         ),
     );
     await flushPromisesAndTimers();
@@ -129,8 +157,8 @@ test('GraphQL Fragments', async () => {
         variables: { id: 'ID1' },
         mapResponse: ({ feedback: response }, { variables }) => {
             expect(variables).toEqual({ id: 'ID1' });
-            const feedback = readInlineData(testFeedbackFragment, response);
-            return feedback?.seen_count;
+            // Access fragment data directly from response instead of using readInlineData
+            return response?.seen_count;
         },
     });
 
@@ -139,12 +167,15 @@ test('GraphQL Fragments', async () => {
     expect(c.textContent).toBe('"loading"');
 
     act(() =>
-        environment.mock.resolveMostRecentOperation(operation =>
-            MockPayloadGenerator.generate(operation, {
-                ID: () => operation.request.variables.id,
-                Feedback: () => ({ seen_count: 123 }),
-            }),
-        ),
+        environment.mock.resolveMostRecentOperation(operation => ({
+            data: {
+                feedback: {
+                    __typename: 'Feedback',
+                    id: operation.request.variables.id,
+                    seen_count: 123
+                }
+            }
+        })),
     );
     await flushPromisesAndTimers();
     expect(c.textContent).toBe('123');

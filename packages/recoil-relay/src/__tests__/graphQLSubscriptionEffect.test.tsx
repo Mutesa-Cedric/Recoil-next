@@ -3,8 +3,7 @@
  */
 
 import React, { act } from 'react';
-import { atomFamily } from 'recoil';
-import { MockPayloadGenerator } from 'relay-test-utils';
+import { atomFamily } from 'recoil-next';
 import { expect, test } from 'vitest';
 import { testFeedbackSubscription } from '../__test_utils__/MockQueries';
 import { mockRelayEnvironment } from '../__test_utils__/mockRelayEnvironment';
@@ -16,15 +15,18 @@ test('GraphQL Subscription', async () => {
 
   const query = atomFamily({
     key: 'graphql remote subscription',
-    effects: ({ id }: { id: string }) => [
-      graphQLSubscriptionEffect({
-        environment,
-        subscription: testFeedbackSubscription,
-        variables: { input: { feedback_id: id } },
-        mapResponse: ({ feedback_like_subscribe }) =>
-          feedback_like_subscribe?.feedback?.seen_count,
-      }),
-    ],
+    // @ts-expect-error
+    effects: ({ id }: { id: string }) => {
+      return [
+        graphQLSubscriptionEffect({
+          environment,
+          subscription: testFeedbackSubscription as any,
+          variables: { input: { feedback_id: id } },
+          mapResponse: ({ feedback_like_subscribe }) =>
+            feedback_like_subscribe?.feedback?.seen_count,
+        }),
+      ]
+    },
   });
 
   const c = renderElements(React.createElement(ReadsAtom, { atom: query({ id: 'ID' }) }));
@@ -36,10 +38,18 @@ test('GraphQL Subscription', async () => {
   act(() =>
     environment.mock.nextValue(
       operation,
-      MockPayloadGenerator.generate(operation, {
-        ID: () => operation.request.variables.input.feedback_id,
-        Feedback: () => ({ seen_count: 123 }),
-      }),
+      {
+        data: {
+          feedback_like_subscribe: {
+            __typename: 'FeedbackLikeResponsePayload',
+            feedback: {
+              __typename: 'Feedback',
+              id: operation.request.variables.input.feedback_id,
+              seen_count: 123
+            }
+          }
+        }
+      }
     ),
   );
   await flushPromisesAndTimers();
@@ -48,10 +58,18 @@ test('GraphQL Subscription', async () => {
   act(() =>
     environment.mock.nextValue(
       operation,
-      MockPayloadGenerator.generate(operation, {
-        ID: () => operation.request.variables.input.feedback_id,
-        Feedback: () => ({ seen_count: 456 }),
-      }),
+      {
+        data: {
+          feedback_like_subscribe: {
+            __typename: 'FeedbackLikeResponsePayload',
+            feedback: {
+              __typename: 'Feedback',
+              id: operation.request.variables.input.feedback_id,
+              seen_count: 456
+            }
+          }
+        }
+      }
     ),
   );
   await flushPromisesAndTimers();
@@ -60,10 +78,18 @@ test('GraphQL Subscription', async () => {
   act(() =>
     environment.mock.nextValue(
       operation,
-      MockPayloadGenerator.generate(operation, {
-        ID: () => operation.request.variables.input.feedback_id,
-        Feedback: () => ({ seen_count: 789 }),
-      }),
+      {
+        data: {
+          feedback_like_subscribe: {
+            __typename: 'FeedbackLikeResponsePayload',
+            feedback: {
+              __typename: 'Feedback',
+              id: operation.request.variables.input.feedback_id,
+              seen_count: 789
+            }
+          }
+        }
+      }
     ),
   );
   await flushPromisesAndTimers();

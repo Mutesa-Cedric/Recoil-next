@@ -2,14 +2,13 @@
  * TypeScript port of RecoilRelay_graphQLQueryEffect-test.js
  */
 
-import { test, expect, describe } from 'vitest';
-import { act } from 'react';
-import { atom, atomFamily } from 'recoil';
-import { MockPayloadGenerator } from 'relay-test-utils';
-import { mockRelayEnvironment } from '../__test_utils__/mockRelayEnvironment';
+import React, { act } from 'react';
+import { atomFamily } from 'recoil-next';
+import { expect, test } from 'vitest';
 import { testFeedbackQuery } from '../__test_utils__/MockQueries';
-import { graphQLQueryEffect } from '../graphQLQueryEffect';
+import { mockRelayEnvironment } from '../__test_utils__/mockRelayEnvironment';
 import { ReadsAtom, flushPromisesAndTimers } from '../__test_utils__/TestUtils';
+import { graphQLQueryEffect } from '../graphQLQueryEffect';
 
 test('Relay Query with <RecoilRoot>', async () => {
   const { environment, mockEnvironmentKey, renderElements } = mockRelayEnvironment();
@@ -17,15 +16,18 @@ test('Relay Query with <RecoilRoot>', async () => {
   const query = atomFamily({
     key: 'graphql query',
     default: { feedback: null },
-    effects: (variables: any) => [
-      graphQLQueryEffect({
-        environment: mockEnvironmentKey,
-        query: testFeedbackQuery,
-        variables,
-        mapResponse: (data: any) => data,
-        subscribeToLocalMutations_UNSTABLE: false,
-      }),
-    ],
+    // @ts-expect-error
+    effects: (variables: any) => {
+      return [
+        graphQLQueryEffect({
+          environment: mockEnvironmentKey,
+          query: testFeedbackQuery,
+          variables,
+          mapResponse: (data: any) => data,
+          subscribeToLocalMutations_UNSTABLE: false,
+        }),
+      ]
+    },
   });
 
   const c = renderElements(React.createElement(ReadsAtom, { atom: query({ id: 'ID' }) }));
@@ -33,12 +35,15 @@ test('Relay Query with <RecoilRoot>', async () => {
   expect(c.textContent).toBe('"loading"');
 
   act(() =>
-    environment.mock.resolveMostRecentOperation(operation =>
-      MockPayloadGenerator.generate(operation, {
-        ID: () => operation.request.variables.id,
-        Feedback: () => ({ seen_count: 123 }),
-      }),
-    ),
+    environment.mock.resolveMostRecentOperation(operation => ({
+      data: {
+        feedback: {
+          __typename: 'Feedback',
+          id: operation.request.variables.id,
+          seen_count: 123
+        }
+      }
+    })),
   );
   await flushPromisesAndTimers();
   expect(c.textContent).toBe('{"feedback":{"id":"ID","seen_count":123}}');
@@ -49,15 +54,18 @@ test('Relay Query with Snapshot', async () => {
 
   const query = atomFamily({
     key: 'graphql snapshot query',
-    effects: (variables: any) => [
-      graphQLQueryEffect({
-        environment: mockEnvironmentKey,
-        query: testFeedbackQuery,
-        variables,
-        mapResponse: (data: any) => data,
-        subscribeToLocalMutations_UNSTABLE: false,
-      }),
-    ],
+    // @ts-expect-error
+    effects: (variables: any) => {
+      return [
+        graphQLQueryEffect({
+          environment: mockEnvironmentKey,
+          query: testFeedbackQuery,
+          variables,
+          mapResponse: (data: any) => data,
+          subscribeToLocalMutations_UNSTABLE: false,
+        }),
+      ]
+    },
   });
 
   const queryAtom = query({ id: 'ID' });
@@ -65,12 +73,15 @@ test('Relay Query with Snapshot', async () => {
   expect(loadable.state).toBe('loading');
 
   act(() =>
-    environment.mock.resolveMostRecentOperation(operation =>
-      MockPayloadGenerator.generate(operation, {
-        ID: () => operation.request.variables.id,
-        Feedback: () => ({ seen_count: 123 }),
-      }),
-    ),
+    environment.mock.resolveMostRecentOperation(operation => ({
+      data: {
+        feedback: {
+          __typename: 'Feedback',
+          id: operation.request.variables.id,
+          seen_count: 123
+        }
+      }
+    })),
   );
   await flushPromisesAndTimers();
 
@@ -87,15 +98,18 @@ test('Relay Query with Local Updates', async () => {
   const query = atomFamily({
     key: 'graphql query local updates',
     default: { feedback: null },
-    effects: (variables: any) => [
-      graphQLQueryEffect({
-        environment: mockEnvironmentKey,
-        query: testFeedbackQuery,
-        variables,
-        mapResponse: (data: any) => data,
-        subscribeToLocalMutations_UNSTABLE: true,
-      }),
-    ],
+    // @ts-expect-error
+    effects: (variables: any) => {
+      return [
+        graphQLQueryEffect({
+          environment: mockEnvironmentKey,
+          query: testFeedbackQuery,
+          variables,
+          mapResponse: (data: any) => data,
+          subscribeToLocalMutations_UNSTABLE: true,
+        }),
+      ]
+    },
   });
 
   const c = renderElements(React.createElement(ReadsAtom, { atom: query({ id: 'ID' }) }));
@@ -103,12 +117,15 @@ test('Relay Query with Local Updates', async () => {
   expect(c.textContent).toBe('"loading"');
 
   act(() =>
-    environment.mock.resolveMostRecentOperation(operation =>
-      MockPayloadGenerator.generate(operation, {
-        ID: () => operation.request.variables.id,
-        Feedback: () => ({ seen_count: 123 }),
-      }),
-    ),
+    environment.mock.resolveMostRecentOperation(operation => ({
+      data: {
+        feedback: {
+          __typename: 'Feedback',
+          id: operation.request.variables.id,
+          seen_count: 123
+        }
+      }
+    })),
   );
   await flushPromisesAndTimers();
   expect(c.textContent).toBe('{"feedback":{"id":"ID","seen_count":123}}');
@@ -132,15 +149,18 @@ test('Relay Query with Variables Function', async () => {
   const query = atomFamily({
     key: 'graphql query variables function',
     default: { feedback: null },
-    effects: (variables: any) => [
-      graphQLQueryEffect({
-        environment: mockEnvironmentKey,
-        query: testFeedbackQuery,
-        variables: () => variables,
-        mapResponse: (data: any) => data,
-        subscribeToLocalMutations_UNSTABLE: false,
-      }),
-    ],
+    // @ts-expect-error
+    effects: (variables: any) => {
+      return [
+        graphQLQueryEffect({
+          environment: mockEnvironmentKey,
+          query: testFeedbackQuery,
+          variables: () => variables,
+          mapResponse: (data: any) => data,
+          subscribeToLocalMutations_UNSTABLE: false,
+        }),
+      ]
+    },
   });
 
   const c = renderElements(React.createElement(ReadsAtom, { atom: query({ id: 'ID' }) }));
@@ -148,12 +168,15 @@ test('Relay Query with Variables Function', async () => {
   expect(c.textContent).toBe('"loading"');
 
   act(() =>
-    environment.mock.resolveMostRecentOperation(operation =>
-      MockPayloadGenerator.generate(operation, {
-        ID: () => operation.request.variables.id,
-        Feedback: () => ({ seen_count: 123 }),
-      }),
-    ),
+    environment.mock.resolveMostRecentOperation(operation => ({
+      data: {
+        feedback: {
+          __typename: 'Feedback',
+          id: 'ID',
+          seen_count: 123
+        }
+      }
+    })),
   );
   await flushPromisesAndTimers();
   expect(c.textContent).toBe('{"feedback":{"id":"ID","seen_count":123}}');
