@@ -2,12 +2,13 @@
  * TypeScript port of Constants.js
  */
 
-declare const __DEV__: boolean;
+// __DEV__ with fallback for environments where it's not available
+const _DEV_MODE: boolean = (globalThis as any).__DEV__ ?? false;
 
-const ExtensionSource: string = __DEV__
+const ExtensionSource: string = _DEV_MODE
   ? 'recoil-dev-tools-DEV-MODE'
   : 'recoil-dev-tools';
-const ExtensionSourceContentScript: string = __DEV__
+const ExtensionSourceContentScript: string = _DEV_MODE
   ? 'recoil-dev-tools-content-script-DEV-MODE'
   : 'recoil-dev-tools-content-script';
 

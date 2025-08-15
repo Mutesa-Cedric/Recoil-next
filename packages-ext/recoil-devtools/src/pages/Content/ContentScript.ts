@@ -102,16 +102,19 @@ function initContentScriptListeners() {
 
 // - Load page script so it can access the window object
 function initPageScript() {
-  const pageScript = document.createElement('script');
-  pageScript.type = 'text/javascript';
+  // Only initialize if chrome extension API is available (not in test environment)
+  if (typeof chrome !== 'undefined' && chrome.extension) {
+    const pageScript = document.createElement('script');
+    pageScript.type = 'text/javascript';
 
-  pageScript.src = chrome.extension.getURL('pageScript.bundle.js');
-  // remove the pageScript node after it has run
-  pageScript.onload = function () {
-    const element = this as HTMLScriptElement;
-    element.parentNode?.removeChild(element);
-  };
-  nullthrows(document.head ?? document.documentElement).appendChild(pageScript);
+    pageScript.src = chrome.extension.getURL('pageScript.bundle.js');
+    // remove the pageScript node after it has run
+    pageScript.onload = function () {
+      const element = this as HTMLScriptElement;
+      element.parentNode?.removeChild(element);
+    };
+    nullthrows(document.head ?? document.documentElement).appendChild(pageScript);
+  }
 }
 
 initContentScriptListeners();

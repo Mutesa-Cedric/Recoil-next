@@ -1,9 +1,10 @@
 // TypeScript port of Logger.js
 
-declare const __DEV__: boolean;
+// __DEV__ with fallback for environments where it's not available
+const _DEV_MODE: boolean = (globalThis as any).__DEV__ ?? false;
 
 function debug(...args: readonly any[]) {
-  if (__DEV__) {
+  if (_DEV_MODE) {
     /* eslint-disable-next-line fb-www/no-console */
     console.log(...args);
   }

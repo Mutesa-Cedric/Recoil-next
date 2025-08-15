@@ -10,6 +10,9 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
   },
+  define: {
+    __DEV__: true,
+  },
   resolve: {
     alias: {
       'recoil-shared': new URL('../../packages/shared/src', import.meta.url).pathname,

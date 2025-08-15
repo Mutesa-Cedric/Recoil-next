@@ -74,6 +74,9 @@ function onConnect(port: chrome.runtime.Port): void {
   });
 }
 
-chrome.runtime.onConnect.addListener(onConnect);
+// Only add listener if chrome is available (not in test environment)
+if (typeof chrome !== 'undefined' && chrome.runtime) {
+  chrome.runtime.onConnect.addListener(onConnect);
+}
 
 export {onConnect};

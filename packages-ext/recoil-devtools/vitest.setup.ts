@@ -6,10 +6,10 @@ import '@testing-library/jest-dom';
 import {vi} from 'vitest';
 
 // Define global __DEV__ for tests
-global.__DEV__ = true;
+(globalThis as any).__DEV__ = true;
 
 // Setup basic Chrome API mock for all tests
-global.chrome = {
+const mockChrome = {
   runtime: {
     onConnect: {
       addListener: vi.fn(),
@@ -20,3 +20,7 @@ global.chrome = {
     getURL: vi.fn(() => ''),
   },
 } as any;
+
+// Make chrome available both as global and globalThis property
+(global as any).chrome = mockChrome;
+(globalThis as any).chrome = mockChrome;
