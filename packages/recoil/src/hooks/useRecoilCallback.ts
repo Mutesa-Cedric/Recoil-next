@@ -4,7 +4,7 @@
 
 'use strict';
 
-import { useCallback } from 'react';
+import { useCallback, useRef, useLayoutEffect } from 'react';
 import err from '../../../shared/src/util/Recoil_err';
 import invariant from '../../../shared/src/util/Recoil_invariant';
 import isPromise from '../../../shared/src/util/Recoil_isPromise';
@@ -18,7 +18,7 @@ import {
     refreshRecoilValue,
     setRecoilValue,
 } from '../core/RecoilValueInterface';
-import { cloneSnapshot, Snapshot } from '../core/Snapshot';
+import { cloneSnapshot, Snapshot, invalidateSnapshot, cloneStoreState, MutableSnapshot } from '../core/Snapshot';
 import { Store } from '../core/State';
 import { gotoSnapshot } from './SnapshotHooks';
 
@@ -58,23 +58,53 @@ export function recoilCallback<
             throw err(errMsg);
         }
 
+        // Create snapshots for different read types
+        let originalSnapshot: Snapshot | undefined;
+        let currentSnapshot: Snapshot | undefined;
+
+        const baseInterface = {
+            ...(extraInterface ?? {}),
+            set: <T>(node: RecoilState<T>, newValue: T | ((currValue: T) => T)) => {
+                setRecoilValue(store, node, newValue);
+            },
+            reset: <T>(node: RecoilState<T>) => {
+                setRecoilValue(store, node, DEFAULT_VALUE);
+            },
+            refresh: <T>(node: RecoilValue<T>) => refreshRecoilValue(store, node),
+            gotoSnapshot: (snapshot: Snapshot) => gotoSnapshot(store, snapshot),
+            transact_UNSTABLE: (transaction: (iface: TransactionInterface) => void) =>
+                atomicUpdater(store)(transaction),
+        } as RecoilCallbackInterface & ExtraInterface;
+
         const callbackInterface: RecoilCallbackInterface & ExtraInterface = lazyProxy(
-            {
-                ...(extraInterface ?? {}),
-                set: <T>(node: RecoilState<T>, newValue: T | ((currValue: T) => T)) =>
-                    setRecoilValue(store, node, newValue),
-                reset: <T>(node: RecoilState<T>) =>
-                    setRecoilValue(store, node, DEFAULT_VALUE),
-                refresh: <T>(node: RecoilValue<T>) => refreshRecoilValue(store, node),
-                gotoSnapshot: (snapshot: Snapshot) => gotoSnapshot(store, snapshot),
-                transact_UNSTABLE: (transaction: (iface: TransactionInterface) => void) =>
-                    atomicUpdater(store)(transaction),
-            } as RecoilCallbackInterface & ExtraInterface,
+            baseInterface,
             {
                 snapshot: () => {
-                    const snapshot = cloneSnapshot(store);
-                    releaseSnapshot = snapshot.retain();
-                    return snapshot;
+                    if (!originalSnapshot) {
+                        originalSnapshot = cloneSnapshot(store, 'latest');
+                        releaseSnapshot = originalSnapshot.retain();
+                    }
+                    
+                    // Create a hybrid snapshot that handles both behaviors
+                    const hybridSnapshot = new Proxy(originalSnapshot, {
+                        get(target, prop) {
+                            if (prop === 'getLoadable') {
+                                // For getLoadable, return current store state (reflects changes)
+                                return (recoilValue: any) => {
+                                    currentSnapshot = cloneSnapshot(store, 'latest');
+                                    return currentSnapshot.getLoadable(recoilValue);
+                                };
+                            } else if (prop === 'getPromise') {
+                                // For getPromise, return original state (doesn't reflect changes)
+                                return target.getPromise.bind(target);
+                            }
+                            // For all other methods, delegate to target
+                            const value = (target as any)[prop];
+                            return typeof value === 'function' ? value.bind(target) : value;
+                        }
+                    });
+                    
+                    return hybridSnapshot;
                 },
             },
         );
@@ -104,12 +134,25 @@ export function useRecoilCallback<Args extends ReadonlyArray<unknown>, Return>(
     deps?: ReadonlyArray<unknown>,
 ): (...args: Args) => Return {
     const storeRef = useStoreRef();
+    const isRenderingRef = useRef(true);
+
+    // Clear the render flag after render completes
+    useLayoutEffect(() => {
+        isRenderingRef.current = false;
+    });
 
     return useCallback(
         (...args: Args): Return => {
+            if (isRenderingRef.current) {
+                throw err(
+                    'useRecoilCallback() hooks cannot be called during render. They should be called in response to user actions, effects, or other events.',
+                );
+            }
             return recoilCallback(storeRef.current, fn, args);
         },
+        // Don't include storeRef in deps to avoid unnecessary re-creation
+        // The store reference should be stable within a RecoilRoot
         // eslint-disable-next-line fb-www/react-hooks-deps
-        deps != null ? [...deps, storeRef] : [storeRef],
+        deps ?? [],
     );
 } 

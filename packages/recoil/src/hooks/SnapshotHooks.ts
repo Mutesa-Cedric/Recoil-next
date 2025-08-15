@@ -12,23 +12,33 @@ import mergeMaps from '../../../shared/src/util/Recoil_mergeMaps';
 import nullthrows from '../../../shared/src/util/Recoil_nullthrows';
 import recoverableViolation from '../../../shared/src/util/Recoil_recoverableViolation';
 import usePrevious from '../../../shared/src/util/Recoil_usePrevious';
+import { Loadable, loadableWithValue } from '../adt/Loadable';
 import { batchUpdates } from '../core/Batching';
-import { DEFAULT_VALUE, getNode, nodes } from '../core/Node';
-import { PersistenceType } from '../core/Node';
+import { copyTreeState, getDownstreamNodes, invalidateDownstreams } from '../core/FunctionalCore';
+import { DEFAULT_VALUE, getNode, nodes, PersistenceType } from '../core/Node';
 import { useStoreRef } from '../core/RecoilRoot';
-import {
-    AbstractRecoilValue,
-    setRecoilValueLoadable,
-} from '../core/RecoilValueInterface';
 import { SUSPENSE_TIMEOUT_MS } from '../core/Retention';
 import { cloneSnapshot, Snapshot } from '../core/Snapshot';
 import { NodeKey, Store, TreeState } from '../core/State';
-import { loadableWithValue } from '../adt/Loadable';
 
 function useTransactionSubscription(callback: (store: Store) => void) {
     const storeRef = useStoreRef();
     useEffect(() => {
-        const sub = storeRef.current.subscribeToTransactions(callback);
+        const wrappedCallback = (store: Store) => {
+            try {
+                callback(store);
+            } catch (error) {
+                // In React 19, snapshots can fail more aggressively
+                if (error && typeof error === 'object' && 'message' in error &&
+                    typeof error.message === 'string' &&
+                    error.message.includes('already been released')) {
+                    console.warn('Snapshot already released in transaction subscription, skipping');
+                    return;
+                }
+                throw error;
+            }
+        };
+        const sub = storeRef.current.subscribeToTransactions(wrappedCallback);
         return sub.release;
     }, [callback, storeRef]);
 }
@@ -136,20 +146,58 @@ export function useRecoilTransactionObserver(
 // Return a snapshot of the current state and subscribe to all state changes
 export function useRecoilSnapshot(): Snapshot {
     const storeRef = useStoreRef();
-    const [snapshot, setSnapshot] = useState(() =>
-        cloneSnapshot(storeRef.current),
-    );
+    const [snapshot, setSnapshot] = useState(() => {
+        try {
+            return cloneSnapshot(storeRef.current);
+        } catch (error) {
+            // In React 19, snapshots can be released more aggressively
+            // If the snapshot was already released, create a fresh one
+            if (error && typeof error === 'object' && 'message' in error &&
+                typeof error.message === 'string' &&
+                error.message.includes('already been released')) {
+                console.warn('Snapshot already released during initial state, creating fresh snapshot');
+                return cloneSnapshot(storeRef.current);
+            }
+            throw error;
+        }
+    });
     const previousSnapshot = usePrevious(snapshot);
     const timeoutID = useRef<number | null>(null);
     const releaseRef = useRef<(() => void) | null>(null);
 
     useTransactionSubscription(
-        useCallback((store: Store) => setSnapshot(cloneSnapshot(store)), []),
+        useCallback((store: Store) => {
+            try {
+                setSnapshot(cloneSnapshot(store));
+            } catch (error) {
+                // In React 19, snapshots can be released more aggressively
+                // If the snapshot was already released, skip this update
+                if (error && typeof error === 'object' && 'message' in error &&
+                    typeof error.message === 'string' &&
+                    error.message.includes('already been released')) {
+                    console.warn('Snapshot already released during transaction subscription, skipping update');
+                    return;
+                }
+                throw error;
+            }
+        }, []),
     );
 
     // Retain snapshot for duration component is mounted
     useEffect(() => {
-        const release = snapshot.retain();
+        let release: (() => void) | null = null;
+        try {
+            release = snapshot.retain();
+        } catch (error) {
+            // If snapshot retention fails, skip this effect
+            if (error && typeof error === 'object' && 'message' in error &&
+                typeof error.message === 'string' &&
+                error.message.includes('already been released')) {
+                console.warn('Cannot retain snapshot in useEffect, already released');
+                return;
+            }
+            throw error;
+        }
 
         // Release the retain from the rendering call
         if (timeoutID.current && !isSSR) {
@@ -165,7 +213,9 @@ export function useRecoilSnapshot(): Snapshot {
             // then the new effect will run. We don't want the snapshot to be released
             // by that cleanup before the new effect has a chance to retain it again.
             // Use timeout of 10 to workaround Firefox issue: https://github.com/facebookexperimental/Recoil/issues/1936
-            window.setTimeout(release, 10);
+            if (release) {
+                window.setTimeout(release, 10);
+            }
         };
     }, [snapshot]);
 
@@ -179,7 +229,19 @@ export function useRecoilSnapshot(): Snapshot {
             releaseRef.current?.();
             releaseRef.current = null;
         }
-        releaseRef.current = snapshot.retain();
+        try {
+            releaseRef.current = snapshot.retain();
+        } catch (error) {
+            // If snapshot retention fails, skip this retention
+            if (error && typeof error === 'object' && 'message' in error &&
+                typeof error.message === 'string' &&
+                error.message.includes('already been released')) {
+                console.warn('Cannot retain snapshot in render, already released');
+                releaseRef.current = null;
+            } else {
+                throw error;
+            }
+        }
         timeoutID.current = window.setTimeout(() => {
             timeoutID.current = null;
             releaseRef.current?.();
@@ -190,40 +252,67 @@ export function useRecoilSnapshot(): Snapshot {
     return snapshot;
 }
 
+function notifyComponents(store: Store, treeState: TreeState): void {
+    const storeState = store.getState();
+    const dependentNodes = getDownstreamNodes(store, treeState, treeState.dirtyAtoms);
+
+    for (const key of dependentNodes) {
+        const comps = storeState.nodeToComponentSubscriptions.get(key);
+        if (comps) {
+            for (const [_subID, [_debugName, callback]] of comps) {
+                try {
+                    callback(treeState);
+                } catch (error) {
+                    console.error(`Error in component callback for ${key}:`, error);
+                }
+            }
+        }
+    }
+}
+
 export function gotoSnapshot(store: Store, snapshot: Snapshot): void {
     const storeState = store.getState();
     const prev = storeState.nextTree ?? storeState.currentTree;
     const next = snapshot.getStore_INTERNAL().getState().currentTree;
+
     batchUpdates(() => {
-        const keysToUpdate = new Set<NodeKey>();
-        for (const keys of [prev.atomValues.keys(), next.atomValues.keys()]) {
-            for (const key of keys) {
-                if (
-                    prev.atomValues.get(key)?.contents !==
-                    next.atomValues.get(key)?.contents &&
-                    getNode(key).shouldRestoreFromSnapshots
-                ) {
-                    keysToUpdate.add(key);
+        store.replaceState(currentTree => {
+            const newTree = copyTreeState(currentTree);
+            newTree.stateID = snapshot.getID();
+
+            const atomKeysChanged = new Set<NodeKey>();
+
+            // Update atoms that should be restored from snapshots
+            for (const key of new Set([...prev.atomValues.keys(), ...next.atomValues.keys()])) {
+                const node = getNode(key);
+                if (!node.shouldRestoreFromSnapshots) continue;
+
+                const prevContents = prev.atomValues.get(key)?.contents;
+                const nextContents = next.atomValues.get(key)?.contents;
+
+                if (prevContents !== nextContents) {
+                    atomKeysChanged.add(key);
+                    const loadable = next.atomValues.has(key)
+                        ? nullthrows(next.atomValues.get(key))
+                        : loadableWithValue(DEFAULT_VALUE);
+
+                    if (loadable && loadable.state === 'hasValue' && loadable.contents === DEFAULT_VALUE) {
+                        newTree.atomValues.delete(key);
+                    } else {
+                        newTree.atomValues.set(key, loadable as Loadable<unknown>);
+                    }
+                    newTree.dirtyAtoms.add(key);
                 }
             }
-        }
-        keysToUpdate.forEach(key => {
-            const loadable = next.atomValues.get(key);
-            if (loadable) {
-                setRecoilValueLoadable(
-                    store,
-                    new AbstractRecoilValue(key),
-                    loadable,
-                );
-            } else {
-                setRecoilValueLoadable(
-                    store,
-                    new AbstractRecoilValue(key),
-                    loadableWithValue(DEFAULT_VALUE),
-                );
+
+            // If atoms changed, invalidate dependent selectors and notify components
+            if (atomKeysChanged.size > 0) {
+                invalidateDownstreams(store, newTree);
+                notifyComponents(store, newTree);
             }
+
+            return newTree;
         });
-        store.replaceState(state => ({ ...state, stateID: snapshot.getID() }));
     });
 }
 

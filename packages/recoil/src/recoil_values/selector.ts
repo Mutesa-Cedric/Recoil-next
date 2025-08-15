@@ -367,10 +367,9 @@ export function selector<T>(
         executionID: ExecutionID | null,
     ): void {
         if (
-            executionID != null &&
-            (isLatestExecution(store, executionID) ||
-                state.version === store.getState()?.currentTree?.version ||
-                state.version === store.getState()?.nextTree?.version)
+            (executionID != null && isLatestExecution(store, executionID)) ||
+            state.version === store.getState()?.currentTree?.version ||
+            state.version === store.getState()?.nextTree?.version
         ) {
             saveDepsToStore(
                 key,
@@ -763,7 +762,8 @@ export function selector<T>(
         discoveredDependencyNodeKeys.clear();
         invalidateSelector(treeState);
         cache.clear();
-        markRecoilValueModified(store, recoilValue as RecoilValue<unknown>);
+        // Don't call markRecoilValueModified here as it causes nested state updates
+        // The caller (like refreshRecoilValue) should handle marking as dirty
     }
 
     if (set != null) {

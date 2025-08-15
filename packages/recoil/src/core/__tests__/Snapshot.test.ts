@@ -2,18 +2,17 @@
  * TypeScript port of Recoil_Snapshot-test.js
  */
 
-import { describe, test, expect, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, test } from 'vitest';
 
-import type { Snapshot } from '../Snapshot';
 import type { RecoilState, RecoilValueReadOnly } from '../RecoilValue';
+import type { Snapshot } from '../Snapshot';
 import type { Store } from '../State';
 
-import { atom } from '../../recoil_values/atom';
-import { constSelector } from '../../recoil_values/constSelector';
-import { selector } from '../../recoil_values/selector';
-import { freshSnapshot } from '../Snapshot';
 import { persistentMap } from '../../adt/PersistentMap';
+import { atom } from '../../recoil_values/atom';
+import { selector } from '../../recoil_values/selector';
 import { getNextStoreID, getNextTreeStateVersion } from '../Keys';
+import { freshSnapshot } from '../Snapshot';
 
 // Create a proper mock store for testing (same pattern as other tests)
 function makeStore(): Store {

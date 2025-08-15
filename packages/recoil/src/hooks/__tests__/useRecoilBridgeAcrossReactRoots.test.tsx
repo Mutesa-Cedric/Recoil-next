@@ -12,6 +12,7 @@ import type { MutableSnapshot } from '../../core/Snapshot';
 
 import { RecoilRoot, useRecoilStoreID } from '../../core/RecoilRoot';
 import { atom } from '../../recoil_values/atom';
+import { useRecoilState } from '../Hooks';
 import { useRecoilBridgeAcrossReactRoots } from '../useRecoilBridgeAcrossReactRoots';
 
 // Error boundary component for testing
@@ -55,21 +56,29 @@ function renderUnwrappedElements(element: React.ReactElement, container?: HTMLEl
   return newContainer;
 }
 
-// Test component that reads and writes atom values
+// Test component that reads and writes atom values  
 function componentThatReadsAndWritesAtom<T>(
   recoilState: any,
 ): [React.ComponentType<{}>, ((updater: T | ((prev: T) => T)) => void)] {
-  let updateValue: any;
+  const setterRef = { current: null as ((updater: T | ((prev: T) => T)) => void) | null };
+  
   const Component = () => {
     const [value, setValue] = useRecoilState(recoilState);
-    updateValue = setValue;
+    setterRef.current = setValue;
     return <>{JSON.stringify(value)}</>;
   };
+  
+  const updateValue = (updater: T | ((prev: T) => T)) => {
+    if (setterRef.current) {
+      setterRef.current(updater);
+    } else {
+      throw new Error('Component not yet rendered');
+    }
+  };
+  
   return [Component, updateValue];
 }
 
-// Import useRecoilState
-import { useRecoilState } from '../Hooks';
 
 function NestedReactRoot({children}: {children: React.ReactNode}) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -112,13 +121,20 @@ describe('useRecoilBridgeAcrossReactRoots', () => {
       </RecoilRoot>,
     );
 
+    // Wait for the async useEffect in NestedReactRoot to complete
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+
     expect(container.textContent).toEqual('"INITIALIZE""INITIALIZE"');
 
-    act(() => setAtom('SET'));
+    await act(async () => {
+      setAtom('SET');
+    });
     expect(container.textContent).toEqual('"SET""SET"');
   });
 
-  test('StoreID matches bridged store', () => {
+  test('StoreID matches bridged store', async () => {
     function RecoilStoreID({storeIDRef}: {storeIDRef: {current: StoreID | null}}) {
       storeIDRef.current = useRecoilStoreID();
       return null;
@@ -136,6 +152,12 @@ describe('useRecoilBridgeAcrossReactRoots', () => {
         RENDER
       </>,
     );
+    
+    // Wait for the async useEffect in NestedReactRoot to complete
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
+    
     expect(c.textContent).toEqual('RENDER');
     expect(rootStoreIDRef.current).toBe(nestedStoreIDRef.current);
     expect(rootStoreIDRef.current).not.toBe(null);

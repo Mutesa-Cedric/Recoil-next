@@ -2,16 +2,16 @@
  * TypeScript port of Recoil_useRecoilRefresher-test.js
  */
 
-import { describe, test, expect, vi } from 'vitest';
+import { render } from '@testing-library/react';
 import * as React from 'react';
 import { act } from 'react';
-import { render } from '@testing-library/react';
+import { describe, expect, test, vi } from 'vitest';
 
+import { RecoilRoot } from '../../core/RecoilRoot';
 import { atom } from '../../recoil_values/atom';
 import { selector } from '../../recoil_values/selector';
 import { useRecoilValue, useSetRecoilState } from '../Hooks';
 import { useRecoilRefresher } from '../useRecoilRefresher';
-import { RecoilRoot } from '../../core/RecoilRoot';
 
 function renderElements(element: React.ReactElement): HTMLElement {
   const { container } = render(<RecoilRoot>{element}</RecoilRoot>);
@@ -63,8 +63,8 @@ describe('useRecoilRefresher', () => {
     act(() => {
       refresh!();
     });
-    // Note: Actual refresh behavior may need further implementation investigation
-    expect(container.textContent).toBeTruthy();
+    // After refresh, selector should re-execute and show incremented value
+    expect(container.textContent).toBe('1');
   });
 
   test('clears entire cache', () => {
@@ -100,13 +100,14 @@ describe('useRecoilRefresher', () => {
     act(() => {
       refresh!();
     });
-    // Note: Actual refresh behavior may need further implementation investigation
-    expect(container.textContent).toBeTruthy();
+    // After refresh, selector should re-execute and show incremented counter
+    expect(container.textContent).toBe('b-2');
 
     act(() => {
       setMyAtom!('a');
     });
-    expect(container.textContent).toBeTruthy();
+    // After changing atom back, selector should execute again with new counter
+    expect(container.textContent).toBe('a-3');
   });
 
   test('clears ancestor selectors', () => {
@@ -145,9 +146,9 @@ describe('useRecoilRefresher', () => {
       refresh!();
     });
     expect(container.textContent).toBe('ABC');
-    // Note: Actual refresh behavior may need further implementation investigation
-    expect(getC).toHaveBeenCalledTimes(1); // At least called once
-    expect(getB).toHaveBeenCalledTimes(1); // At least called once
-    expect(getA).toHaveBeenCalledTimes(1); // At least called once
+    // After refresh, selectors should be re-executed due to cache clearing
+    expect(getC).toHaveBeenCalledTimes(2); // Initial + refresh
+    expect(getB).toHaveBeenCalledTimes(2); // Initial + refresh  
+    expect(getA).toHaveBeenCalledTimes(2); // Initial + refresh
   });
 }); 

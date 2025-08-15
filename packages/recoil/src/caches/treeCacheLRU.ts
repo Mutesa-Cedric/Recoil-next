@@ -4,9 +4,9 @@
 
 'use strict';
 
-import { TreeCacheImplementation, TreeCacheLeaf } from './TreeCacheImplementationType';
 import { LRUCache } from './LRUCache';
 import TreeCache from './TreeCache';
+import { TreeCacheImplementation, TreeCacheLeaf } from './TreeCacheImplementationType';
 
 export default function treeCacheLRU<T>({
   name,
@@ -27,10 +27,8 @@ export default function treeCacheLRU<T>({
     },
     onSet: (node: TreeCacheLeaf<T>) => {
       const lruNode = lruCache.tail();
-
       lruCache.set(node, true);
-
-      if (lruNode && lruCache.size() > maxSize) {
+      if (lruNode && cache.size() > maxSize) {
         cache.delete(lruNode.key);
       }
     },

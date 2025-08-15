@@ -79,42 +79,42 @@ export default class TreeCache<T = unknown> {
 
     set(route: NodeCacheRoute, value: T, handlers?: SetHandlers<T>): void {
         const addLeaf = () => {
-            let node: TreeCacheBranch<T> | null = this._root as TreeCacheBranch<T> | null;
+            // First, setup the branch nodes for the route:
+            let node: TreeCacheBranch<T> | null = null;
             let branchKey: unknown = undefined;
-            
+
             for (const [nodeKey, nodeValue] of route) {
+                // node now refers to the next node down in the tree
+                const parent = node as TreeCacheBranch<T> | null;
+                // Get existing node or create a new one
                 const root = this._root;
-                if (root?.type === 'leaf') {
+                const existing = parent ? parent.branches.get(branchKey) : root;
+                node = (existing as TreeCacheBranch<T>) ?? {
+                    type: 'branch',
+                    nodeKey,
+                    parent,
+                    branches: new Map(),
+                    branchKey,
+                };
+
+                // If we found an existing node, confirm it has a consistent value
+                if (node.type !== 'branch' || node.nodeKey !== nodeKey) {
                     throw this.invalidCacheError();
                 }
 
-                const parent: TreeCacheBranch<T> | null = node;
-                let current: TreeCacheNode<T> | null = parent ? parent.branches.get(branchKey) ?? null : root;
-                
-                if (!current) {
-                    current = {
-                        type: 'branch',
-                        nodeKey,
-                        parent,
-                        branches: new Map(),
-                        branchKey,
-                    };
-                    if (parent) {
-                        parent.branches.set(branchKey, current as TreeCacheBranch<T>);
-                    } else {
-                        this._root = current;
-                    }
+                // Add the branch node to the tree
+                if (parent) {
+                    parent.branches.set(branchKey, node);
                 }
+                handlers?.onNodeVisit?.(node);
 
-                if (current.type !== 'branch' || current.nodeKey !== nodeKey) {
-                    throw this.invalidCacheError();
-                }
-
-                handlers?.onNodeVisit?.(current);
-                node = current;
+                // Prepare for next iteration and install root if it is new.
                 branchKey = this._mapNodeValue(nodeValue);
+                this._root = this._root ?? node;
             }
 
+            // Second, setup the leaf node:
+            // If there is an existing leaf for this route confirm it is consistent
             const oldLeaf: TreeCacheNode<T> | null = node
                 ? node.branches.get(branchKey) ?? null
                 : this._root;
@@ -125,6 +125,7 @@ export default class TreeCache<T = unknown> {
                 throw this.invalidCacheError();
             }
 
+            // Create a new or replacement leaf.
             const leafNode: TreeCacheLeaf<T> = {
                 type: 'leaf',
                 value,
@@ -132,12 +133,15 @@ export default class TreeCache<T = unknown> {
                 branchKey,
             };
 
+            // Install the leaf and call handlers
             if (node) {
                 node.branches.set(branchKey, leafNode);
-            } else {
-                this._root = leafNode;
             }
-            this._numLeafs++;
+            this._root = this._root ?? leafNode;
+            // Only increment if this is a new leaf (not a replacement)
+            if (oldLeaf == null) {
+                this._numLeafs++;
+            }
             this._onSet(leafNode);
             handlers?.onNodeVisit?.(leafNode);
         };

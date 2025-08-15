@@ -131,12 +131,23 @@ export const waitForAny: <T extends RecoilValues>(
         const [results, exceptions] = concurrentRequests(get, deps);
 
         if (exceptions.some(exp => !isPromise(exp))) {
+            // If all are errors (no promises), waitForAny should throw the first error
+            if (exceptions.every(exp => isError(exp))) {
+                const firstError = exceptions.find(isError);
+                if (firstError) {
+                    throw firstError;
+                }
+            }
             return wrapLoadables(dependencies, results, exceptions);
         }
 
-        return new Promise(resolve => {
+        return new Promise((resolve, reject) => {
+            let pendingCount = 0;
+            let settledCount = 0;
+            
             for (const [i, exp] of exceptions.entries()) {
                 if (isPromise(exp)) {
+                    pendingCount++;
                     (exp as Promise<unknown>)
                         .then(result => {
                             results[i] = result;
@@ -145,7 +156,17 @@ export const waitForAny: <T extends RecoilValues>(
                         })
                         .catch(error => {
                             exceptions[i] = error;
-                            resolve(wrapLoadables(dependencies, results, exceptions));
+                            settledCount++;
+                            // Only resolve with error if ALL promises have settled/failed
+                            if (settledCount === pendingCount) {
+                                // All promises have settled with errors, so reject with the first error
+                                const firstError = exceptions.find(isError);
+                                if (firstError) {
+                                    reject(firstError);
+                                } else {
+                                    resolve(wrapLoadables(dependencies, results, exceptions));
+                                }
+                            }
                         });
                 }
             }

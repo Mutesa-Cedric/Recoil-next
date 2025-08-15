@@ -2,15 +2,15 @@
  * TypeScript port of Recoil_useRecoilStateReset-test.js
  */
 
-import { describe, test, expect } from 'vitest';
+import { render } from '@testing-library/react';
 import * as React from 'react';
 import { act } from 'react';
-import { render } from '@testing-library/react';
+import { describe, expect, test } from 'vitest';
 
+import { RecoilRoot } from '../../core/RecoilRoot';
 import { atom } from '../../recoil_values/atom';
 import { selector } from '../../recoil_values/selector';
 import { useRecoilState, useResetRecoilState } from '../Hooks';
-import { RecoilRoot } from '../../core/RecoilRoot';
 
 function renderElements(element: React.ReactElement): HTMLElement {
   const { container } = render(<RecoilRoot>{element}</RecoilRoot>);

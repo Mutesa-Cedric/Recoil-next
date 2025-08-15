@@ -2,20 +2,17 @@
  * TypeScript port of Recoil_atom-test.js
  */
 
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
 import { act } from 'react';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { Loadable } from '../../adt/Loadable';
-import type { RecoilValue } from '../../core/RecoilValue';
-import type { RecoilState } from '../../core/RecoilValue';
+import type { RecoilState, RecoilValue } from '../../core/RecoilValue';
 import type { Store } from '../../core/State';
 
-import { DEFAULT_VALUE, DefaultValue } from '../../core/Node';
 import RecoilEnv from '../../../../shared/src/util/Recoil_RecoilEnv';
-import { isRecoilValue } from '../../core/RecoilValue';
-import { RecoilLoadable, isLoadable, loadableWithValue } from '../../adt/Loadable';
 import { persistentMap } from '../../adt/PersistentMap';
 import { getNextStoreID, getNextTreeStateVersion } from '../../core/Keys';
+import { DEFAULT_VALUE } from '../../core/Node';
 import {
   getRecoilValueAsLoadable,
   setRecoilValue,

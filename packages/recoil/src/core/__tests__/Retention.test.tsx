@@ -2,21 +2,21 @@
  * TypeScript port of Recoil_Retention-test.js
  */
 
-import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { render } from '@testing-library/react';
 import * as React from 'react';
-import { useState, act } from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, useState } from 'react';
+import { describe, expect, test, vi } from 'vitest';
 
 import type { RecoilState } from '../../core/RecoilValue';
 import type { RetentionZone } from '../RetentionZone';
 import { retentionZone } from '../RetentionZone';
 
-import { RecoilRoot } from '../RecoilRoot';
-import { useRecoilValue, useRecoilValueLoadable, useRecoilState } from '../../hooks/Hooks';
+import { useRecoilState, useRecoilValue, useRecoilValueLoadable } from '../../hooks/Hooks';
 import { useRecoilCallback } from '../../hooks/useRecoilCallback';
 import useRetain from '../../hooks/useRetain';
 import { atom } from '../../recoil_values/atom';
 import { selector } from '../../recoil_values/selector';
+import { RecoilRoot } from '../RecoilRoot';
 
 // Error boundary component for testing
 class ErrorBoundary extends React.Component<

@@ -2,7 +2,7 @@
  * TypeScript port of Recoil_treeCacheFromPolicy-test.js
  */
 
-import { describe, test, expect } from 'vitest';
+import { describe, expect, test } from 'vitest';
 import type { NodeKey } from '../../core/Keys';
 import type { NodeCacheRoute } from '../TreeCacheImplementationType';
 import treeCacheFromPolicy from '../treeCacheFromPolicy';
@@ -17,18 +17,24 @@ describe('treeCacheFromPolicy()', () => {
     const policy = { equality: 'reference' as const, eviction: 'keep-all' as const };
     const cache = treeCacheFromPolicy<{ [key: string]: number }>(policy);
 
+    // Use objects as values to test reference equality properly
+    const val1 = { x: 1 };
+    const val2 = { x: 2 };
+    const val3 = { x: 3 };
+    const val4 = { x: 4 };
+
     const path1: NodeCacheRoute = [
-      ['a', 1],
-      ['b', 2],
+      ['a', val1],
+      ['b', val2],
     ];
     const obj1 = { a: 1 };
 
-    const path2: NodeCacheRoute = [['a', 2]];
+    const path2: NodeCacheRoute = [['a', val3]];
     const obj2 = { b: 2 };
 
     const path3: NodeCacheRoute = [
-      ['a', 3],
-      ['c', 4],
+      ['a', val4],
+      ['c', val4],  // Note: reusing val4 to test reference equality
     ];
     const obj3 = { c: 3 };
 
@@ -42,6 +48,8 @@ describe('treeCacheFromPolicy()', () => {
     expect(cache.get(valGetterFromPath(path2))).toBe(obj2);
     expect(cache.get(valGetterFromPath(path3))).toBe(obj3);
 
+    // With reference equality, cloned paths should not match because 
+    // the object references in the paths are different
     expect(cache.get(valGetterFromPath(clonePath(path1)))).toBe(undefined);
     expect(cache.get(valGetterFromPath(clonePath(path2)))).toBe(undefined);
     expect(cache.get(valGetterFromPath(clonePath(path3)))).toBe(undefined);

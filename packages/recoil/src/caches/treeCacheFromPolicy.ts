@@ -11,11 +11,10 @@ import {
 } from './CachePolicy';
 import { TreeCacheImplementation } from './TreeCacheImplementationType';
 
-import TreeCache from './TreeCache';
-import treeCacheLRU from './treeCacheLRU';
-import err from '../../../shared/src/util/Recoil_err';
 import nullthrows from '../../../shared/src/util/Recoil_nullthrows';
 import stableStringify from '../../../shared/src/util/Recoil_stableStringify';
+import TreeCache from './TreeCache';
+import treeCacheLRU from './treeCacheLRU';
 
 const defaultPolicy: {
     equality: 'reference';
@@ -48,7 +47,6 @@ function getValueMapper(equality: EqualityPolicy): (key: unknown) => unknown {
         case 'value':
             return val => stableStringify(val);
     }
-    throw err(`Unrecognized equality policy ${equality}`);
 }
 
 function getTreeCache<T>(
@@ -70,5 +68,4 @@ function getTreeCache<T>(
             return treeCacheLRU<T>({ name, maxSize: 1, mapNodeValue });
     }
 
-    throw err(`Unrecognized eviction policy ${eviction}`);
 } 

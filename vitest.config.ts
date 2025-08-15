@@ -5,6 +5,12 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./vitest.setup.ts'],
+    exclude: [
+      'node_modules/**',
+      'dist/**',
+      'Recoil-old/**',
+      '**/node_modules/**',
+    ],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
@@ -14,6 +20,7 @@ export default defineConfig({
         '**/*.d.ts',
         '**/*.config.*',
         '**/coverage/',
+        "Recoil-old"
       ],
     },
   },
@@ -21,6 +28,8 @@ export default defineConfig({
     alias: {
       'recoil-shared': new URL('./packages/shared/src', import.meta.url).pathname,
       'recoil': new URL('./packages/recoil/src', import.meta.url).pathname,
+      'react': new URL('./node_modules/react', import.meta.url).pathname,
+      'react-dom': new URL('./node_modules/react-dom', import.meta.url).pathname,
     },
   },
 }); 

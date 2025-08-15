@@ -18,7 +18,10 @@ import {
 } from '../__test_utils__/TestUtils';
 import { urlSyncEffect } from '../RecoilSync_URL';
 
-// TODO: React 19 snapshot lifecycle compatibility issue
+// TODO: React 19 snapshot lifecycle compatibility issue - snapshots are released more aggressively
+// This test is currently failing due to "Snapshot has already been released" error in React 19.
+// The error occurs during useRecoilSnapshot() hook execution when components rapidly re-render
+// during history navigation operations. This is a known compatibility issue that needs investigation.
 test.skip('Push URLs in browser history', async () => {
   const loc = { part: 'queryParams' } as const;
 

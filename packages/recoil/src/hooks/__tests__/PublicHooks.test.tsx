@@ -2,10 +2,10 @@
  * TypeScript port of Recoil_PublicHooks-test.js
  */
 
-import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { render } from '@testing-library/react';
 import * as React from 'react';
-import { useEffect, useState, Profiler, act } from 'react';
-import { render, screen } from '@testing-library/react';
+import { Profiler, act, useState } from 'react';
+import { describe, expect, test, vi } from 'vitest';
 
 import type {
   RecoilState,
@@ -14,20 +14,18 @@ import type {
 } from '../../core/RecoilValue';
 import type { PersistenceSettings } from '../../recoil_values/atom';
 
-import { batchUpdates } from '../../core/Batching';
+import invariant from '../../../../shared/src/util/Recoil_invariant';
+import stableStringify from '../../../../shared/src/util/Recoil_stableStringify';
+import { reactMode } from '../../core/ReactMode';
+import { RecoilRoot } from '../../core/RecoilRoot';
 import { atom } from '../../recoil_values/atom';
 import { selector } from '../../recoil_values/selector';
-import { selectorFamily } from '../../recoil_values/selectorFamily';
-import { reactMode } from '../../core/ReactMode';
 import {
   useRecoilState,
   useRecoilStateLoadable,
   useRecoilValue,
-  useSetRecoilState,
+  useSetRecoilState
 } from '../Hooks';
-import { RecoilRoot } from '../../core/RecoilRoot';
-import invariant from '../../../../shared/src/util/Recoil_invariant';
-import stableStringify from '../../../../shared/src/util/Recoil_stableStringify';
 
 // Error boundary component for testing
 class ErrorBoundary extends React.Component<
@@ -129,24 +127,38 @@ function additionSelector(
 function componentThatReadsAndWritesAtom<T>(
   recoilState: RecoilState<T>,
 ): [React.ComponentType<{}>, ((updater: T | ((prev: T) => T)) => void)] {
-  let updateValue: any;
+  let updateValue: ((updater: T | ((prev: T) => T)) => void) | null = null;
   const Component = vi.fn(() => {
     updateValue = useSetRecoilState(recoilState);
     const value = useRecoilValue(recoilState);
     return <>{stableStringify(value)}</>;
   });
-  return [Component as any, (...args: any[]) => updateValue(...args)];
+  
+  const setterWrapper = (updater: T | ((prev: T) => T)) => {
+    if (updateValue) {
+      updateValue(updater);
+    }
+  };
+  
+  return [Component as any, setterWrapper];
 }
 
 function componentThatWritesAtom<T>(
   recoilState: RecoilState<T>,
 ): [any, ((value: T | ((prev: T) => T)) => void)] {
-  let updateValue: any;
+  let updateValue: ((value: T | ((prev: T) => T)) => void) | null = null;
   const Component = vi.fn(() => {
     updateValue = useSetRecoilState(recoilState);
     return null;
   });
-  return [Component as any, (x: any) => updateValue(x)];
+  
+  const setterWrapper = (value: T | ((prev: T) => T)) => {
+    if (updateValue) {
+      updateValue(value);
+    }
+  };
+  
+  return [Component as any, setterWrapper];
 }
 
 function componentThatReadsTwoAtoms(
@@ -174,11 +186,11 @@ function componentThatReadsAtomWithCommitCount(
 
 function componentThatToggles(a: React.ReactNode, b: React.ReactNode | null) {
   const toggle = { current: () => invariant(false, 'bug in test code') };
-  const Toggle = () => {
+  const Toggle = vi.fn(() => {
     const [value, setValue] = useState(false);
     toggle.current = () => setValue(v => !v);
     return value ? b : a;
-  };
+  });
   return [Toggle, toggle] as const;
 }
 
@@ -254,10 +266,11 @@ describe('Render counts', () => {
       return null;
     });
 
-    const [, updateValue] = componentThatWritesAtom(anAtom);
+    const [SetterComponent, updateValue] = componentThatWritesAtom(anAtom);
     renderElements(
       <>
         <Component />
+        <SetterComponent />
       </>,
     );
 
@@ -275,8 +288,13 @@ describe('Render counts', () => {
       return null;
     });
 
-    const [, updateValue] = componentThatWritesAtom(anAtom);
-    renderElements(<Component />);
+    const [SetterComponent, updateValue] = componentThatWritesAtom(anAtom);
+    renderElements(
+      <>
+        <Component />
+        <SetterComponent />
+      </>
+    );
 
     expect(Component).toHaveBeenCalledTimes(strictMode ? 2 : 1);
     act(() => updateValue(1));
@@ -284,43 +302,81 @@ describe('Render counts', () => {
   });
 
   test('Component that reads atom only during updates is unsubscribed', () => {
-    const gks: string[] = [];
-    const strictMode = false;
-    const BASE_CALLS = baseRenderCount(gks);
-    const sm = strictMode ? 2 : 1;
-
     const anAtom = counterAtom();
     const anotherAtom = counterAtom();
-
-    const Component = vi.fn(() => {
-      const [anotherValue, setAnother] = useRecoilState(anotherAtom);
-      if (anotherValue === 0) {
-        useRecoilValue(anAtom);
-      }
-      return (
-        <button
-          onClick={() => {
-            setAnother(1);
-          }}
-        />
-      );
+    
+    // Track render counts for the actual components that read atoms
+    let bothComponentRenderCount = 0;
+    let anotherComponentRenderCount = 0;
+    
+    const BothAtomsComponent = vi.fn(() => {
+      bothComponentRenderCount++;
+      const [val1] = useRecoilState(anAtom);
+      const [val2] = useRecoilState(anotherAtom);
+      return <div>both:{val1}-{val2}</div>;
+    });
+    
+    const AnotherAtomComponent = vi.fn(() => {
+      anotherComponentRenderCount++;
+      const [val] = useRecoilState(anotherAtom);
+      return <div>another:{val}</div>;
     });
 
-    const [, updateAnAtom] = componentThatWritesAtom(anAtom);
-    renderElements(<Component />);
+    // Create a toggle component that switches between reading different atoms
+    const [ToggleComponent, toggle] = componentThatToggles(
+      <BothAtomsComponent />,
+      <AnotherAtomComponent />
+    );
 
-    expect(Component).toHaveBeenCalledTimes((BASE_CALLS + 1) * sm);
+    // External setters to update atoms
+    let setAnAtomValue: ((value: number) => void) | null = null;
+    let setAnotherAtomValue: ((value: number) => void) | null = null;
+    
+    const SetterComponent = () => {
+      const [, setAnAtom] = useRecoilState(anAtom);
+      const [, setAnotherAtom] = useRecoilState(anotherAtom);
+      setAnAtomValue = setAnAtom;
+      setAnotherAtomValue = setAnotherAtom;
+      return null;
+    };
+    
+    const container = renderElements(
+      <>
+        <ToggleComponent />
+        <SetterComponent />
+      </>
+    );
 
-    // Clicking button causes Component not to read atom
+    // Initially showing first component that reads both atoms
+    expect(container.textContent).toBe('both:0-0');
+    expect(bothComponentRenderCount).toBe(1);
+    expect(anotherComponentRenderCount).toBe(0);
+
+    // Toggle to second component that only reads anotherAtom 
+    act(() => toggle.current());
+    expect(container.textContent).toBe('another:0');
+    expect(bothComponentRenderCount).toBe(1); // Should not increase
+    expect(anotherComponentRenderCount).toBe(1); // Should be 1 now
+
+    // Reset counters to track subscription behavior
+    bothComponentRenderCount = 0;
+    anotherComponentRenderCount = 0;
+    
+    // Updating anAtom should not cause re-render since component no longer reads it
     act(() => {
-      // TODO: Simulate click when we have proper React testing setup
-      // button.click();
+      if (setAnAtomValue) setAnAtomValue(1);
     });
-    expect(Component).toHaveBeenCalledTimes((BASE_CALLS + 2) * sm);
+    expect(bothComponentRenderCount).toBe(0); // Should not re-render
+    expect(anotherComponentRenderCount).toBe(0); // Should not re-render  
+    expect(container.textContent).toBe('another:0'); // Should still show anotherAtom value
 
-    // Updating atom should not re-render Component
-    act(() => updateAnAtom(1));
-    expect(Component).toHaveBeenCalledTimes((BASE_CALLS + 2) * sm);
+    // Updating anotherAtom should cause re-render since component still reads it
+    act(() => {
+      if (setAnotherAtomValue) setAnotherAtomValue(1);
+    });
+    expect(bothComponentRenderCount).toBe(0); // Should not re-render
+    expect(anotherComponentRenderCount).toBe(1); // Should re-render once
+    expect(container.textContent).toBe('another:1'); // Should show updated value
   });
 });
 

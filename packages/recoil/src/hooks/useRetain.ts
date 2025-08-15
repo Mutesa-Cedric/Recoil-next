@@ -4,15 +4,14 @@
 
 import { useEffect, useRef } from 'react';
 import type { RecoilValue } from '../core/RecoilValue';
-import type { Store } from '../core/State';
 
-import { useStoreRef } from '../core/RecoilRoot';
-import { updateRetainCount, SUSPENSE_TIMEOUT_MS } from '../core/Retention';
-import { RetentionZone } from '../core/RetentionZone';
 import { isSSR } from '../../../shared/src/util/Recoil_Environment';
 import gkx from '../../../shared/src/util/Recoil_gkx';
 import shallowArrayEqual from '../../../shared/src/util/Recoil_shallowArrayEqual';
 import usePrevious from '../../../shared/src/util/Recoil_usePrevious';
+import { useStoreRef } from '../core/RecoilRoot';
+import { SUSPENSE_TIMEOUT_MS, updateRetainCount } from '../core/Retention';
+import { RetentionZone } from '../core/RetentionZone';
 
 export type Retainable = RecoilValue<unknown> | RetentionZone;
 

@@ -1,22 +1,17 @@
 /**
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- * @oncall recoil
+ * TypeScript port of Recoil_atomFamily.js
  */
 
 'use strict';
+import stableStringify from '../../../shared/src/util/Recoil_stableStringify';
+import { Loadable } from '../adt/Loadable';
+import { WrappedValue } from '../adt/Wrapper';
 import cacheFromPolicy from '../caches/cacheFromPolicy';
 import { CachePolicyWithoutEviction } from '../caches/CachePolicy';
 import { setConfigDeletionHandler } from '../core/Node';
 import { RecoilState, RecoilValue } from '../core/RecoilValue';
 import { RetainedBy } from '../core/RetainedBy';
-import { Loadable } from '../adt/Loadable';
-import { WrappedValue } from '../adt/Wrapper';
 import atom, { AtomEffect, AtomOptionsWithoutDefault } from './atom';
-import stableStringify from '../../../shared/src/util/Recoil_stableStringify';
 import { Parameter } from './selectorFamily';
 
 export type AtomFamilyOptionsWithoutDefault<T, P extends Parameter> = Readonly<

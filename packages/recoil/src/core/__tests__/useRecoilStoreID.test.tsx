@@ -2,10 +2,9 @@
  * TypeScript port of Recoil_useRecoilStoreID-test.js
  */
 
-import { describe, test, expect, vi, beforeEach } from 'vitest';
+import { render } from '@testing-library/react';
 import * as React from 'react';
-import { act } from 'react';
-import { render, screen } from '@testing-library/react';
+import { describe, expect, test } from 'vitest';
 
 import type { StoreID } from '../Keys';
 

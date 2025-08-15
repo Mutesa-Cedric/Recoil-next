@@ -1,4 +1,5 @@
-import { beforeAll, vi } from 'vitest';
+import { beforeAll, afterEach, vi } from 'vitest';
+import { cleanup } from '@testing-library/react';
 
 // Set up DOM environment
 beforeAll(() => {
@@ -35,6 +36,9 @@ beforeAll(() => {
   global.TextEncoder = TextEncoder;
   global.TextDecoder = TextDecoder;
 
+  // React test environment
+  global.IS_REACT_ACT_ENVIRONMENT = true;
+
   // Jest globals for compatibility with libraries that expect them
   global.jest = {
     fn: vi.fn,
@@ -43,4 +47,17 @@ beforeAll(() => {
     resetAllMocks: vi.resetAllMocks,
     restoreAllMocks: vi.restoreAllMocks,
   };
+});
+
+// Clean up DOM after each test
+afterEach(() => {
+  // Clean up React Testing Library
+  cleanup();
+  document.body.innerHTML = '';
+  // Clear all timers to prevent test interference
+  vi.clearAllTimers();
+  // Reset to real timers to avoid timer pollution
+  vi.useRealTimers();
+  // Clear all mocks to prevent spy pollution
+  vi.clearAllMocks();
 }); 

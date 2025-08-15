@@ -10,6 +10,7 @@ import type { AtomWrites, NodeKey, Store, TreeState } from './State';
 
 import {
     copyTreeState,
+    getDownstreamNodes,
     getNodeLoadable,
     invalidateDownstreams,
     setNodeValue,
@@ -90,9 +91,29 @@ export function markRecoilValueModified<T>(store: Store, rv: AbstractRecoilValue
     store.replaceState(state => {
         const newState = copyTreeState(state);
         newState.dirtyAtoms.add(rv.key);
+        notifyComponents(store, newState);
         return newState;
     });
 }
+
+function notifyComponents(store: Store, treeState: TreeState): void {
+    const storeState = store.getState();
+    const dependentNodes = getDownstreamNodes(store, treeState, treeState.dirtyAtoms);
+    
+    for (const key of dependentNodes) {
+        const comps = storeState.nodeToComponentSubscriptions.get(key);
+        if (comps) {
+            for (const [_subID, [_debugName, callback]] of comps) {
+                try {
+                    callback(treeState);
+                } catch (error) {
+                    console.error(`Error in component callback for ${key}:`, error);
+                }
+            }
+        }
+    }
+}
+
 
 function valueFromValueOrUpdater<T>(
     store: Store,
@@ -129,6 +150,7 @@ export function setRecoilValue<T>(
         const writes = setNodeValue(store, newState, recoilValue.key, newValue);
         writes.forEach((loadable, key) => writeLoadableToTreeState(newState, key, loadable));
         invalidateDownstreams(store, newState);
+        newState.dirtyAtoms.add(recoilValue.key);
         return newState;
     });
 }
@@ -176,9 +198,17 @@ export function refreshRecoilValue<T>(
     store: Store,
     { key }: AbstractRecoilValue<T>,
 ): void {
-    const { currentTree } = store.getState();
-    const node = getNode(key);
-    node.clearCache?.(store, currentTree);
+    store.replaceState(state => {
+        const newState = copyTreeState(state);
+        const node = getNode(key);
+        // Clear the cache without triggering nested state updates
+        node.clearCache?.(store, newState);
+        // Mark as dirty to trigger re-renders
+        newState.dirtyAtoms.add(key);
+        // Notify components directly without nested state update
+        notifyComponents(store, newState);
+        return newState;
+    });
 }
 
 export { AbstractRecoilValue, RecoilState, RecoilValueReadOnly, isRecoilValue };

@@ -7,15 +7,15 @@ import { describe, expect, test } from 'vitest';
 
 import type { Loadable, RecoilState, RecoilValue } from '../../index';
 
-import { atom, selector, selectorFamily } from '../../index';
+import { atom, selectorFamily } from '../../index';
 import { waitForAll } from '../../recoil_values/WaitFor';
+import { graph as makeGraph } from '../Graph';
+import { getNextStoreID } from '../Keys';
 import {
   getRecoilValueAsLoadable,
   setRecoilValue,
 } from '../RecoilValueInterface';
-import { graph as makeGraph } from '../Graph';
-import { getNextStoreID, getNextTreeStateVersion } from '../Keys';
-import { makeEmptyStoreState, type Store, type StoreState } from '../State';
+import { makeEmptyStoreState, type Store } from '../State';
 
 // Create a proper mock store for testing
 function makeStore(): Store {

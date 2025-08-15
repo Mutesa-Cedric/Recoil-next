@@ -2,11 +2,11 @@
  * TypeScript port of Recoil_React-test.js
  */
 
-import { describe, test, expect } from 'vitest';
-import * as React from 'react';
-import { useState, act } from 'react';
 import { render } from '@testing-library/react';
+import * as React from 'react';
+import { act, useState } from 'react';
 import { flushSync } from 'react-dom';
+import { describe, expect, test } from 'vitest';
 
 import { RecoilRoot } from '../../core/RecoilRoot';
 import { atom } from '../../recoil_values/atom';

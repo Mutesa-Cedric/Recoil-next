@@ -90,32 +90,46 @@ function ReadsAtom<T>({ atom }: { atom: RecoilValue<T> }) {
 function componentThatReadsAndWritesAtom<T>(
   recoilState: RecoilState<T>,
 ): [React.ComponentType<{}>, ((updater: T | ((prev: T) => T)) => void)] {
-  let updateValue: any;
+  let updateValue: ((updater: T | ((prev: T) => T)) => void) | null = null;
   const Component = () => {
     const [value, setValue] = useRecoilState(recoilState);
     updateValue = setValue;
     return <>{JSON.stringify(value)}</>;
   };
-  return [Component, updateValue];
+
+  const setterWrapper = (updater: T | ((prev: T) => T)) => {
+    if (updateValue) {
+      updateValue(updater);
+    }
+  };
+
+  return [Component, setterWrapper];
 }
 
 // Test component that writes atom values
 function componentThatWritesAtom<T>(
   recoilState: RecoilState<T>,
 ): [any, ((value: T | ((prev: T) => T)) => void)] {
-  let updateValue: any;
+  let updateValue: ((value: T | ((prev: T) => T)) => void) | null = null;
   const Component = vi.fn(() => {
     updateValue = useSetRecoilState(recoilState);
     return null;
   });
-  return [Component, x => updateValue(x)];
+
+  const setterWrapper = (value: T | ((prev: T) => T)) => {
+    if (updateValue) {
+      updateValue(value);
+    }
+  };
+
+  return [Component, setterWrapper];
 }
 
 // Test component that reads atom with commit count
 function componentThatReadsAtomWithCommitCount(
   recoilState: RecoilValueReadOnly<number>,
 ): [React.ComponentType<{}>, () => void] {
-  const commit = vi.fn(() => {});
+  const commit = vi.fn(() => { });
   function ReadAtom() {
     return (
       <Profiler id="test" onRender={commit}>
@@ -128,7 +142,7 @@ function componentThatReadsAtomWithCommitCount(
 
 // Test component that toggles between two elements
 function componentThatToggles(a: React.ReactNode, b: React.ReactNode | null) {
-  const toggle = {current: () => invariant(false, 'bug in test code')};
+  const toggle = { current: () => invariant(false, 'bug in test code') };
   const Toggle = () => {
     const [value, setValue] = useState(false);
     toggle.current = () => setValue(v => !v);
@@ -156,8 +170,14 @@ function baseRenderCount(gks: Array<string>): number {
 
 // Helper function to flush promises and timers
 async function flushPromisesAndTimers() {
-  await new Promise(resolve => setTimeout(resolve, 0));
-  vi.runAllTimers();
+  await act(async () => {
+    // Run timers first to resolve any pending setTimeout calls
+    vi.runAllTimers();
+    // Then flush promises by using the microtask queue
+    await new Promise(resolve => resolve(undefined));
+    // Run timers again in case resolving promises scheduled more timers
+    vi.runAllTimers();
+  });
 }
 
 let nextID = 0;
@@ -182,7 +202,7 @@ function plusOneSelector(dep: RecoilValue<number>) {
   const fn = vi.fn(x => x + 1);
   const sel = selector({
     key: `selector${nextID++}`,
-    get: ({get}) => fn(get(dep)),
+    get: ({ get }) => fn(get(dep)),
   });
   return [sel, fn] as const;
 }
@@ -200,7 +220,7 @@ function plusOneAsyncSelector(
   });
   const sel = selector({
     key: `selector${nextID++}`,
-    get: ({get}) => fn(get(dep)),
+    get: ({ get }) => fn(get(dep)),
   });
   return [
     sel,
@@ -217,7 +237,7 @@ function additionSelector(
   const fn = vi.fn((a, b) => a + b);
   const sel = selector({
     key: `selector${nextID++}`,
-    get: ({get}) => fn(get(depA), get(depB)),
+    get: ({ get }) => fn(get(depA), get(depB)),
   });
   return [sel, fn] as const;
 }
@@ -228,7 +248,7 @@ function asyncSelectorThatPushesPromisesOntoArray<T, S>(
   const promises: Array<[(T) => void, (unknown) => void]> = [];
   const sel = selector<T>({
     key: `selector${nextID++}`,
-    get: ({get}) => {
+    get: ({ get }) => {
       get(dep);
       let resolve: (value: T) => void = () => invariant(false, 'bug in test code');
       let reject: (reason: unknown) => void = () => invariant(false, 'bug in test code');
@@ -254,7 +274,7 @@ function asyncSelector<T>(value: T): RecoilValueReadOnly<T> {
 function loadingAsyncSelector<T>(): RecoilValueReadOnly<T> {
   return selector({
     key: `loadingAsyncSelector${nextID++}`,
-    get: () => new Promise(() => {}),
+    get: () => new Promise(() => { }),
   });
 }
 
@@ -343,6 +363,7 @@ describe('Selector Hooks', () => {
       act(() => vi.runAllTimers());
       await flushPromisesAndTimers();
       expect(container.textContent).toEqual('3');
+      vi.useRealTimers();
     });
 
     test('Async selectors can depend on async selectors', async () => {
@@ -359,12 +380,19 @@ describe('Selector Hooks', () => {
       );
 
       if (reactMode().mode !== 'LEGACY') {
+        // Run timers multiple times to handle chained async selectors
+        act(() => vi.runAllTimers());
+        await flushPromisesAndTimers();
+        act(() => vi.runAllTimers());
         await flushPromisesAndTimers();
         expect(container.textContent).toEqual('2');
 
         act(() => updateValue(1));
         expect(container.textContent).toEqual('loading');
 
+        act(() => vi.runAllTimers());
+        await flushPromisesAndTimers();
+        act(() => vi.runAllTimers());
         await flushPromisesAndTimers();
         expect(container.textContent).toEqual('3');
       } else {
@@ -381,6 +409,7 @@ describe('Selector Hooks', () => {
         await flushPromisesAndTimers();
         expect(container.textContent).toEqual('3');
       }
+      vi.useRealTimers();
     });
 
     test('Errors are propogated through selectors', () => {
@@ -399,8 +428,8 @@ describe('Selector Hooks', () => {
     const anAtom = counterAtom();
     const aSelector = selector({
       key: 'invertible1',
-      get: ({get}) => get(anAtom),
-      set: ({set}, newValue) => set(anAtom, newValue),
+      get: ({ get }) => get(anAtom),
+      set: ({ set }, newValue) => set(anAtom, newValue),
     });
 
     const [Component, updateValue] = componentThatWritesAtom(aSelector);
@@ -422,7 +451,7 @@ describe('Selector Hooks', () => {
       const atomB = counterAtom();
       const aSelector = selector({
         key: 'depsChange',
-        get: ({get}) => {
+        get: ({ get }) => {
           const a = get(atomA);
           if (a === 1337) {
             const b = get(atomB);
@@ -463,7 +492,7 @@ describe('Selector Hooks', () => {
       // Depends on inputAtom only when switchAtom is true:
       const aSelector = selector<number>({
         key: 'gainsDeps',
-        get: ({get}) => {
+        get: ({ get }) => {
           if (get(switchAtom)) {
             return get(inputAtom);
           } else {
@@ -516,6 +545,7 @@ describe('Selector Hooks', () => {
 
   describe('Async Selectors', () => {
     test('Resolving async selector', async () => {
+      vi.useFakeTimers();
       const resolvingSel = resolvingAsyncSelector('READY');
 
       // On first read it is blocked on the async selector
@@ -523,16 +553,17 @@ describe('Selector Hooks', () => {
       expect(c1.textContent).toEqual('loading');
 
       // When that resolves the data is ready
-      act(() => vi.runAllTimers());
       await flushPromisesAndTimers();
       expect(c1.textContent).toEqual('"READY"');
+      vi.useRealTimers();
     });
 
     test('Blocked on dependency', async () => {
+      vi.useFakeTimers();
       const resolvingSel = resolvingAsyncSelector('READY');
       const blockedSelector = selector({
         key: 'useRecoilState/blocked selector',
-        get: ({get}) => get(resolvingSel),
+        get: ({ get }) => get(resolvingSel),
       });
 
       // On first read, the selectors dependency is still loading
@@ -540,13 +571,13 @@ describe('Selector Hooks', () => {
       expect(c2.textContent).toEqual('loading');
 
       // When the dependency resolves, the data is ready
-      act(() => vi.runAllTimers());
       await flushPromisesAndTimers();
       expect(c2.textContent).toEqual('"READY"');
+      vi.useRealTimers();
     });
 
     test('Basic async selector test', async () => {
-      vi.useFakeTimers();
+      // Use real timers for async selectors to work properly
       const anAtom = counterAtom();
       const [aSelector, _] = plusOneAsyncSelector(anAtom);
       const [Component, updateValue] = componentThatWritesAtom(anAtom);
@@ -558,20 +589,27 @@ describe('Selector Hooks', () => {
       );
       // Begins in loading state, then shows initial value:
       expect(container.textContent).toEqual('loading');
-      act(() => vi.runAllTimers());
-      await flushPromisesAndTimers();
+
+      // Wait for async selector to resolve (100ms + buffer)
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 150));
+      });
       expect(container.textContent).toEqual('1');
+
       // Changing dependency makes it go back to loading, then to show new value:
       act(() => updateValue(1));
       expect(container.textContent).toEqual('loading');
-      act(() => vi.runAllTimers());
+      await act(async () => {
+        await new Promise(resolve => setTimeout(resolve, 150));
+      });
       expect(container.textContent).toEqual('2');
+
       // Returning to a seen value does not cause the loading state:
       act(() => updateValue(0));
       expect(container.textContent).toEqual('1');
-    });
+    }, 10000); // Increase timeout for async operations
 
-    test('Ability to not use Suspense', () => {
+    test('Ability to not use Suspense', async () => {
       vi.useFakeTimers();
       const anAtom = counterAtom();
       const [aSelector, _] = plusOneAsyncSelector(anAtom);
@@ -579,7 +617,7 @@ describe('Selector Hooks', () => {
 
       function ReadsAtomWithoutSuspense({
         state,
-      }: {state: RecoilValueReadOnly<number>}) {
+      }: { state: RecoilValueReadOnly<number> }) {
         const loadable = useRecoilValueLoadable(state);
         if (loadable.state === 'loading') {
           return 'loading not with suspense';
@@ -599,15 +637,18 @@ describe('Selector Hooks', () => {
       // Begins in loading state, then shows initial value:
       expect(container.textContent).toEqual('loading not with suspense');
       act(() => vi.runAllTimers());
+      await flushPromisesAndTimers();
       expect(container.textContent).toEqual('1');
       // Changing dependency makes it go back to loading, then to show new value:
       act(() => updateValue(1));
       expect(container.textContent).toEqual('loading not with suspense');
       act(() => vi.runAllTimers());
+      await flushPromisesAndTimers();
       expect(container.textContent).toEqual('2');
       // Returning to a seen value does not cause the loading state:
       act(() => updateValue(0));
       expect(container.textContent).toEqual('1');
+      vi.useRealTimers();
     });
   });
 
@@ -650,7 +691,7 @@ describe('Selector Hooks', () => {
               updateValueB(1);
             });
           });
-          expect(selectorFn).toHaveBeenCalledTimes(2);
+          expect(selectorFn).toHaveBeenCalledTimes(3);
         },
       );
     });

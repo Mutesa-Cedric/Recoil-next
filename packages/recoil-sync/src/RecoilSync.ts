@@ -2,7 +2,7 @@
  * TypeScript port of RecoilSync.js
  */
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { AtomEffect, Loadable, RecoilState, StoreID } from 'recoil-next';
 import {
   DefaultValue,
@@ -316,7 +316,25 @@ export function useRecoilSync({
   const recoilStoreID = useRecoilStoreID();
 
   // Subscribe to Recoil state changes  
-  const snapshot = useRecoilSnapshot();
+  const [snapshotError, setSnapshotError] = useState<boolean>(false);
+  
+  let snapshot: Snapshot | null = null;
+  try {
+    snapshot = useRecoilSnapshot();
+  } catch (error) {
+    // In React 19, snapshots can be released more aggressively during component lifecycle
+    if (error && typeof error === 'object' && 'message' in error && 
+        typeof error.message === 'string' && 
+        error.message.includes('already been released')) {
+      console.warn('Snapshot already released in useRecoilSync, disabling sync');
+      if (!snapshotError) {
+        setSnapshotError(true);
+      }
+    } else {
+      throw error;
+    }
+  }
+  
   const previousSnapshotRef = useRef(snapshot);
   const isMountedRef = useRef(true);
   
@@ -327,7 +345,7 @@ export function useRecoilSync({
   }, []);
   
   useEffect(() => {
-    if (!isMountedRef.current) return;
+    if (!isMountedRef.current || snapshot === null || snapshotError) return;
     
     // Check if snapshot is still valid before using it
     try {
@@ -402,7 +420,7 @@ export function useRecoilSync({
       // General snapshot error handling
       console.warn('Error in snapshot effect, skipping sync:', error);
     }
-  }, [read, recoilStoreID, snapshot, storeKey, write]);
+  }, [read, recoilStoreID, snapshot, storeKey, write, snapshotError]);
 
   const updateItems = useRecoilTransaction_UNSTABLE(
     ({ set, reset }) =>

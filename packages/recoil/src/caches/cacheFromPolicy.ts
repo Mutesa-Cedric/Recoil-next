@@ -4,6 +4,9 @@
 
 'use strict';
 
+import err from '../../../shared/src/util/Recoil_err';
+import nullthrows from '../../../shared/src/util/Recoil_nullthrows';
+import stableStringify from '../../../shared/src/util/Recoil_stableStringify';
 import { CacheImplementation } from './CacheImplementationType';
 import {
     CachePolicy,
@@ -12,9 +15,6 @@ import {
 } from './CachePolicy';
 import { LRUCache } from './LRUCache';
 import { MapCache } from './MapCache';
-import err from '../../../shared/src/util/Recoil_err';
-import nullthrows from '../../../shared/src/util/Recoil_nullthrows';
-import stableStringify from '../../../shared/src/util/Recoil_stableStringify';
 
 const defaultPolicy: {
     equality: 'reference';

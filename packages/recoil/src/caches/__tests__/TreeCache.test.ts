@@ -2,12 +2,11 @@
  * TypeScript port of Recoil_TreeCache-test.js
  */
 
-import { describe, test, expect } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
-import TreeCache from '../TreeCache';
 import { loadableWithValue } from '../../adt/Loadable';
 import type { NodeKey } from '../../core/Keys';
-import nullthrows from '../../../../shared/src/util/Recoil_nullthrows';
+import TreeCache from '../TreeCache';
 
 describe('TreeCache', () => {
   test('setting and getting values', () => {
@@ -108,8 +107,9 @@ describe('TreeCache', () => {
   test('clear cache', () => {
     const cache = new TreeCache();
 
-    const route1 = [['a', 1]] as [NodeKey, unknown][];
-    const route2 = [['b', 2]] as [NodeKey, unknown][];
+    // Use the same nodeKey structure but different values for consistent tree structure
+    const route1 = [['same', 1]] as [NodeKey, unknown][];
+    const route2 = [['same', 2]] as [NodeKey, unknown][];
 
     cache.set(route1, loadableWithValue('value1'));
     cache.set(route2, loadableWithValue('value2'));

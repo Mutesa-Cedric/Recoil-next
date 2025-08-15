@@ -2,16 +2,15 @@
  * TypeScript port of Recoil_useRecoilValueLoadable-test.js
  */
 
-import { describe, test, expect } from 'vitest';
-import * as React from 'react';
-import { act } from 'react';
 import { render } from '@testing-library/react';
+import * as React from 'react';
+import { describe, expect, test } from 'vitest';
 
+import { RecoilRoot } from '../../core/RecoilRoot';
 import { constSelector } from '../../recoil_values/constSelector';
 import { errorSelector } from '../../recoil_values/errorSelector';
 import { selector } from '../../recoil_values/selector';
 import { useRecoilValueLoadable } from '../Hooks';
-import { RecoilRoot } from '../../core/RecoilRoot';
 
 // Helper function to create async selectors for testing
 let id = 0;

@@ -58,8 +58,9 @@ function ReadsAtom<T>({ atom }: { atom: RecoilValue<T> }) {
 function componentThatReadsAndWritesAtom<T>(
   recoilState: RecoilState<T>,
 ): [React.ComponentType<{}>, ((updater: T | ((prev: T) => T)) => void), () => void] {
-  let updateValue: any;
-  let resetValue: any;
+  let updateValue: ((updater: T | ((prev: T) => T)) => void) | null = null;
+  let resetValue: (() => void) | null = null;
+  
   const Component = () => {
     const [value, setValue] = useRecoilState(recoilState);
     const resetRecoilState = useResetRecoilState(recoilState);
@@ -67,21 +68,34 @@ function componentThatReadsAndWritesAtom<T>(
     resetValue = resetRecoilState;
     return <>{JSON.stringify(value)}</>;
   };
-  return [Component, updateValue, resetValue];
+  
+  const setterWrapper = (updater: T | ((prev: T) => T)) => {
+    if (updateValue) {
+      updateValue(updater);
+    }
+  };
+  
+  const resetWrapper = () => {
+    if (resetValue) {
+      resetValue();
+    }
+  };
+  
+  return [Component, setterWrapper, resetWrapper];
 }
 
 describe('useGetRecoilValueInfo', () => {
   test('useGetRecoilValueInfo', () => {
     const myAtom = atom<string>({
-      key: 'useGetRecoilValueInfo atom',
+      key: `useGetRecoilValueInfo atom ${Math.random()}`,
       default: 'DEFAULT',
     });
     const selectorA = selector({
-      key: 'useGetRecoilValueInfo A',
+      key: `useGetRecoilValueInfo A ${Math.random()}`,
       get: ({get}) => get(myAtom),
     });
     const selectorB = selector({
-      key: 'useGetRecoilValueInfo B',
+      key: `useGetRecoilValueInfo B ${Math.random()}`,
       get: ({get}) => get(selectorA) + get(myAtom),
     });
 
@@ -111,7 +125,7 @@ describe('useGetRecoilValueInfo', () => {
     expect(Array.from(getNodeInfo(myAtom).deps)).toEqual([]);
     expect(Array.from(getNodeInfo(myAtom).subscribers.nodes)).toEqual([]);
     expect(getNodeInfo(selectorA)).toMatchObject({
-      loadable: undefined,
+      loadable: null,
       isActive: false,
       isSet: false,
       isModified: false,
@@ -120,7 +134,7 @@ describe('useGetRecoilValueInfo', () => {
     expect(Array.from(getNodeInfo(selectorA).deps)).toEqual([]);
     expect(Array.from(getNodeInfo(selectorA).subscribers.nodes)).toEqual([]);
     expect(getNodeInfo(selectorB)).toMatchObject({
-      loadable: undefined,
+      loadable: null,
       isActive: false,
       isSet: false,
       isModified: false,

@@ -2,23 +2,20 @@
  * TypeScript port of Recoil_useRecoilSnapshot-test.js
  */
 
-import { describe, test, expect, beforeEach } from 'vitest';
-import * as React from 'react';
 import { render } from '@testing-library/react';
+import * as React from 'react';
+import { beforeEach, describe, expect, test } from 'vitest';
 
 import type { Store } from '../../core/State';
 
-import { atom } from '../../recoil_values/atom';
-import { selector } from '../../recoil_values/selector';
-import { constSelector } from '../../recoil_values/constSelector';
-import { freshSnapshot } from '../../core/Snapshot';
-import { useRecoilSnapshot, useGotoRecoilSnapshot } from '../SnapshotHooks';
-import { RecoilRoot } from '../../core/RecoilRoot';
-import { useRecoilValue, useSetRecoilState } from '../Hooks';
 import { persistentMap } from '../../adt/PersistentMap';
 import { getNextStoreID, getNextTreeStateVersion } from '../../core/Keys';
+import { RecoilRoot } from '../../core/RecoilRoot';
+import { freshSnapshot } from '../../core/Snapshot';
+import { atom } from '../../recoil_values/atom';
+import { useRecoilValue, useSetRecoilState } from '../Hooks';
+import { useGotoRecoilSnapshot, useRecoilSnapshot } from '../SnapshotHooks';
 
-// Create a proper mock store for testing (same pattern as other tests)
 function makeStore(): Store {
   const storeState = {
     currentTree: {

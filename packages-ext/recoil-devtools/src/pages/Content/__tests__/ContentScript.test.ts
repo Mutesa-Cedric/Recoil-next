@@ -3,7 +3,7 @@
  * Recoil DevTools browser extension.
  */
 
-import {vi} from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 // Mock spies
 const handlers: any[] = [];
@@ -21,12 +21,17 @@ const bg = {
   }),
 };
 
-// Override chrome.runtime.connect to return our mock bg
-global.chrome.runtime.connect = (): chrome.runtime.Port => bg as any;
-
-global.window.addEventListener = (evt: any, handler: any) => {
-  handlers.push(handler);
+// a minimal chrome namespace mock for type safety
+(globalThis as any).chrome = {
+  runtime: {
+    connect: () => bg,
+  },
 };
+
+// Type-safe window.addEventListener mock
+globalThis.window.addEventListener = ((evt: string, handler: EventListenerOrEventListenerObject) => {
+  handlers.push(handler);
+}) as typeof window.addEventListener;
 
 // Mock constants
 vi.mock('../../../constants/Constants', () => ({
@@ -48,7 +53,7 @@ beforeAll(async () => {
   const constants = await import('../../../constants/Constants');
   ExtensionSource = constants.ExtensionSource;
   RecoilDevToolsActions = constants.RecoilDevToolsActions;
-  
+
   // Side-effect: initializes handlers variable
   await import('../ContentScript');
 });
@@ -99,7 +104,7 @@ describe('initializing Content Script listeners', () => {
       data: {
         action: RecoilDevToolsActions.UPDATE,
         source: ExtensionSource,
-        message: {modifiedValues: {a: {t: '0', v: 2}}},
+        message: { modifiedValues: { a: { t: '0', v: 2 } } },
       },
     });
     expect(bg.postMessage).toHaveBeenLastCalledWith({
@@ -107,7 +112,7 @@ describe('initializing Content Script listeners', () => {
       source: ExtensionSource,
       message: {
         modifiedValues: {
-          a: {t: '0', v: 2},
+          a: { t: '0', v: 2 },
         },
       },
     });
@@ -121,7 +126,7 @@ describe('initializing Content Script listeners', () => {
       data: {
         action: RecoilDevToolsActions.UPDATE,
         source: ExtensionSource,
-        message: {mustThrow: true, modifiedValues: {a: {t: '0', v: 2}}},
+        message: { mustThrow: true, modifiedValues: { a: { t: '0', v: 2 } } },
       },
     });
     expect(bg.postMessage).toHaveBeenCalledTimes(4);

@@ -5,7 +5,7 @@
 'use strict';
 const __DEV__ = process.env.NODE_ENV !== 'production';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { setByAddingToSet } from '../../../shared/src/util/Recoil_CopyOnWrite';
 import differenceSets from '../../../shared/src/util/Recoil_differenceSets';
 import { isSSR } from '../../../shared/src/util/Recoil_Environment';
@@ -17,7 +17,7 @@ import recoverableViolation from '../../../shared/src/util/Recoil_recoverableVio
 import useComponentName from '../../../shared/src/util/Recoil_useComponentName';
 import { Loadable } from '../adt/Loadable';
 import { batchUpdates } from '../core/Batching';
-import { DefaultValue, DEFAULT_VALUE } from '../core/Node';
+import { DEFAULT_VALUE, DefaultValue } from '../core/Node';
 import {
     currentRendererSupportsUseSyncExternalStore,
     reactMode,
@@ -26,16 +26,15 @@ import { useStoreRef } from '../core/RecoilRoot';
 import { isRecoilValue, RecoilState, RecoilValue } from '../core/RecoilValue';
 import {
     AbstractRecoilValue,
+    ComponentSubscription,
     getRecoilValueAsLoadable,
     setRecoilValue,
     setUnvalidatedRecoilValue,
     subscribeToRecoilValue,
 } from '../core/RecoilValueInterface';
-import { ComponentSubscription } from '../core/RecoilValueInterface';
 import { updateRetainCount } from '../core/Retention';
 import { NodeKey, StoreRef, StoreState, TreeState } from '../core/State';
 import useRetain from './useRetain';
-import { useSyncExternalStore } from 'react';
 
 function handleLoadable<T>(
     loadable: Loadable<T>,
@@ -318,19 +317,19 @@ function useRecoilValueLoadable_SYNC_EXTERNAL_STORE<T>(
     const subscribe = useCallback(
         (notify: () => void): (() => void) => {
             const store = storeRef.current;
-            
+
             // Add retention for the recoil value
             if (gkx('recoil_memory_managament_2020')) {
                 updateRetainCount(store, recoilValue.key, 1);
             }
-            
+
             const subscription = subscribeToRecoilValue(
                 store,
                 recoilValue,
-                notify,
+                (_treeState) => notify(),
                 componentName,
             );
-            
+
             return () => {
                 // Release retention when subscription is released
                 if (gkx('recoil_memory_managament_2020')) {
@@ -388,22 +387,22 @@ function useRecoilValueLoadable_TRANSITION_SUPPORT<T>(
         [getState],
     );
 
+    const [state, setState] = useState(getState);
+
     useEffect(() => {
         const subscription = subscribeToRecoilValue(
             storeRef.current,
             recoilValue,
             _state => {
-                setState(updateState as any);
+                setState(updateState);
             },
             componentName,
         );
 
-        setState(updateState as any);
+        setState(updateState);
 
         return subscription.release;
     }, [componentName, recoilValue, storeRef, updateState]);
-
-    const [state, setState] = useState(getState);
 
     return state.key !== recoilValue.key ? getLoadable() : state.loadable;
 }
@@ -485,6 +484,7 @@ export function useRecoilValueLoadable<T>(
     if (gkx('recoil_memory_managament_2020')) {
         useRetain(recoilValue);
     }
+
     return {
         TRANSITION_SUPPORT: useRecoilValueLoadable_TRANSITION_SUPPORT,
         SYNC_EXTERNAL_STORE: currentRendererSupportsUseSyncExternalStore()

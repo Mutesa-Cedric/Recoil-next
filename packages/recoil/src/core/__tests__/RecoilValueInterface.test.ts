@@ -18,7 +18,6 @@ import {
 } from '../RecoilValueInterface';
 import type { Store } from '../State';
 
-// Create a simplified mock store for testing
 function makeStore(): Store {
     const storeState = {
         currentTree: {

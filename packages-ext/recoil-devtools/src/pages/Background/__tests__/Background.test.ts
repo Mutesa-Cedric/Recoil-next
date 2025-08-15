@@ -3,13 +3,14 @@
  * Recoil DevTools browser extension.
  */
 
-import {vi} from 'vitest';
-import {onConnect} from '../Background';
-import {RecoilDevToolsActions} from '../../../constants/Constants';
+import { vi, describe, it, expect } from 'vitest';
+import { onConnect } from '../Background';
+import { RecoilDevToolsActions } from '../../../constants/Constants';
+
 
 describe('Background Proccess', () => {
   it('onConnect listern added', () => {
-    expect(chrome.runtime.onConnect.addListener).toHaveBeenCalled();
+    expect(globalThis.chrome.runtime.onConnect.addListener).toHaveBeenCalled();
   });
 
   const store = (global.window as any).store;
@@ -37,7 +38,7 @@ describe('Background Proccess', () => {
       action: RecoilDevToolsActions.INIT,
       data: {
         initialValues: {
-          a: {t: '0', v: 2},
+          a: { t: '0', v: 2 },
         },
       },
     });
@@ -50,13 +51,13 @@ describe('Background Proccess', () => {
       action: RecoilDevToolsActions.UPDATE,
       message: {
         modifiedValues: {
-          b: {t: '0', v: 2},
+          b: { t: '0', v: 2 },
         },
       },
     });
     expect(store.connections.get(0).transactions.getSize()).toBe(2);
     expect(store.connections.get(0).transactions.get(1).modifiedValues).toEqual(
-      [{isSubscriber: false, name: 'b'}],
+      [{ isSubscriber: false, name: 'b' }],
     );
   });
 
@@ -84,7 +85,7 @@ describe('Background Proccess', () => {
 
     expect(store.connections.get(0).transactions.getSize()).toBe(3);
     expect(store.connections.get(0).transactions.get(2).modifiedValues).toEqual(
-      [{isSubscriber: false, name: 'c'}],
+      [{ isSubscriber: false, name: 'c' }],
     );
   });
 
@@ -135,10 +136,10 @@ describe('Background Proccess', () => {
 
     expect(store.connections.get(0).transactions.getSize()).toBe(5);
     expect(store.connections.get(0).transactions.get(3).modifiedValues).toEqual(
-      [{isSubscriber: false, name: 'd'}],
+      [{ isSubscriber: false, name: 'd' }],
     );
     expect(store.connections.get(0).transactions.get(4).modifiedValues).toEqual(
-      [{isSubscriber: false, name: 'e'}],
+      [{ isSubscriber: false, name: 'e' }],
     );
   });
 });

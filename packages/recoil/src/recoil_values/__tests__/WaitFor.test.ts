@@ -306,7 +306,7 @@ describe('WaitFor', () => {
     });
 
     describe('Error handling', () => {
-        test('waitForAll - reject', () => {
+        test('waitForAll - reject', async () => {
             const [asyncA, resolveA] = asyncSelector<string>();
             const [asyncB, , rejectB] = asyncSelector<string>();
             const waitForAllSel = waitForAll([asyncA, asyncB]);
@@ -314,11 +314,13 @@ describe('WaitFor', () => {
             expect(getState(waitForAllSel)).toBe('loading');
 
             rejectB(new Error('ERROR B'));
+            // Wait for Promise rejection to propagate
+            await new Promise(resolve => setTimeout(resolve, 0));
             // Should propagate error
             expect(getState(waitForAllSel)).toBe('hasError');
         });
 
-        test('waitForAny - all reject', () => {
+        test('waitForAny - all reject', async () => {
             const [asyncA, , rejectA] = asyncSelector<string>();
             const [asyncB, , rejectB] = asyncSelector<string>();
             const waitForAnySel = waitForAny([asyncA, asyncB]);
@@ -326,9 +328,12 @@ describe('WaitFor', () => {
             expect(getState(waitForAnySel)).toBe('loading');
 
             rejectA(new Error('ERROR A'));
+            await new Promise(resolve => setTimeout(resolve, 0));
             expect(getState(waitForAnySel)).toBe('loading');
 
             rejectB(new Error('ERROR B'));
+            // Wait for Promise rejection to propagate
+            await new Promise(resolve => setTimeout(resolve, 0));
             // Should error when all fail
             expect(getState(waitForAnySel)).toBe('hasError');
         });
