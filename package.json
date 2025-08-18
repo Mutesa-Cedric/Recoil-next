@@ -23,7 +23,7 @@
     "scripts": {
         "build": "node scripts/build.mjs",
         "build:shared": "pnpm --filter shared build",
-        "build:recoil": "pnpm --filter recoil-next build", 
+        "build:recoil": "pnpm --filter recoil-next build",
         "build:recoil-relay": "pnpm --filter recoil-relay-next build",
         "build:recoil-sync": "pnpm --filter recoil-sync-next build",
         "build:refine": "pnpm --filter refine-next build",
@@ -56,7 +56,7 @@
         "@types/react": "^18.2.39",
         "@types/react-dom": "^18.2.14",
         "@typescript-eslint/eslint-plugin": "^8.36.0",
-        "@vitest/ui": "^2.1.8",
+        "@vitest/ui": "^3.2.4",
         "eslint-config-prettier": "^10.1.5",
         "eslint-plugin-prettier": "^5.5.1",
         "hamt_plus": "^1.0.2",
@@ -68,6 +68,6 @@
         "rollup-plugin-dts": "^6.2.1",
         "tslib": "^2.6.0",
         "typescript": "^5.4.2",
-        "vitest": "^2.1.8"
+        "vitest": "^3.2.4"
     }
 }
