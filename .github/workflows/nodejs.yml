@@ -1,7 +1,4 @@
-# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
-
-name: Node.js CI
+name: CI
 
 on:
   push:
@@ -10,38 +7,76 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-
+  test:
+    name: Test (Node ${{ matrix.node-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-
+    
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [16.x, 18.x]
+        node-version: [18.x, 20.x, 22.x]
         os: [ubuntu-latest, windows-latest, macOS-latest]
-        react: ['17.0.2', '18.1.0']
+        include:
+          # Test with different React versions on Ubuntu only
+          - node-version: 20.x
+            os: ubuntu-latest
+            react-version: "^18.0.0"
+          - node-version: 20.x  
+            os: ubuntu-latest
+            react-version: "^19.0.0"
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm install
-    - name: Install React (Unix/Mac)
-      run: >
-       sed -i'' -e 's/\("react\(-dom\)\{0,1\}\(-test-renderer\)\{0,1\}": "\).*"/\1${{ matrix.react }}"/g' package.json
-      if: matrix.os != 'windows-latest'
-    - name: Install React (Windows)
-      run: >
-       sed -i 's/\(""react\(-dom\)\\{0,1\\}\(-test-renderer\)\\{0,1\\}"": ""\).*""/\1${{ matrix.react }}""/g' package.json
-      if: matrix.os == 'windows-latest'
-    - run: npm run typecheck
-    - run: npm test
-    - run: npm run lint
-    - run: npm run build
-    - run: npm run pack
-    - name: Create package
-      uses: actions/upload-artifact@v3
+        cache: 'pnpm'
+        
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: Install specific React version
+      if: matrix.react-version
+      run: npm install react@${{ matrix.react-version }} react-dom@${{ matrix.react-version }} react-test-renderer@${{ matrix.react-version }} --no-save
+      
+    - name: Type check
+      run: pnpm run typecheck
+      
+    - name: Lint
+      run: pnpm run lint
+      
+    - name: Run tests
+      run: pnpm run test:run
+      
+    - name: Build
+      run: pnpm run build
+      
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        name: package
-        path: "*.tgz"
+        node-version: '20.x'
+        cache: 'pnpm'
+        
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: Run security audit
+      run: pnpm audit --audit-level moderate
+      
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: javascript
+        
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3

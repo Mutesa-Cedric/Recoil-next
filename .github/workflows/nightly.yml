@@ -1,22 +1,48 @@
-name: Nightly Push
+name: Nightly Release
 
 on:
   schedule:
-    - cron:  '0 8 * * *' # every day at 8 am UTC / 1 am PDT / 4 am EDT
+    - cron: '0 8 * * *' # Daily at 8 AM UTC
+  workflow_dispatch: # Allow manual trigger
 
 jobs:
-  deploy-nightly:
-    if: github.repository_owner == 'Mutesa-Cedric'
+  nightly:
+    name: Nightly Build & Deploy
     runs-on: ubuntu-latest
-
+    if: github.repository_owner == github.actor || github.event_name == 'workflow_dispatch'
+    
+    permissions:
+      contents: write
+      packages: write
+    
     steps:
-    - uses: actions/checkout@v2
-    # config GIT so it can do git push
-    - uses: fregante/setup-git-user@v1
-    - name: Use Node.js 16.x
-      uses: actions/setup-node@v1
+    - name: Checkout code
+      uses: actions/checkout@v4
       with:
-        node-version: 16.x
-    - run: npm install
-    - run: npm run build
-    - run: npm run deploy-nightly
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+        
+    - name: Setup Git user
+      uses: fregante/setup-git-user@v2
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'pnpm'
+        registry-url: 'https://registry.npmjs.org'
+        
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: Run tests
+      run: pnpm run test:run
+      
+    - name: Build packages
+      run: pnpm run build
+      
+    - name: Deploy nightly
+      run: pnpm run deploy-nightly
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -3,7 +3,7 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { AtomEffect, Loadable, RecoilState, StoreID } from 'recoil-next';
+import type { AtomEffect, Loadable, RecoilState, Snapshot, StoreID } from 'recoil-next';
 import {
   DefaultValue,
   RecoilLoadable,

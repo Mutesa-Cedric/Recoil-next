@@ -1,7 +1,13 @@
-// this file is ignored by prettier because it hits SyntaxError on `import.meta.url`
+/**
+ * Utility to get the project root directory for recoil-next
+ */
 
-import {fileURLToPath} from 'url';
-import path from 'path';
+import { fileURLToPath } from 'url';
+import * as path from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
-export const projectRootDir = path.resolve(__filename, '../..');
+const __dirname = path.dirname(__filename);
+
+export const projectRootDir = path.resolve(__dirname, '..');
+
+export default projectRootDir;

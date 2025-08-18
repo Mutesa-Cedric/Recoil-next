@@ -1,5 +1,6 @@
-import { beforeAll, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
+import React from 'react';
+import { afterEach, beforeAll, vi } from 'vitest';
 
 // Declare __DEV__ globally for TypeScript
 declare global {
@@ -45,11 +46,11 @@ beforeAll(() => {
   global.TextDecoder = TextDecoder;
 
   // React test environment with concurrent features disabled
-  global.IS_REACT_ACT_ENVIRONMENT = true;
-  
+  (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+
   // Disable React concurrent features that might cause snapshot issues
-  if (typeof React !== 'undefined' && React.unstable_act) {
-    global.React = React;
+  if (typeof React !== 'undefined' && (React as any).unstable_act) {
+    (globalThis as any).React = React;
   }
 
   // Define __DEV__ for React development checks

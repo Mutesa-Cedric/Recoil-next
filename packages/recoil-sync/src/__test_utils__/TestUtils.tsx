@@ -2,10 +2,9 @@
  * TypeScript port of test utilities for recoil-sync
  */
 
+import { act, render } from '@testing-library/react';
 import React from 'react';
-import { act } from '@testing-library/react';
-import { atom, useRecoilValue, useSetRecoilState, useResetRecoilState, RecoilRoot } from 'recoil-next';
-import { render } from '@testing-library/react';
+import { RecoilRoot, useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil-next';
 
 // Simple stringify that handles Set and Map like the original stableStringify
 function simpleStringify(value: any): string {
@@ -58,10 +57,8 @@ export async function flushPromisesAndTimers() {
 export function renderElements(elements: React.ReactNode) {
   const div = document.createElement('div');
   const { container } = render(
-    React.createElement(RecoilRoot, { 
-      override: false  // Disable strict mode effects that might cause snapshot issues
-    }, elements),
+    <RecoilRoot override={false}>{elements}</RecoilRoot>,
     { container: div }
   );
   return container;
-} 
+}

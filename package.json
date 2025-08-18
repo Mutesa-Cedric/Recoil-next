@@ -21,18 +21,26 @@
         "dist"
     ],
     "scripts": {
-        "build": "rollup -c",
-        "build:shared": "cd packages/shared && npm run build",
-        "build:recoil": "cd packages/recoil && npm run build",
-        "build:recoil-relay": "cd packages/recoil-relay && npm run build",
-        "build:recoil-sync": "cd packages/recoil-sync && npm run build",
-        "build:refine": "cd packages/refine && npm run build",
+        "build": "node scripts/build.mjs",
+        "build:shared": "pnpm --filter shared build",
+        "build:recoil": "pnpm --filter recoil-next build", 
+        "build:recoil-relay": "pnpm --filter recoil-relay-next build",
+        "build:recoil-sync": "pnpm --filter recoil-sync-next build",
+        "build:refine": "pnpm --filter refine-next build",
+        "build:all": "pnpm --filter './packages/**' build",
         "test": "vitest",
         "test:ui": "vitest --ui",
         "test:run": "vitest run",
-        "lint": "eslint \"src/**/*.{ts,tsx}\"",
-        "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,md}\"",
-        "typecheck": "tsc --noEmit"
+        "test:all": "pnpm --filter './packages/**' test",
+        "lint": "eslint \"packages/**/*.{ts,tsx}\" \"packages-ext/**/*.{ts,tsx}\"",
+        "lint:all": "pnpm --filter './packages/**' --filter './packages-ext/**' lint",
+        "format": "prettier --write \"packages/**/*.{ts,tsx,js,jsx,json,md}\" \"packages-ext/**/*.{ts,tsx,js,jsx,json,md}\" \"*.{json,md,yml,yaml}\"",
+        "typecheck": "tsc --noEmit",
+        "typecheck:all": "pnpm --filter './packages/**' typecheck",
+        "pack": "node scripts/pack.mjs",
+        "deploy-nightly": "node scripts/deploy_nightly_build.js",
+        "clean": "pnpm --filter './packages/**' --filter './packages-ext/**' clean && rm -rf dist",
+        "dev": "pnpm --filter todo-example dev"
     },
     "peerDependencies": {
         "react": ">=18"
