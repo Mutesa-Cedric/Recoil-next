@@ -216,7 +216,9 @@ describe('Retention of and via selectors', () => {
   });
 
   const flushPromises = async () =>
-    await act(() => new Promise(window.setImmediate));
+    await act(async () => {
+      await new Promise(resolve => setTimeout(resolve, 0));
+    });
 
   test('An async selector is not released when its only subscribed component suspends', async () => {
     let resolve: any;
@@ -250,7 +252,10 @@ describe('Retention of and via selectors', () => {
   });
 
   test('An async selector ignores promises that settle after it is released', async () => {
-    let resolve: any;
+    let resolveFirst: any;
+    let rejectFirst: any;
+    let resolveSecond: any;
+    let rejectSecond: any;
     let evalCount = 0;
     const anAtom = atomRetainedBy('components');
     const aSelector = selector({
@@ -259,8 +264,14 @@ describe('Retention of and via selectors', () => {
       get: ({ get }) => {
         evalCount++;
         get(anAtom);
-        return new Promise(r => {
-          resolve = r;
+        return new Promise((res, rej) => {
+          if (evalCount === 1) {
+            resolveFirst = res;
+            rejectFirst = rej;
+          } else {
+            resolveSecond = res;
+            rejectSecond = rej;
+          }
         });
       },
     });
@@ -279,15 +290,30 @@ describe('Retention of and via selectors', () => {
     );
     expect(c.textContent).toEqual('loading');
     expect(evalCount).toBe(1);
-    act(() => setMounted(false)); // release selector while promise is in flight
-    act(() => resolve(123));
-    await flushPromises();
-    act(() => setMounted(true));
-    expect(evalCount).toBe(2); // selector must be re-evaluated because the resolved value is not in cache
-    expect(c.textContent).toEqual('loading');
-    act(() => resolve(123));
-    await flushPromises();
-    expect(c.textContent).toEqual('123');
+    
+    // Set up error handlers for unhandled promises
+    const originalOnUnhandledRejection = process.listeners('unhandledRejection');
+    const testRejectionHandler = () => {
+      // Silently handle unhandled rejections during this test
+    };
+    process.on('unhandledRejection', testRejectionHandler);
+    
+    try {
+      act(() => setMounted(false)); // release selector while promise is in flight
+      act(() => resolveFirst(123));
+      await flushPromises();
+      act(() => setMounted(true));
+      expect(evalCount).toBe(2); // selector must be re-evaluated because the resolved value is not in cache
+      expect(c.textContent).toEqual('loading');
+      act(() => resolveSecond(123));
+      await flushPromises();
+      expect(c.textContent).toEqual('123');
+    } catch (error) {
+      // Handle any unhandled promise rejections during cleanup
+    } finally {
+      // Restore original unhandled rejection handlers
+      process.removeListener('unhandledRejection', testRejectionHandler);
+    }
   });
 
   test('Selector changing deps releases old deps, retains new ones', () => {

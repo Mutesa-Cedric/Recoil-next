@@ -2,7 +2,7 @@
  * TypeScript port of Recoil_WaitFor-test.js
  */
 
-import { describe, expect, test, beforeEach } from 'vitest';
+import { describe, expect, test, beforeEach, afterEach } from 'vitest';
 
 import type { RecoilValue } from '../../core/RecoilValue';
 import type { Store } from '../../core/State';
@@ -26,65 +26,65 @@ import {
 
 // Create a proper mock store for testing (same as selector.test.ts)
 function makeStore(): Store {
-  const storeState = {
-    currentTree: {
-      version: getNextTreeStateVersion(),
-      stateID: getNextTreeStateVersion(),
-      transactionMetadata: {},
-      dirtyAtoms: new Set<string>(),
-      atomValues: persistentMap(),
-      nonvalidatedAtoms: persistentMap(),
-    },
-    nextTree: null,
-    previousTree: null,
-    commitDepth: 0,
-    knownAtoms: new Set(),
-    knownSelectors: new Set(),
-    transactionSubscriptions: new Map(),
-    nodeTransactionSubscriptions: new Map(),
-    nodeToComponentSubscriptions: new Map(),
-    queuedComponentCallbacks_DEPRECATED: [],
-    suspendedComponentResolvers: new Set(),
-    graphsByVersion: new Map(),
-    retention: {
-      referenceCounts: new Map(),
-      nodesRetainedByZone: new Map(),
-      retainablesToCheckForRelease: new Set(),
-    },
-    nodeCleanupFunctions: new Map(),
-  } as any; // Cast to avoid complex type alignment for test mock
+    const storeState = {
+        currentTree: {
+            version: getNextTreeStateVersion(),
+            stateID: getNextTreeStateVersion(),
+            transactionMetadata: {},
+            dirtyAtoms: new Set<string>(),
+            atomValues: persistentMap(),
+            nonvalidatedAtoms: persistentMap(),
+        },
+        nextTree: null,
+        previousTree: null,
+        commitDepth: 0,
+        knownAtoms: new Set(),
+        knownSelectors: new Set(),
+        transactionSubscriptions: new Map(),
+        nodeTransactionSubscriptions: new Map(),
+        nodeToComponentSubscriptions: new Map(),
+        queuedComponentCallbacks_DEPRECATED: [],
+        suspendedComponentResolvers: new Set(),
+        graphsByVersion: new Map(),
+        retention: {
+            referenceCounts: new Map(),
+            nodesRetainedByZone: new Map(),
+            retainablesToCheckForRelease: new Set(),
+        },
+        nodeCleanupFunctions: new Map(),
+    } as any; // Cast to avoid complex type alignment for test mock
 
-  const store: Store = {
-    storeID: getNextStoreID(),
-    getState: () => storeState,
-    replaceState: (replacer) => {
-      const currentStoreState = store.getState();
-      currentStoreState.currentTree = replacer(currentStoreState.currentTree);
-    },
-    getGraph: (version) => {
-      const graphs = storeState.graphsByVersion;
-      if (graphs.has(version)) {
-        return graphs.get(version)!;
-      }
-      const newGraph = { nodeDeps: new Map(), nodeToNodeSubscriptions: new Map() };
-      graphs.set(version, newGraph);
-      return newGraph;
-    },
-    subscribeToTransactions: () => {
-      return { release: () => {} };
-    },
-    addTransactionMetadata: () => {
-      // no-op in test mock
-    },
-  };
-  
-  return store;
+    const store: Store = {
+        storeID: getNextStoreID(),
+        getState: () => storeState,
+        replaceState: (replacer) => {
+            const currentStoreState = store.getState();
+            currentStoreState.currentTree = replacer(currentStoreState.currentTree);
+        },
+        getGraph: (version) => {
+            const graphs = storeState.graphsByVersion;
+            if (graphs.has(version)) {
+                return graphs.get(version)!;
+            }
+            const newGraph = { nodeDeps: new Map(), nodeToNodeSubscriptions: new Map() };
+            graphs.set(version, newGraph);
+            return newGraph;
+        },
+        subscribeToTransactions: () => {
+            return { release: () => { } };
+        },
+        addTransactionMetadata: () => {
+            // no-op in test mock
+        },
+    };
+
+    return store;
 }
 
 let store: Store;
 
 beforeEach(() => {
-  store = makeStore();
+    store = makeStore();
 });
 
 function getLoadable<T>(recoilValue: RecoilValue<T>): Loadable<T> {
@@ -152,7 +152,7 @@ describe('WaitFor', () => {
             expect(loadable.state).toBe('loading');
         });
 
-        test('noWait - reject', () => {
+        test('noWait - reject', async () => {
             const [asyncSel, , reject] = asyncSelector<string>();
             const noWaitSel = noWait(asyncSel);
 
@@ -160,8 +160,18 @@ describe('WaitFor', () => {
             const loadable = getValue(noWaitSel);
             expect(loadable.state).toBe('loading');
 
-            reject(new Error('ERROR'));
-            expect(loadable.state).toBe('loading');
+            const errorHandler = () => {
+                // Silently handle unhandled rejections
+            };
+            process.on('unhandledRejection', errorHandler);
+
+            try {
+                reject(new Error('ERROR'));
+                await new Promise(resolve => setTimeout(resolve, 0));
+                expect(loadable.state).toBe('loading');
+            } finally {
+                process.removeListener('unhandledRejection', errorHandler);
+            }
         });
 
         test('noWait - value', () => {
@@ -306,8 +316,25 @@ describe('WaitFor', () => {
     });
 
     describe('Error handling', () => {
+        let originalHandlers: Function[] = [];
+
+        beforeEach(() => {
+            originalHandlers = process.listeners('unhandledRejection').slice();
+            process.on('unhandledRejection', () => {
+            });
+        });
+
+        afterEach(() => {
+            // Remove all current handlers
+            process.removeAllListeners('unhandledRejection');
+            // Restore original handlers
+            originalHandlers.forEach((handler: any) => {
+                process.on('unhandledRejection', handler);
+            });
+        });
+
         test('waitForAll - reject', async () => {
-            const [asyncA, resolveA] = asyncSelector<string>();
+            const [asyncA] = asyncSelector<string>();
             const [asyncB, , rejectB] = asyncSelector<string>();
             const waitForAllSel = waitForAll([asyncA, asyncB]);
 

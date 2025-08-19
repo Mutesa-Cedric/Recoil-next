@@ -25,21 +25,16 @@ function ReadsAtom<T>({ atom }: { atom: any }) {
 
 test('Reads Recoil values', async () => {
   const anAtom = atom({ key: getUniqueAtomKey('reads-recoil-values'), default: 'DEFAULT' });
-  let pTest: Promise<any> = Promise.reject(
-    new Error("Callback didn't resolve"),
-  );
   let cb: any;
 
   function Component() {
-    cb = useRecoilCallback(({ snapshot }) => () => {
-      // eslint-disable-next-line vitest/valid-expect
-      pTest = expect(snapshot.getPromise(anAtom)).resolves.toBe('DEFAULT');
+    cb = useRecoilCallback(({ snapshot }) => async () => {
+      await expect(snapshot.getPromise(anAtom)).resolves.toBe('DEFAULT');
     });
     return null;
   }
   renderElements(<Component />);
-  cb();
-  await pTest;
+  await cb();
 });
 
 test('Can read Recoil values without throwing', async () => {
@@ -74,15 +69,11 @@ test('Can read Recoil values without throwing', async () => {
 test('Sets Recoil values (by queueing them)', async () => {
   const anAtom = atom({ key: getUniqueAtomKey('sets-recoil-values'), default: 'DEFAULT' });
   let cb: any;
-  let pTest: Promise<any> = Promise.reject(
-    new Error("Callback didn't resolve"),
-  );
 
   function Component() {
-    cb = useRecoilCallback(({ snapshot, set }) => (value: any) => {
+    cb = useRecoilCallback(({ snapshot, set }) => async (value: any) => {
       set(anAtom, value);
-      // eslint-disable-next-line vitest/valid-expect
-      pTest = expect(snapshot.getPromise(anAtom)).resolves.toBe('DEFAULT');
+      await expect(snapshot.getPromise(anAtom)).resolves.toBe('DEFAULT');
     });
     return null;
   }
@@ -95,10 +86,9 @@ test('Sets Recoil values (by queueing them)', async () => {
   );
   expect(container.textContent).toBe('"DEFAULT"');
   await act(async () => {
-    cb(123);
+    await cb(123);
   });
   expect(container.textContent).toBe('123');
-  await pTest;
 });
 
 test('Reset Recoil values', async () => {
