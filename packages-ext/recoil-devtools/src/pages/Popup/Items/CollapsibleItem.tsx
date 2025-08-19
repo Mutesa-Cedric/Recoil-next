@@ -54,12 +54,12 @@ const styles = {
 };
 
 type Props = {
-  children?: React.ReactNode,
-  label: React.ReactNode,
-  collapsible?: boolean,
-  startCollapsed?: boolean | null | undefined,
-  inContainer?: boolean,
-  isRoot?: boolean,
+  children?: React.ReactNode;
+  label: React.ReactNode;
+  collapsible?: boolean;
+  startCollapsed?: boolean | null | undefined;
+  inContainer?: boolean;
+  isRoot?: boolean;
 };
 
 const noop = () => {};

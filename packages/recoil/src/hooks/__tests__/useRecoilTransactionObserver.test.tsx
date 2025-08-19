@@ -2,35 +2,35 @@
  * TypeScript port of Recoil_useRecoilTransactionObserver-test.js
  */
 
-import { render } from '@testing-library/react';
+import {render} from '@testing-library/react';
 import * as React from 'react';
-import { act } from 'react';
-import { expect, test, vi } from 'vitest';
+import {act} from 'react';
+import {expect, test, vi} from 'vitest';
 
-import type {
-    RecoilState,
-    RecoilValue
-} from '../../core/RecoilValue';
+import type {RecoilState, RecoilValue} from '../../core/RecoilValue';
 
 import stableStringify from '../../../../shared/src/util/Recoil_stableStringify';
-import { RecoilRoot } from '../../core/RecoilRoot';
-import type { Snapshot } from '../../core/Snapshot';
-import { freshSnapshot } from '../../core/Snapshot';
-import { atom } from '../../recoil_values/atom';
-import { atomFamily } from '../../recoil_values/atomFamily';
-import { selector } from '../../recoil_values/selector';
-import { useRecoilValue, useSetRecoilState } from '../Hooks';
-import { useRecoilTransactionObserver } from '../SnapshotHooks';
+import {RecoilRoot} from '../../core/RecoilRoot';
+import type {Snapshot} from '../../core/Snapshot';
+import {freshSnapshot} from '../../core/Snapshot';
+import {atom} from '../../recoil_values/atom';
+import {atomFamily} from '../../recoil_values/atomFamily';
+import {selector} from '../../recoil_values/selector';
+import {useRecoilValue, useSetRecoilState} from '../Hooks';
+import {useRecoilTransactionObserver} from '../SnapshotHooks';
 
 // Error boundary component for testing
 class ErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: (error: Error) => React.ReactNode },
-  { hasError: boolean; error?: Error }
+  {children: React.ReactNode; fallback?: (error: Error) => React.ReactNode},
+  {hasError: boolean; error?: Error}
 > {
-  state: { hasError: boolean; error?: Error } = { hasError: false };
+  state: {hasError: boolean; error?: Error} = {hasError: false};
 
-  static getDerivedStateFromError(error: Error): { hasError: boolean; error?: Error } {
-    return { hasError: true, error };
+  static getDerivedStateFromError(error: Error): {
+    hasError: boolean;
+    error?: Error;
+  } {
+    return {hasError: true, error};
   }
 
   render(): React.ReactNode {
@@ -44,18 +44,18 @@ class ErrorBoundary extends React.Component<
 
 // React rendering utilities for testing
 function renderElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(
+  const {container} = render(
     <RecoilRoot>
       <ErrorBoundary>
         <React.Suspense fallback="loading">{element}</React.Suspense>
       </ErrorBoundary>
-    </RecoilRoot>
+    </RecoilRoot>,
   );
   return container;
 }
 
 // Test component to read atom values
-function ReadsAtom<T>({ atom }: { atom: RecoilValue<T> }) {
+function ReadsAtom<T>({atom}: {atom: RecoilValue<T>}) {
   const value = useRecoilValue(atom);
   return <>{stableStringify(value)}</>;
 }
@@ -63,7 +63,7 @@ function ReadsAtom<T>({ atom }: { atom: RecoilValue<T> }) {
 // Component that reads and writes atoms
 function componentThatReadsAndWritesAtom<T>(
   recoilState: RecoilState<T>,
-): [React.ComponentType<{}>, ((updater: T | ((prev: T) => T)) => void)] {
+): [React.ComponentType<{}>, (updater: T | ((prev: T) => T)) => void] {
   let updateValue: any;
   const Component = vi.fn(() => {
     updateValue = useSetRecoilState(recoilState);
@@ -76,7 +76,13 @@ function componentThatReadsAndWritesAtom<T>(
 function TransactionObserver({
   callback,
 }: {
-  callback: ({previousSnapshot, snapshot}: {previousSnapshot: Snapshot; snapshot: Snapshot}) => void;
+  callback: ({
+    previousSnapshot,
+    snapshot,
+  }: {
+    previousSnapshot: Snapshot;
+    snapshot: Snapshot;
+  }) => void;
 }) {
   useRecoilTransactionObserver(callback);
   return null;
@@ -97,9 +103,7 @@ test('getNodes', () => {
     key: 'useRecoilTransactionObserver getNodes atom',
     default: x => x,
   });
-  const [ReadsAtomA, setAtomA] = componentThatReadsAndWritesAtom(
-    atoms('A'),
-  );
+  const [ReadsAtomA, setAtomA] = componentThatReadsAndWritesAtom(atoms('A'));
   const [ReadsAtomB, setAtomB] = componentThatReadsAndWritesAtom(atoms('B'));
   const selectorA = selector({
     key: 'useRecoilTransactionObserver getNodes selector',
@@ -274,4 +278,4 @@ test('useRecoilTransactionObserver - cleanup on unmount', () => {
   // Note: In a real test, we would unmount here, but for now we'll just test the functionality
   act(() => setAtom(2));
   expect(transactionCount).toBe(2);
-}); 
+});

@@ -3,7 +3,7 @@
  * Recoil DevTools browser extension.
  */
 
-import { beforeAll, describe, expect, it, vi } from 'vitest';
+import {beforeAll, describe, expect, it, vi} from 'vitest';
 
 // Mock spies
 const handlers: any[] = [];
@@ -29,7 +29,10 @@ const bg = {
 };
 
 // Type-safe window.addEventListener mock
-globalThis.window.addEventListener = ((evt: string, handler: EventListenerOrEventListenerObject) => {
+globalThis.window.addEventListener = ((
+  evt: string,
+  handler: EventListenerOrEventListenerObject,
+) => {
   handlers.push(handler);
 }) as typeof window.addEventListener;
 
@@ -104,7 +107,7 @@ describe('initializing Content Script listeners', () => {
       data: {
         action: RecoilDevToolsActions.UPDATE,
         source: ExtensionSource,
-        message: { modifiedValues: { a: { t: '0', v: 2 } } },
+        message: {modifiedValues: {a: {t: '0', v: 2}}},
       },
     });
     expect(bg.postMessage).toHaveBeenLastCalledWith({
@@ -112,7 +115,7 @@ describe('initializing Content Script listeners', () => {
       source: ExtensionSource,
       message: {
         modifiedValues: {
-          a: { t: '0', v: 2 },
+          a: {t: '0', v: 2},
         },
       },
     });
@@ -126,7 +129,7 @@ describe('initializing Content Script listeners', () => {
       data: {
         action: RecoilDevToolsActions.UPDATE,
         source: ExtensionSource,
-        message: { mustThrow: true, modifiedValues: { a: { t: '0', v: 2 } } },
+        message: {mustThrow: true, modifiedValues: {a: {t: '0', v: 2}}},
       },
     });
     expect(bg.postMessage).toHaveBeenCalledTimes(4);

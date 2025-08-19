@@ -5,9 +5,9 @@
 let _invalidateMemoizedSnapshot: (() => void) | null = null;
 
 export function setInvalidateMemoizedSnapshot(invalidate: () => void): void {
-    _invalidateMemoizedSnapshot = invalidate;
+  _invalidateMemoizedSnapshot = invalidate;
 }
 
 export function invalidateMemoizedSnapshot(): void {
-    _invalidateMemoizedSnapshot?.();
-} 
+  _invalidateMemoizedSnapshot?.();
+}

@@ -106,22 +106,20 @@ function createSankeyData(
   edges: readonly {value: number; source: string; target: string}[];
 } {
   const nodes = Object.keys(deps);
-  const edges = nodes.reduce((agg: {value: number; source: string; target: string}[], target) => {
-    agg.push(
-      ...Array.from(deps[target]).map(source => ({
-        value: nodeWeights[source]?.updateCount ?? 1,
-        source,
-        target,
-      })),
-    );
-    return agg;
-  }, []);
+  const edges = nodes.reduce(
+    (agg: {value: number; source: string; target: string}[], target) => {
+      agg.push(
+        ...Array.from(deps[target]).map(source => ({
+          value: nodeWeights[source]?.updateCount ?? 1,
+          source,
+          target,
+        })),
+      );
+      return agg;
+    },
+    [],
+  );
   return {nodes, edges};
 }
 
-export {
-  createGraph,
-  depsHaveChaged,
-  flattenLevels,
-  createSankeyData,
-};
+export {createGraph, depsHaveChaged, flattenLevels, createSankeyData};

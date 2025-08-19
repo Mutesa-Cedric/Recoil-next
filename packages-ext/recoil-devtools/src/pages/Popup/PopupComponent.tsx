@@ -3,13 +3,13 @@
  * Recoil DevTools browser extension.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import type {MainTabsType} from '../../constants/Constants';
 import ConnectionContext from './ConnectionContext';
 import Header from './PopupHeader';
 import Main from './PopupMainContent';
 import Sidebar from './PopupSidebar';
-import { useSelectedTransaction } from './useSelectionHooks';
+import {useSelectedTransaction} from './useSelectionHooks';
 
 const styles = {
   app: {
@@ -31,7 +31,7 @@ const styles = {
 };
 
 type Props = {
-  readonly maxTransactionId: number,
+  readonly maxTransactionId: number;
 };
 
 const PopupComponent = ({maxTransactionId}: Props): React.ReactNode => {

@@ -3,17 +3,17 @@
  */
 
 import React from 'react';
-import { render, act } from '@testing-library/react';
-import { RecoilRoot } from '../../../recoil/src';
+import {render, act} from '@testing-library/react';
+import {RecoilRoot} from '../../../recoil/src';
 
 class ErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: (error: Error) => React.ReactNode },
-  { hasError: boolean; error?: Error }
+  {children: React.ReactNode; fallback?: (error: Error) => React.ReactNode},
+  {hasError: boolean; error?: Error}
 > {
-  state = { hasError: false, error: undefined };
+  state = {hasError: false, error: undefined};
 
   static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
+    return {hasError: true, error};
   }
 
   render() {
@@ -27,7 +27,7 @@ class ErrorBoundary extends React.Component<
 
 export function renderElements(
   elements: React.ReactNode,
-  container?: HTMLDivElement
+  container?: HTMLDivElement,
 ): HTMLDivElement {
   const div = container ?? document.createElement('div');
   document.body.appendChild(div);
@@ -35,12 +35,10 @@ export function renderElements(
   const result = render(
     <RecoilRoot>
       <ErrorBoundary>
-        <React.Suspense fallback="loading">
-          {elements}
-        </React.Suspense>
+        <React.Suspense fallback="loading">{elements}</React.Suspense>
       </ErrorBoundary>
     </RecoilRoot>,
-    { container: div }
+    {container: div},
   );
 
   return result.container as HTMLDivElement;
@@ -51,7 +49,7 @@ export function flushPromisesAndTimers(): Promise<void> {
     () =>
       new Promise<void>(resolve => {
         setTimeout(resolve, 100);
-      })
+      }),
   );
 }
 

@@ -1,7 +1,7 @@
 /**
  * TypeScript port of Recoil_Memoize-test.js
  */
-import { describe, it, expect, vi } from 'vitest';
+import {describe, it, expect, vi} from 'vitest';
 import {
   memoizeOneWithArgsHash,
   memoizeOneWithArgsHashAndInvalidation,
@@ -12,9 +12,8 @@ describe('memoizeWithArgsHash', () => {
   it('caches functions based on the hash function', () => {
     let i = 0;
     const f = vi.fn(() => i++);
-    const mem = (memoizeWithArgsHash as any)(
-      f,
-      (_a: any, _b: any, c: any) => String(c),
+    const mem = (memoizeWithArgsHash as any)(f, (_a: any, _b: any, c: any) =>
+      String(c),
     );
     expect(mem()).toBe(0);
     expect(mem(1, 2, 3)).toBe(1);
@@ -24,10 +23,7 @@ describe('memoizeWithArgsHash', () => {
   it('handles "hasOwnProperty" as a hash key with no errors', () => {
     let i = 0;
     const f = vi.fn(() => i++);
-    const mem = (memoizeWithArgsHash as any)(
-      f,
-      () => 'hasOwnProperty',
-    );
+    const mem = (memoizeWithArgsHash as any)(f, () => 'hasOwnProperty');
     expect(mem()).toBe(0);
     expect(() => mem()).not.toThrow();
     expect(mem(1)).toBe(0);
@@ -53,9 +49,8 @@ describe('memoizeOneWithArgsHash', () => {
   it('caches functions based on partial arguments', () => {
     let i = 0;
     const f = vi.fn(() => i++);
-    const mem = (memoizeOneWithArgsHash as any)(
-      f,
-      (_a: any, _b: any, c: any) => String(c),
+    const mem = (memoizeOneWithArgsHash as any)(f, (_a: any, _b: any, c: any) =>
+      String(c),
     );
     expect(mem()).toBe(0);
     expect(mem(1, 2, 3)).toBe(1);
@@ -72,8 +67,8 @@ describe('memoizeOneWithArgsHashAndInvalidation', () => {
     let i = 0;
     const f = vi.fn(() => i++);
     const [mem, invalidate] = (memoizeOneWithArgsHashAndInvalidation as any)(
-      f, 
-      (a: any, b: any, c: any) => String(a) + String(b) + String(c)
+      f,
+      (a: any, b: any, c: any) => String(a) + String(b) + String(c),
     );
     expect(mem()).toBe(0);
     expect(mem(1, 2, 3)).toBe(1);
@@ -90,8 +85,8 @@ describe('memoizeOneWithArgsHashAndInvalidation', () => {
     let i = 0;
     const f = vi.fn(() => i++);
     const [mem, invalidate] = (memoizeOneWithArgsHashAndInvalidation as any)(
-      f, 
-      (_a: any, _b: any, c: any) => String(c)
+      f,
+      (_a: any, _b: any, c: any) => String(c),
     );
     expect(mem()).toBe(0);
     expect(mem(1, 2, 3)).toBe(1);
@@ -105,4 +100,4 @@ describe('memoizeOneWithArgsHashAndInvalidation', () => {
     expect(mem(1, 2, 4)).toBe(3);
     expect(f.mock.calls.length).toBe(4);
   });
-}); 
+});

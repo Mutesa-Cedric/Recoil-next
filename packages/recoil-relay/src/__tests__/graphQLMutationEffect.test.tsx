@@ -2,17 +2,20 @@
  * TypeScript port of RecoilRelay_graphQLMutationEffect-test.js
  */
 
-import React, { act } from 'react';
-import { atom } from 'recoil-next';
-import { expect, test, vi } from 'vitest';
-import { testFeedbackMutation } from '../__test_utils__/MockQueries';
-import { mockRelayEnvironment } from '../__test_utils__/mockRelayEnvironment';
-import { ComponentThatReadsAndWritesAtom, flushPromisesAndTimers } from '../__test_utils__/TestUtils';
-import { graphQLMutationEffect } from '../graphQLMutationEffect';
+import React, {act} from 'react';
+import {atom} from 'recoil-next';
+import {expect, test, vi} from 'vitest';
+import {testFeedbackMutation} from '../__test_utils__/MockQueries';
+import {mockRelayEnvironment} from '../__test_utils__/mockRelayEnvironment';
+import {
+  ComponentThatReadsAndWritesAtom,
+  flushPromisesAndTimers,
+} from '../__test_utils__/TestUtils';
+import {graphQLMutationEffect} from '../graphQLMutationEffect';
 
 // Test that mutating an atom will commit a mutation operation
 test('Atom Mutation', async () => {
-  const { environment, renderElements } = mockRelayEnvironment();
+  const {environment, renderElements} = mockRelayEnvironment();
 
   const myAtom = atom({
     key: 'graphql atom mutation',
@@ -21,12 +24,15 @@ test('Atom Mutation', async () => {
       graphQLMutationEffect({
         environment,
         mutation: testFeedbackMutation as any,
-        variables: (actor_id: string) => ({ data: { feedback_id: 'ID', actor_id } }),
+        variables: (actor_id: string) => ({
+          data: {feedback_id: 'ID', actor_id},
+        }),
       }),
     ],
   });
 
-  const [ReadAtom, setAtom, resetAtom] = ComponentThatReadsAndWritesAtom(myAtom);
+  const [ReadAtom, setAtom, resetAtom] =
+    ComponentThatReadsAndWritesAtom(myAtom);
   const c = renderElements(React.createElement(ReadAtom));
   await flushPromisesAndTimers();
   expect(c.textContent).toBe('"DEFAULT"');
@@ -36,7 +42,7 @@ test('Atom Mutation', async () => {
 
   expect(
     environment.mock.getMostRecentOperation().request.variables.data,
-  ).toEqual({ feedback_id: 'ID', actor_id: 'SET' });
+  ).toEqual({feedback_id: 'ID', actor_id: 'SET'});
 
   // Mutation error reverts atom to previous value.
   act(() =>
@@ -63,11 +69,11 @@ test('Atom Mutation', async () => {
   expect(c.textContent).toBe('"DEFAULT"');
   expect(
     environment.mock.getMostRecentOperation().request.variables.data,
-  ).toEqual({ feedback_id: 'ID', actor_id: 'DEFAULT' });
+  ).toEqual({feedback_id: 'ID', actor_id: 'DEFAULT'});
 });
 
 test('Updaters', async () => {
-  const { environment, renderElements } = mockRelayEnvironment();
+  const {environment, renderElements} = mockRelayEnvironment();
 
   const updater = vi.fn((store, data) => {
     expect(data?.feedback_like?.feedback?.id).toEqual('ID');
@@ -96,14 +102,16 @@ test('Updaters', async () => {
       graphQLMutationEffect({
         environment,
         mutation: testFeedbackMutation as any,
-        variables: (actor_id: string) => ({ data: { feedback_id: 'ID', actor_id } }),
+        variables: (actor_id: string) => ({
+          data: {feedback_id: 'ID', actor_id},
+        }),
         updater_UNSTABLE: updater,
         optimisticUpdater_UNSTABLE: optimisticUpdater,
         optimisticResponse_UNSTABLE: (actor_id: string) => ({
           feedback_like: {
             __typename: 'FeedbackLike',
-            feedback: { __typename: 'Feedback', id: 'ID' },
-            liker: { __typename: 'Actor', id: 'OPTIMISTIC_' + actor_id },
+            feedback: {__typename: 'Feedback', id: 'ID'},
+            liker: {__typename: 'Actor', id: 'OPTIMISTIC_' + actor_id},
           },
         }),
       }),
@@ -120,17 +128,17 @@ test('Updaters', async () => {
 
   expect(
     environment.mock.getMostRecentOperation().request.variables.data,
-  ).toEqual({ feedback_id: 'ID', actor_id: 'SET' });
+  ).toEqual({feedback_id: 'ID', actor_id: 'SET'});
 
   act(() =>
     environment.mock.resolveMostRecentOperation(operation => ({
       data: {
         feedback_like: {
           __typename: 'FeedbackLike',
-          feedback: { __typename: 'Feedback', id: 'ID' },
-          liker: { __typename: 'Actor', id: 'ACTOR' }
-        }
-      }
+          feedback: {__typename: 'Feedback', id: 'ID'},
+          liker: {__typename: 'Actor', id: 'ACTOR'},
+        },
+      },
     })),
   );
   expect(c.textContent).toBe('"SET"'); // Errors in updaters will revert value
@@ -139,7 +147,7 @@ test('Updaters', async () => {
 });
 
 test('Aborted mutation', async () => {
-  const { environment, renderElements } = mockRelayEnvironment();
+  const {environment, renderElements} = mockRelayEnvironment();
 
   const myAtom = atom({
     key: 'graphql atom mutation abort',
@@ -161,4 +169,4 @@ test('Aborted mutation', async () => {
   act(() => setAtom('SET'));
   expect(c.textContent).toBe('"SET"');
   expect(environment.mock.getAllOperations().length).toBe(0);
-}); 
+});

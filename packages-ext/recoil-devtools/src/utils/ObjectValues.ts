@@ -10,7 +10,7 @@
  * just too common. So wrap TypeScript and provide better typing.
  */
 export default function objectValues<TValue>(
-  obj: Record<string | number | symbol, TValue>
+  obj: Record<string | number | symbol, TValue>,
 ): Array<TValue> {
   return Object.values(obj) as Array<TValue>;
 }

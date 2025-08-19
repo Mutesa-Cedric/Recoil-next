@@ -1,15 +1,15 @@
 // TypeScript port of TodoItemCreator.jsx
 
-import { todoListState } from './Todo_state';
-import React, { useState, ChangeEvent } from 'react';
-import { useSetRecoilState } from 'recoil-next';
+import {todoListState} from './Todo_state';
+import React, {useState, ChangeEvent} from 'react';
+import {useSetRecoilState} from 'recoil-next';
 
 export const TodoItemCreator: React.FC = () => {
   const [inputValue, setInputValue] = useState<string>('');
   const setTodoList = useSetRecoilState(todoListState);
 
   const addItem = () => {
-    setTodoList((oldTodoList) => [
+    setTodoList(oldTodoList => [
       ...oldTodoList,
       {
         id: getId(),
@@ -21,7 +21,7 @@ export const TodoItemCreator: React.FC = () => {
   };
 
   const onChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { value } = event.target;
+    const {value} = event.target;
     setInputValue(value);
   };
 

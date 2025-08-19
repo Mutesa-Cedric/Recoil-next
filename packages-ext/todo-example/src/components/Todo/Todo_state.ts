@@ -1,5 +1,5 @@
-import { atom, selector } from 'recoil-next';
-import { TodoItem, TodoFilterType, TodoStats } from './Todo_types';
+import {atom, selector} from 'recoil-next';
+import {TodoItem, TodoFilterType, TodoStats} from './Todo_types';
 
 export const todoListState = atom<TodoItem[]>({
   key: 'todoListState',
@@ -13,15 +13,15 @@ export const todoListFilterState = atom<TodoFilterType>({
 
 export const filteredTodoListState = selector<TodoItem[]>({
   key: 'filteredTodoListState',
-  get: ({ get }) => {
+  get: ({get}) => {
     const filter = get(todoListFilterState);
     const list = get(todoListState);
 
     switch (filter) {
       case 'Show Completed':
-        return list.filter((item) => item.isComplete);
+        return list.filter(item => item.isComplete);
       case 'Show Uncompleted':
-        return list.filter((item) => !item.isComplete);
+        return list.filter(item => !item.isComplete);
       default:
         return list;
     }
@@ -30,10 +30,10 @@ export const filteredTodoListState = selector<TodoItem[]>({
 
 export const todoListStatsState = selector<TodoStats>({
   key: 'todoListStatsState',
-  get: ({ get }) => {
+  get: ({get}) => {
     const todoList = get(todoListState);
     const totalNum = todoList.length;
-    const totalCompletedNum = todoList.filter((item) => item.isComplete).length;
+    const totalCompletedNum = todoList.filter(item => item.isComplete).length;
     const totalUncompletedNum = totalNum - totalCompletedNum;
     const percentCompleted =
       totalNum === 0 ? 0 : (totalCompletedNum / totalNum) * 100;

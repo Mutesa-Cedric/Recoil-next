@@ -3,9 +3,9 @@
  * Recoil DevTools browser extension.
  */
 
-import React, { useContext } from 'react';
+import React, {useContext} from 'react';
 import type {MainTabsType} from '../../constants/Constants';
-import { MainTabsTitle } from '../../constants/Constants';
+import {MainTabsTitle} from '../../constants/Constants';
 import ConnectionContext from './ConnectionContext';
 import DependencyGraph from './PopupDependencyGraph';
 import Diff from './PopupDiff';
@@ -52,7 +52,7 @@ const styles = {
 };
 
 type Props = {
-  readonly selectedMainTab: MainTabsType,
+  readonly selectedMainTab: MainTabsType;
 };
 
 function MainContent({selectedMainTab}: Props): React.ReactNode {

@@ -4,4 +4,4 @@
 
 import err from '../polyfill/err';
 
-export default err; 
+export default err;

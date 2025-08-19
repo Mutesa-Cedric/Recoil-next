@@ -2,18 +2,21 @@
  * TypeScript port of Recoil_atomWithFallback-test.js
  */
 
-import { describe, test, expect, beforeEach } from 'vitest';
+import {describe, test, expect, beforeEach} from 'vitest';
 
-import type { Store } from '../../core/State';
-import type { RecoilState, RecoilValue } from '../../core/RecoilValue';
+import type {Store} from '../../core/State';
+import type {RecoilState, RecoilValue} from '../../core/RecoilValue';
 
-import { atom } from '../atom';
-import { constSelector } from '../constSelector';
-import { selector } from '../selector';
-import { persistentMap } from '../../adt/PersistentMap';
-import { getNextStoreID, getNextTreeStateVersion } from '../../core/Keys';
-import { getRecoilValueAsLoadable, setRecoilValue } from '../../core/RecoilValueInterface';
-import { DefaultValue } from '../../core/Node';
+import {atom} from '../atom';
+import {constSelector} from '../constSelector';
+import {selector} from '../selector';
+import {persistentMap} from '../../adt/PersistentMap';
+import {getNextStoreID, getNextTreeStateVersion} from '../../core/Keys';
+import {
+  getRecoilValueAsLoadable,
+  setRecoilValue,
+} from '../../core/RecoilValueInterface';
+import {DefaultValue} from '../../core/Node';
 
 // Create a proper mock store for testing (same pattern as other tests)
 function makeStore(): Store {
@@ -48,27 +51,30 @@ function makeStore(): Store {
   const store: Store = {
     storeID: getNextStoreID(),
     getState: () => storeState,
-    replaceState: (replacer) => {
+    replaceState: replacer => {
       const currentStoreState = store.getState();
       currentStoreState.currentTree = replacer(currentStoreState.currentTree);
     },
-    getGraph: (version) => {
+    getGraph: version => {
       const graphs = storeState.graphsByVersion;
       if (graphs.has(version)) {
         return graphs.get(version)!;
       }
-      const newGraph = { nodeDeps: new Map(), nodeToNodeSubscriptions: new Map() };
+      const newGraph = {
+        nodeDeps: new Map(),
+        nodeToNodeSubscriptions: new Map(),
+      };
       graphs.set(version, newGraph);
       return newGraph;
     },
     subscribeToTransactions: () => {
-      return { release: () => {} };
+      return {release: () => {}};
     },
     addTransactionMetadata: () => {
       // no-op in test mock
     },
   };
-  
+
   return store;
 }
 
@@ -94,7 +100,7 @@ let id = 0;
 
 describe('atomWithFallback', () => {
   test('atom with fallback to another atom', () => {
-    const fallbackAtom = atom<number>({ key: `fallback${id}`, default: 1 });
+    const fallbackAtom = atom<number>({key: `fallback${id}`, default: 1});
     const hasFallbackAtom = atom<number>({
       key: `hasFallback${id++}`,
       default: fallbackAtom,
@@ -116,10 +122,10 @@ describe('atomWithFallback', () => {
   });
 
   test('atom with fallback to selector', () => {
-    const baseAtom = atom<number>({ key: `base${id++}`, default: 10 });
+    const baseAtom = atom<number>({key: `base${id++}`, default: 10});
     const fallbackSelector = selector<number>({
       key: `fallbackSelector${id}`,
-      get: ({ get }) => get(baseAtom) * 2,
+      get: ({get}) => get(baseAtom) * 2,
     });
     const atomWithSelectorFallback = atom<number>({
       key: `atomWithSelectorFallback${id++}`,
@@ -157,7 +163,7 @@ describe('atomWithFallback', () => {
   });
 
   test('resetting atom with fallback', () => {
-    const fallbackAtom = atom<number>({ key: `resetFallback${id}`, default: 42 });
+    const fallbackAtom = atom<number>({key: `resetFallback${id}`, default: 42});
     const atomWithFallback = atom<number>({
       key: `resetAtomWithFallback${id++}`,
       default: fallbackAtom,
@@ -180,7 +186,7 @@ describe('atomWithFallback', () => {
   });
 
   test('nested atom fallbacks', () => {
-    const baseAtom = atom<number>({ key: `nestedBase${id}`, default: 1 });
+    const baseAtom = atom<number>({key: `nestedBase${id}`, default: 1});
     const middleAtom = atom<number>({
       key: `nestedMiddle${id}`,
       default: baseAtom,
@@ -213,4 +219,4 @@ describe('atomWithFallback', () => {
     expect(get(middleAtom)).toEqual(3);
     expect(get(baseAtom)).toEqual(2);
   });
-}); 
+});

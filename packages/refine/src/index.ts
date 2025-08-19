@@ -3,8 +3,8 @@
  */
 
 // Type exports
-export type { AssertionFunction, CoercionFunction } from './API';
-export type { JSONParser } from './JSON';
+export type {AssertionFunction, CoercionFunction} from './API';
+export type {JSONParser} from './JSON';
 export type {
   Checker,
   CheckFailure,
@@ -12,11 +12,11 @@ export type {
   CheckSuccess,
   CheckerReturnType,
 } from './Checkers';
-export type { OptionalPropertyChecker } from './ContainerCheckers';
+export type {OptionalPropertyChecker} from './ContainerCheckers';
 
 // Function imports
-import { assertion, coercion } from './API';
-import { Path } from './Checkers';
+import {assertion, coercion} from './API';
+import {Path} from './Checkers';
 import {
   array,
   dict,
@@ -29,7 +29,7 @@ import {
   writableDict,
   writableObject,
 } from './ContainerCheckers';
-import { jsonParser, jsonParserEnforced } from './JSON';
+import {jsonParser, jsonParserEnforced} from './JSON';
 import {
   bool,
   date,
@@ -97,4 +97,4 @@ export {
   writableArray,
   writableDict,
   writableObject,
-}; 
+};

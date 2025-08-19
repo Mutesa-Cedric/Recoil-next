@@ -5,7 +5,6 @@ const _DEV_MODE: boolean = (globalThis as any).__DEV__ ?? false;
 
 function debug(...args: readonly any[]) {
   if (_DEV_MODE) {
-    /* eslint-disable-next-line fb-www/no-console */
     console.log(...args);
   }
 }

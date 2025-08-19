@@ -4,9 +4,12 @@
 
 'use strict';
 
-import { LRUCache } from './LRUCache';
+import {LRUCache} from './LRUCache';
 import TreeCache from './TreeCache';
-import { TreeCacheImplementation, TreeCacheLeaf } from './TreeCacheImplementationType';
+import {
+  TreeCacheImplementation,
+  TreeCacheLeaf,
+} from './TreeCacheImplementationType';
 
 export default function treeCacheLRU<T>({
   name,
@@ -17,7 +20,7 @@ export default function treeCacheLRU<T>({
   maxSize: number;
   mapNodeValue?: (v: unknown) => unknown;
 }): TreeCacheImplementation<T> {
-  const lruCache = new LRUCache<TreeCacheLeaf<T>, boolean>({ maxSize });
+  const lruCache = new LRUCache<TreeCacheLeaf<T>, boolean>({maxSize});
 
   const cache: TreeCache<T> = new TreeCache({
     name,
@@ -35,4 +38,4 @@ export default function treeCacheLRU<T>({
   });
 
   return cache;
-} 
+}

@@ -2,11 +2,11 @@
  * TypeScript port of RecoilSync_URL.js
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import type { AtomEffect } from 'recoil-next';
-import { DefaultValue, RecoilLoadable } from 'recoil-next';
-import type { CheckerReturnType } from 'refine-next';
-import { assertion, mixed, writableDict } from 'refine-next';
+import React, {useCallback, useEffect, useMemo, useRef} from 'react';
+import type {AtomEffect} from 'recoil-next';
+import {DefaultValue, RecoilLoadable} from 'recoil-next';
+import type {CheckerReturnType} from 'refine-next';
+import {assertion, mixed, writableDict} from 'refine-next';
 import err from '../../shared/src/util/Recoil_err';
 import type {
   ItemKey,
@@ -17,7 +17,7 @@ import type {
   SyncEffectOptions,
   WriteInterface,
 } from './RecoilSync';
-import { syncEffect, useRecoilSync } from './RecoilSync';
+import {syncEffect, useRecoilSync} from './RecoilSync';
 
 type NodeKey = string;
 type ItemState = CheckerReturnType<typeof itemStateChecker>;
@@ -61,7 +61,7 @@ function parseURL(
         : null;
     case 'queryParams': {
       const searchParams = new URLSearchParams(url.search);
-      const { param } = loc;
+      const {param} = loc;
       if (param != null) {
         const stateStr = searchParams.get(param);
         return stateStr != null ? wrapState(deserialize(stateStr)) : new Map();
@@ -97,7 +97,7 @@ function encodeURL(
       url.search = encodeURIComponent(serialize(unwrapState(items)));
       break;
     case 'queryParams': {
-      const { param } = loc;
+      const {param} = loc;
       const searchParams = new URLSearchParams(url.search);
       if (param != null) {
         searchParams.set(param, serialize(unwrapState(items)));
@@ -121,10 +121,10 @@ function encodeURL(
 // useRecoilURLSync()
 ///////////////////////
 export type LocationOption =
-  | { part: 'href' }
-  | { part: 'hash' }
-  | { part: 'search' }
-  | { part: 'queryParams'; param?: string };
+  | {part: 'href'}
+  | {part: 'hash'}
+  | {part: 'search'}
+  | {part: 'queryParams'; param?: string};
 
 export type BrowserInterface = {
   replaceURL?: (url: string) => void;
@@ -160,7 +160,7 @@ export function RecoilURLSync({
   browserInterface,
   children,
 }: RecoilURLSyncOptions): React.ReactNode {
-  const { getURL, replaceURL, pushURL, listenChangeURL } = {
+  const {getURL, replaceURL, pushURL, listenChangeURL} = {
     ...DEFAULT_BROWSER_INTERFACE,
     ...(browserInterface ?? {}),
   };
@@ -171,7 +171,7 @@ export function RecoilURLSync({
   const memoizedLoc = useMemo(
     () => loc,
     // Complications with disjoint union
-    [loc.part, (loc as any).param], // eslint-disable-line fb-www/react-hooks-deps
+    [loc.part, (loc as any).param],
   );
 
   const updateCachedState: () => void = useCallback(() => {
@@ -188,7 +188,7 @@ export function RecoilURLSync({
   useEffect(updateCachedState, [updateCachedState]);
 
   const write = useCallback(
-    ({ diff, allItems }: WriteInterface) => {
+    ({diff, allItems}: WriteInterface) => {
       updateCachedState(); // Just to be safe...
 
       // This could be optimized with an itemKey-based registry if necessary to avoid
@@ -199,13 +199,15 @@ export function RecoilURLSync({
           ? new Set(
               Array.from(atomRegistry)
                 .filter(
-                  ([, { history, itemKeys }]) =>
+                  ([, {history, itemKeys}]) =>
                     history === 'push' &&
-                    Array.from(itemKeys).some(key => 
-                      diff.has(key) && !(diff.get(key) instanceof DefaultValue)
+                    Array.from(itemKeys).some(
+                      key =>
+                        diff.has(key) &&
+                        !(diff.get(key) instanceof DefaultValue),
                     ),
                 )
-                .map(([, { itemKeys }]) => itemKeys)
+                .map(([, {itemKeys}]) => itemKeys)
                 .reduce(
                   (acc, keys) => acc.concat(Array.from(keys)),
                   [] as ItemKey[],
@@ -234,14 +236,14 @@ export function RecoilURLSync({
     [getURL, loc, pushURL, replaceURL, serialize, storeKey, updateCachedState],
   );
 
-  const read: ReadItem = useCallback((itemKey) => {
+  const read: ReadItem = useCallback(itemKey => {
     return cachedState.current?.has(itemKey)
       ? cachedState.current?.get(itemKey)
       : new DefaultValue();
   }, []);
 
   const listen = useCallback(
-    ({ updateAllKnownItems }: ListenInterface) => {
+    ({updateAllKnownItems}: ListenInterface) => {
       function handleUpdate() {
         updateCachedState();
         if (cachedState.current != null) {
@@ -253,7 +255,7 @@ export function RecoilURLSync({
     [listenChangeURL, updateCachedState],
   );
 
-  useRecoilSync({ storeKey, read, write, listen });
+  useRecoilSync({storeKey, read, write, listen});
 
   return children;
 }
@@ -293,4 +295,4 @@ export function urlSyncEffect<T>({
       cleanup?.();
     };
   };
-} 
+}

@@ -79,7 +79,7 @@ const Transaction = ({
 
   const modifiedNodes: React.ReactNode[] = [];
   const subscriberNodes: React.ReactNode[] = [];
-  for (let modifiedValue of transaction.modifiedValues) {
+  for (const modifiedValue of transaction.modifiedValues) {
     const nextList = modifiedValue.isSubscriber
       ? subscriberNodes
       : modifiedNodes;

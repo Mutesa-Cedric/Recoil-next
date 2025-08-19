@@ -67,8 +67,8 @@ const styles = {
 };
 
 type ReferenceProps = {
-  color: string,
-  legend: string,
+  color: string;
+  legend: string;
 };
 
 function ColorReference({color, legend}: ReferenceProps): React.ReactNode {
@@ -125,7 +125,10 @@ function PopupDependencyGraph(): React.ReactNode {
           nodes={{
             data: nodes,
             getNodeKey: (n: any) => n as string,
-            getNodeName: (n: any) => ((n as string).length < 25 ? (n as string) : `${(n as string).substring(0, 22)}...`),
+            getNodeName: (n: any) =>
+              (n as string).length < 25
+                ? (n as string)
+                : `${(n as string).substring(0, 22)}...`,
             getNodeValue: _n => 1,
           }}
           links={{
@@ -140,8 +143,8 @@ function PopupDependencyGraph(): React.ReactNode {
               return type === 'selector'
                 ? 'red'
                 : type === 'atom'
-                ? 'blue'
-                : '#ccc';
+                  ? 'blue'
+                  : '#ccc';
             },
             stroke: 'black',
             'shape-rendering': 'crispEdges',

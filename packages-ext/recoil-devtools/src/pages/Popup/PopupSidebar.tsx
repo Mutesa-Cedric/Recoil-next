@@ -3,7 +3,7 @@
  * Recoil DevTools browser extension.
  */
 
-import React, { useContext, useMemo } from 'react';
+import React, {useContext, useMemo} from 'react';
 import type {TransactionType} from '../../types/DevtoolsTypes';
 import ConnectionContext from './ConnectionContext';
 import Transaction from './PopupSidebarTransaction';

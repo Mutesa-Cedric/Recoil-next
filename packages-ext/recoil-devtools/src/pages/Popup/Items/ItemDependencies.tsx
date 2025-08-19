@@ -3,10 +3,10 @@
  * Recoil DevTools browser extension.
  */
 
-import React, { useContext } from 'react';
-import { SerializedValueType } from '../../../utils/Serialization';
+import React, {useContext} from 'react';
+import {SerializedValueType} from '../../../utils/Serialization';
 import ConnectionContext from '../ConnectionContext';
-import { useSelectedTransaction } from '../useSelectionHooks';
+import {useSelectedTransaction} from '../useSelectionHooks';
 import CollapsibleItem from './CollapsibleItem';
 import Item from './Item';
 import nullthrows from 'nullthrows';
@@ -24,7 +24,7 @@ const styles = {
 };
 
 type Props = {
-  name: string,
+  name: string;
 };
 
 function ItemDependencies({name}: Props): React.ReactNode {

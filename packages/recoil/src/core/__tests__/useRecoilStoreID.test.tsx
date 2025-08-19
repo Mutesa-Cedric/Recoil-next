@@ -2,23 +2,26 @@
  * TypeScript port of Recoil_useRecoilStoreID-test.js
  */
 
-import { render } from '@testing-library/react';
+import {render} from '@testing-library/react';
 import * as React from 'react';
-import { describe, expect, test } from 'vitest';
+import {describe, expect, test} from 'vitest';
 
-import type { StoreID } from '../Keys';
+import type {StoreID} from '../Keys';
 
-import { RecoilRoot, useRecoilStoreID } from '../RecoilRoot';
+import {RecoilRoot, useRecoilStoreID} from '../RecoilRoot';
 
 // Error boundary component for testing
 class ErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: (error: Error) => React.ReactNode },
-  { hasError: boolean; error?: Error }
+  {children: React.ReactNode; fallback?: (error: Error) => React.ReactNode},
+  {hasError: boolean; error?: Error}
 > {
-  state: { hasError: boolean; error?: Error } = { hasError: false };
+  state: {hasError: boolean; error?: Error} = {hasError: false};
 
-  static getDerivedStateFromError(error: Error): { hasError: boolean; error?: Error } {
-    return { hasError: true, error };
+  static getDerivedStateFromError(error: Error): {
+    hasError: boolean;
+    error?: Error;
+  } {
+    return {hasError: true, error};
   }
 
   render(): React.ReactNode {
@@ -32,10 +35,10 @@ class ErrorBoundary extends React.Component<
 
 // React rendering utilities for testing
 function renderElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(
+  const {container} = render(
     <ErrorBoundary>
       <React.Suspense fallback="loading">{element}</React.Suspense>
-    </ErrorBoundary>
+    </ErrorBoundary>,
   );
   return container;
 }
@@ -51,12 +54,12 @@ describe('useRecoilStoreID', () => {
     const container1 = renderElements(
       <RecoilRoot>
         <ReadsStoreID />
-      </RecoilRoot>
+      </RecoilRoot>,
     );
     const container2 = renderElements(
       <RecoilRoot>
         <ReadsStoreID />
-      </RecoilRoot>
+      </RecoilRoot>,
     );
 
     const storeID1 = container1.textContent;
@@ -88,7 +91,7 @@ describe('useRecoilStoreID', () => {
     renderElements(
       <RecoilRoot>
         <OuterComponent />
-      </RecoilRoot>
+      </RecoilRoot>,
     );
 
     expect(outerStoreID!).toBeDefined();
@@ -117,7 +120,7 @@ describe('useRecoilStoreID', () => {
     renderElements(
       <RecoilRoot>
         <OuterComponent />
-      </RecoilRoot>
+      </RecoilRoot>,
     );
 
     expect(outerStoreID!).toBeDefined();
@@ -146,11 +149,11 @@ describe('useRecoilStoreID', () => {
     renderElements(
       <RecoilRoot>
         <OuterComponent />
-      </RecoilRoot>
+      </RecoilRoot>,
     );
 
     expect(outerStoreID!).toBeDefined();
     expect(innerStoreID!).toBeDefined();
     expect(outerStoreID!).not.toBe(innerStoreID!);
   });
-}); 
+});

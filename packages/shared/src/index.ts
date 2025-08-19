@@ -1,2 +1,2 @@
 export * from './util';
-export * from "./polyfill"
+export * from './polyfill';

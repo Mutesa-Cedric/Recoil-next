@@ -2,8 +2,8 @@
  * TypeScript port of Refine_JSON.js
  */
 
-import type { Checker } from './Checkers';
-import { assertion } from './API';
+import type {Checker} from './Checkers';
+import {assertion} from './API';
 
 /**
  * function which takes a json string, parses it,
@@ -54,7 +54,4 @@ function jsonParser<T>(checker: Checker<T>): JSONParser<T | null> {
   };
 }
 
-export {
-  jsonParserEnforced,
-  jsonParser,
-}; 
+export {jsonParserEnforced, jsonParser};

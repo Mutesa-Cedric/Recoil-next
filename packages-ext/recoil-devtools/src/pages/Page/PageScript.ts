@@ -55,7 +55,9 @@ async function normalizeSnapshot(
         const info = snapshot.getInfo_UNSTABLE(node);
         // We only accumulate subscribers if we are looking at only dirty nodes
         if (onlyDirty) {
-          Array.from(info.subscribers.nodes).forEach(node => subscribers.add(node));
+          Array.from(info.subscribers.nodes).forEach(node =>
+            subscribers.add(node),
+          );
         }
         modifiedValues[node.key] = {
           content: serialize(

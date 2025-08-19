@@ -2,14 +2,14 @@
  * TypeScript port of Recoil_treeCacheLRU-test.js
  */
 
-import { describe, expect, test } from 'vitest';
-import { loadableWithValue } from '../../adt/Loadable';
-import type { NodeCacheRoute } from '../TreeCacheImplementationType';
+import {describe, expect, test} from 'vitest';
+import {loadableWithValue} from '../../adt/Loadable';
+import type {NodeCacheRoute} from '../TreeCacheImplementationType';
 import treeCacheLRU from '../treeCacheLRU';
 
 describe('treeCacheLRU()', () => {
   test('getting and setting cache', () => {
-    const cache = treeCacheLRU<any>({ maxSize: 10 });
+    const cache = treeCacheLRU<any>({maxSize: 10});
 
     const [route1, loadable1]: [NodeCacheRoute, any] = [
       [
@@ -52,7 +52,7 @@ describe('treeCacheLRU()', () => {
   });
 
   test('evicting from cache when full', () => {
-    const cache = treeCacheLRU<any>({ maxSize: 2 });
+    const cache = treeCacheLRU<any>({maxSize: 2});
 
     const [route1, loadable1]: [NodeCacheRoute, any] = [
       [
@@ -97,7 +97,7 @@ describe('treeCacheLRU()', () => {
   });
 
   test('updating LRU order on access', () => {
-    const cache = treeCacheLRU<any>({ maxSize: 2 });
+    const cache = treeCacheLRU<any>({maxSize: 2});
 
     const [route1, loadable1]: [NodeCacheRoute, any] = [
       [['a', 1]],
@@ -137,7 +137,7 @@ describe('treeCacheLRU()', () => {
   });
 
   test('clear cache', () => {
-    const cache = treeCacheLRU<any>({ maxSize: 10 });
+    const cache = treeCacheLRU<any>({maxSize: 10});
 
     const [route1, loadable1]: [NodeCacheRoute, any] = [
       [['a', 1]],
@@ -154,4 +154,4 @@ describe('treeCacheLRU()', () => {
       cache.get(nodeKey => route1.find(([key]) => key === nodeKey)?.[1]),
     ).toBe(undefined);
   });
-}); 
+});

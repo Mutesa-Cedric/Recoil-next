@@ -22,7 +22,7 @@ npm install recoil-next
 
 ```jsx
 import React from 'react';
-import { RecoilRoot, atom, useRecoilState } from 'recoil-next';
+import {RecoilRoot, atom, useRecoilState} from 'recoil-next';
 
 const textState = atom({
   key: 'textState',
@@ -42,7 +42,7 @@ function CharacterCounter() {
 
   return (
     <div>
-      <input type="text" value={text} onChange={(e) => setText(e.target.value)} />
+      <input type="text" value={text} onChange={e => setText(e.target.value)} />
       <p>Character count: {text.length}</p>
     </div>
   );
@@ -70,10 +70,10 @@ This library is a drop-in replacement for the original Recoil library. Simply re
 
 ```jsx
 // Before
-import { RecoilRoot, atom, useRecoilState } from 'recoil';
+import {RecoilRoot, atom, useRecoilState} from 'recoil';
 
 // After
-import { RecoilRoot, atom, useRecoilState } from 'recoil-next';
+import {RecoilRoot, atom, useRecoilState} from 'recoil-next';
 ```
 
 ## Requirements

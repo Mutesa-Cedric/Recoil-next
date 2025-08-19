@@ -4,6 +4,6 @@
 
 'use strict';
 
-import { unstable_batchedUpdates } from 'react-dom';
+import {unstable_batchedUpdates} from 'react-dom';
 
-export { unstable_batchedUpdates }; 
+export {unstable_batchedUpdates};

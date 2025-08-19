@@ -3,22 +3,21 @@
  */
 
 import * as React from 'react';
-import { describe, expect, test } from 'vitest';
+import {describe, expect, test} from 'vitest';
 
-import type { MutableSnapshot } from '../Snapshot';
+import type {MutableSnapshot} from '../Snapshot';
 
-import { useSetRecoilState } from '../../hooks/Hooks';
-import { atom } from '../../recoil_values/atom';
-import { constSelector } from '../../recoil_values/constSelector';
-import { selector } from '../../recoil_values/selector';
-import { RecoilRoot, useStoreRef } from '../RecoilRoot';
+import {useSetRecoilState} from '../../hooks/Hooks';
+import {atom} from '../../recoil_values/atom';
+import {constSelector} from '../../recoil_values/constSelector';
+import {selector} from '../../recoil_values/selector';
+import {RecoilRoot, useStoreRef} from '../RecoilRoot';
 
 // Simple test component to read atom values
-function ReadsAtom<T>({ atom }: { atom: any }) {
+function ReadsAtom<T>({atom}: {atom: any}) {
   const value = JSON.stringify('mocked'); // Simplified for testing
   return <>{value}</>;
 }
-
 
 describe('RecoilRoot', () => {
   describe('initializeState', () => {
@@ -29,7 +28,7 @@ describe('RecoilRoot', () => {
       });
       const mySelector = constSelector(myAtom);
 
-      function initializeState({ set, getLoadable }: MutableSnapshot) {
+      function initializeState({set, getLoadable}: MutableSnapshot) {
         expect(getLoadable(myAtom).contents).toEqual('DEFAULT');
         expect(getLoadable(mySelector).contents).toEqual('DEFAULT');
         set(myAtom, 'INITIALIZE');
@@ -56,11 +55,11 @@ describe('RecoilRoot', () => {
       });
       const mySelector = selector({
         key: 'RecoilRoot - initializeState - selector selector',
-        get: ({ get }) => get(myAtom),
-        set: ({ set }, newValue) => set(myAtom, newValue),
+        get: ({get}) => get(myAtom),
+        set: ({set}, newValue) => set(myAtom, newValue),
       });
 
-      function initializeState({ set, getLoadable }: MutableSnapshot) {
+      function initializeState({set, getLoadable}: MutableSnapshot) {
         expect(getLoadable(myAtom).contents).toEqual('DEFAULT');
         expect(getLoadable(mySelector).contents).toEqual('DEFAULT');
         set(mySelector, 'INITIALIZE');
@@ -147,7 +146,7 @@ describe('RecoilRoot', () => {
         default: 'DEFAULT',
       });
 
-      function initializeStateWithError({ set }: MutableSnapshot) {
+      function initializeStateWithError({set}: MutableSnapshot) {
         throw new Error('Initialization error');
       }
 
@@ -194,11 +193,7 @@ describe('RecoilRoot', () => {
       function Counter() {
         const setCount = useSetRecoilState(countAtom);
 
-        return (
-          <button onClick={() => setCount(c => c + 1)}>
-            Increment
-          </button>
-        );
+        return <button onClick={() => setCount(c => c + 1)}>Increment</button>;
       }
 
       const element = (
@@ -237,4 +232,4 @@ describe('RecoilRoot', () => {
       expect(element.type).toBe(RecoilRoot);
     });
   });
-}); 
+});

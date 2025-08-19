@@ -28,9 +28,9 @@ const styles = {
 };
 
 type Props = {
-  name: string,
-  startCollapsed?: boolean,
-  isRoot?: boolean,
+  name: string;
+  startCollapsed?: boolean;
+  isRoot?: boolean;
 };
 
 function DiffItem({

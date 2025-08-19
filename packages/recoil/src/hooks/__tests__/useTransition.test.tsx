@@ -2,30 +2,32 @@
  * TypeScript port of Recoil_useTransition-test.js
  */
 
-import { render } from '@testing-library/react';
+import {render} from '@testing-library/react';
 import * as React from 'react';
-import { useTransition } from 'react';
-import { expect, test } from 'vitest';
+import {useTransition} from 'react';
+import {expect, test} from 'vitest';
 
-
-import { reactMode } from '../../core/ReactMode';
-import { RecoilRoot } from '../../core/RecoilRoot';
-import { atom } from '../../recoil_values/atom';
-import { selectorFamily } from '../../recoil_values/selectorFamily';
+import {reactMode} from '../../core/ReactMode';
+import {RecoilRoot} from '../../core/RecoilRoot';
+import {atom} from '../../recoil_values/atom';
+import {selectorFamily} from '../../recoil_values/selectorFamily';
 import {
   useRecoilState_TRANSITION_SUPPORT_UNSTABLE,
-  useRecoilValue_TRANSITION_SUPPORT_UNSTABLE
+  useRecoilValue_TRANSITION_SUPPORT_UNSTABLE,
 } from '../Hooks';
 
 // Error boundary component for testing
 class ErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: (error: Error) => React.ReactNode },
-  { hasError: boolean; error?: Error }
+  {children: React.ReactNode; fallback?: (error: Error) => React.ReactNode},
+  {hasError: boolean; error?: Error}
 > {
-  state: { hasError: boolean; error?: Error } = { hasError: false };
+  state: {hasError: boolean; error?: Error} = {hasError: false};
 
-  static getDerivedStateFromError(error: Error): { hasError: boolean; error?: Error } {
-    return { hasError: true, error };
+  static getDerivedStateFromError(error: Error): {
+    hasError: boolean;
+    error?: Error;
+  } {
+    return {hasError: true, error};
   }
 
   render(): React.ReactNode {
@@ -39,12 +41,12 @@ class ErrorBoundary extends React.Component<
 
 // React rendering utilities for testing
 function renderElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(
+  const {container} = render(
     <RecoilRoot>
       <ErrorBoundary>
         <React.Suspense fallback="loading">{element}</React.Suspense>
       </ErrorBoundary>
-    </RecoilRoot>
+    </RecoilRoot>,
   );
   return container;
 }
@@ -118,8 +120,7 @@ test('Works with useTransition', async () => {
               startTransition(() => {
                 // This should be wrapped in a transition
               });
-            }}
-          >
+            }}>
             Switch to {index}
           </button>
           {isPending && <div>Loading...</div>}
@@ -147,7 +148,8 @@ test('Works with useTransition', async () => {
   }
 
   function Main() {
-    const [index, setIndex] = useRecoilState_TRANSITION_SUPPORT_UNSTABLE(indexAtom);
+    const [index, setIndex] =
+      useRecoilState_TRANSITION_SUPPORT_UNSTABLE(indexAtom);
     const [isPending, startTransition] = useTransition();
 
     return (
@@ -157,8 +159,7 @@ test('Works with useTransition', async () => {
             startTransition(() => {
               setIndex(1);
             });
-          }}
-        >
+          }}>
           Switch to 1
         </button>
         <button
@@ -166,8 +167,7 @@ test('Works with useTransition', async () => {
             startTransition(() => {
               setIndex(2);
             });
-          }}
-        >
+          }}>
           Switch to 2
         </button>
         <Component index={index} />
@@ -199,10 +199,12 @@ test('Works with useTransition', async () => {
   // Test with selector family
   const selectorFamilyInstance = selectorFamily({
     key: `selectorFamily${nextID++}`,
-    get: (index: number) => ({get}: {get: any}) => {
-      const baseValue = get(indexAtom);
-      return getItem(index + baseValue);
-    },
+    get:
+      (index: number) =>
+      ({get}: {get: any}) => {
+        const baseValue = get(indexAtom);
+        return getItem(index + baseValue);
+      },
   });
 
   function SelectorFamilyComponent({index}: {index: number}) {
@@ -213,7 +215,8 @@ test('Works with useTransition', async () => {
   }
 
   function Main2() {
-    const [index, setIndex] = useRecoilState_TRANSITION_SUPPORT_UNSTABLE(indexAtom);
+    const [index, setIndex] =
+      useRecoilState_TRANSITION_SUPPORT_UNSTABLE(indexAtom);
     const [isPending, startTransition] = useTransition();
 
     return (
@@ -223,8 +226,7 @@ test('Works with useTransition', async () => {
             startTransition(() => {
               setIndex(1);
             });
-          }}
-        >
+          }}>
           Switch to 1
         </button>
         <SelectorFamilyComponent index={index} />
@@ -247,4 +249,4 @@ test('Works with useTransition', async () => {
 
   expect(c2.textContent).toContain('v1');
   expect(c2.textContent).not.toContain('Main Loading...');
-}); 
+});

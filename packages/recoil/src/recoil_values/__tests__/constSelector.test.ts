@@ -2,18 +2,18 @@
  * TypeScript port of Recoil_constSelector-test.js
  */
 
-import { test, expect } from 'vitest';
-import { constSelector } from '../constSelector';
-import { makeEmptyStoreState } from '../../core/State';
-import { getRecoilValueAsLoadable } from '../../core/RecoilValueInterface';
+import {test, expect} from 'vitest';
+import {constSelector} from '../constSelector';
+import {makeEmptyStoreState} from '../../core/State';
+import {getRecoilValueAsLoadable} from '../../core/RecoilValueInterface';
 
 // Simple store setup for testing
 const store = {
   storeID: 'test',
   getState: () => makeEmptyStoreState(),
   replaceState: () => {},
-  getGraph: () => ({ nodeDeps: new Map(), nodeToNodeSubscriptions: new Map() }),
-  subscribeToTransactions: () => ({ release: () => {} }),
+  getGraph: () => ({nodeDeps: new Map(), nodeToNodeSubscriptions: new Map()}),
+  subscribeToTransactions: () => ({release: () => {}}),
   addTransactionMetadata: () => {},
 };
 
@@ -89,4 +89,4 @@ test('constSelector - function', () => {
   expect((get(barSelector) as any)()).toEqual('BAR');
 
   expect(constSelector(foo as any)).toEqual(fooSelector);
-}); 
+});

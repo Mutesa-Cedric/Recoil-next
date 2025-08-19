@@ -5,13 +5,15 @@
 'use strict';
 
 export default function err(message: string): Error {
-    const error = new Error(message);
+  const error = new Error(message);
 
-    if (error.stack === undefined) {
-        try {
-            throw error;
-        } catch (_) { /* T-ignore */ }
+  if (error.stack === undefined) {
+    try {
+      throw error;
+    } catch (_) {
+      /* T-ignore */
     }
+  }
 
-    return error;
-} 
+  return error;
+}

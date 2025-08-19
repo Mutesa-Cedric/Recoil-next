@@ -2,15 +2,15 @@
  * TypeScript port of Recoil_useRecoilValueLoadable-test.js
  */
 
-import { render } from '@testing-library/react';
+import {render} from '@testing-library/react';
 import * as React from 'react';
-import { describe, expect, test } from 'vitest';
+import {describe, expect, test} from 'vitest';
 
-import { RecoilRoot } from '../../core/RecoilRoot';
-import { constSelector } from '../../recoil_values/constSelector';
-import { errorSelector } from '../../recoil_values/errorSelector';
-import { selector } from '../../recoil_values/selector';
-import { useRecoilValueLoadable } from '../Hooks';
+import {RecoilRoot} from '../../core/RecoilRoot';
+import {constSelector} from '../../recoil_values/constSelector';
+import {errorSelector} from '../../recoil_values/errorSelector';
+import {selector} from '../../recoil_values/selector';
+import {useRecoilValueLoadable} from '../Hooks';
 
 // Helper function to create async selectors for testing
 let id = 0;
@@ -34,7 +34,7 @@ function asyncSelector<T>(
 }
 
 function renderElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(<RecoilRoot>{element}</RecoilRoot>);
+  const {container} = render(<RecoilRoot>{element}</RecoilRoot>);
   return container;
 }
 
@@ -48,7 +48,7 @@ describe('useRecoilValueLoadable', () => {
   test('loadable with value', async () => {
     const valueSel = constSelector('VALUE');
     let promise: Promise<any>;
-    
+
     function ReadLoadable() {
       const loadable = useRecoilValueLoadable(valueSel);
       expect(loadable.state).toBe('hasValue');
@@ -63,7 +63,7 @@ describe('useRecoilValueLoadable', () => {
       expect(() => loadable.promiseOrThrow()).toThrow(Error);
       return loadable.valueOrThrow();
     }
-    
+
     const c = renderElements(<ReadLoadable />);
     expect(c.textContent).toEqual('VALUE');
     await promise!;
@@ -72,7 +72,7 @@ describe('useRecoilValueLoadable', () => {
   test('loadable with error', async () => {
     const valueSel = errorSelector<any>('ERROR');
     let promise: Promise<any>;
-    
+
     function ReadLoadable() {
       const loadable = useRecoilValueLoadable(valueSel);
       expect(loadable.state).toBe('hasError');
@@ -88,7 +88,7 @@ describe('useRecoilValueLoadable', () => {
       expect(() => loadable.promiseOrThrow()).toThrow(Error);
       return 'VALUE';
     }
-    
+
     const c = renderElements(<ReadLoadable />);
     expect(c.textContent).toEqual('VALUE');
     await promise!;
@@ -97,7 +97,7 @@ describe('useRecoilValueLoadable', () => {
   test('loading loadable', async () => {
     const [valueSel, resolve] = asyncSelector<string>();
     const promises: Promise<any>[] = [];
-    
+
     function ReadLoadable() {
       const loadable = useRecoilValueLoadable(valueSel);
       if (loadable.state === 'loading') {
@@ -122,16 +122,18 @@ describe('useRecoilValueLoadable', () => {
         return 'LOADING';
       } else {
         // If it's already resolved, just return the value
-        return loadable.state === 'hasValue' ? String(loadable.contents) : 'ERROR';
+        return loadable.state === 'hasValue'
+          ? String(loadable.contents)
+          : 'ERROR';
       }
     }
-    
+
     const c = renderElements(<ReadLoadable />);
-    
+
     // Resolve the promise and verify the promises resolve correctly
     resolve('VALUE');
     await flushPromisesAndTimers();
-    
+
     // Only wait for promises if they were created (i.e., loadable was loading)
     if (promises.length > 0) {
       await Promise.all(promises);
@@ -140,10 +142,10 @@ describe('useRecoilValueLoadable', () => {
 
   test('loadable interface methods', () => {
     const valueSel = constSelector(42);
-    
+
     function TestLoadable() {
       const loadable = useRecoilValueLoadable(valueSel);
-      
+
       // Test that all expected methods exist
       expect(typeof loadable.getValue).toBe('function');
       expect(typeof loadable.toPromise).toBe('function');
@@ -153,14 +155,14 @@ describe('useRecoilValueLoadable', () => {
       expect(typeof loadable.errorOrThrow).toBe('function');
       expect(typeof loadable.promiseMaybe).toBe('function');
       expect(typeof loadable.promiseOrThrow).toBe('function');
-      
+
       // Test property access
       expect(loadable.state).toBe('hasValue');
       expect(loadable.contents).toBe(42);
-      
+
       return null;
     }
-    
+
     renderElements(<TestLoadable />);
   });
-}); 
+});

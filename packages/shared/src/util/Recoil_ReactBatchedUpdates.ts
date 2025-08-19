@@ -4,6 +4,6 @@
 
 'use strict';
 
-import { unstable_batchedUpdates } from '../polyfill/ReactBatchedUpdates';
+import {unstable_batchedUpdates} from '../polyfill/ReactBatchedUpdates';
 
-export { unstable_batchedUpdates }; 
+export {unstable_batchedUpdates};

@@ -1,73 +1,80 @@
 {
-    "name": "recoil-next",
-    "version": "0.2.0",
-    "description": "Continuation of Recoil - A state management library for React",
-    "main": "dist/index.cjs",
-    "module": "dist/index.mjs",
-    "types": "dist/index.d.ts",
-    "exports": {
-        ".": {
-            "import": {
-                "types": "./dist/index.d.ts",
-                "default": "./dist/index.mjs"
-            },
-            "require": {
-                "types": "./dist/index.d.cts",
-                "default": "./dist/index.cjs"
-            }
-        }
-    },
-    "files": [
-        "dist"
-    ],
-    "scripts": {
-        "build": "node scripts/build.mjs",
-        "build:shared": "pnpm --filter shared build",
-        "build:recoil": "pnpm --filter recoil-next build",
-        "build:recoil-relay": "pnpm --filter recoil-relay-next build",
-        "build:recoil-sync": "pnpm --filter recoil-sync-next build",
-        "build:refine": "pnpm --filter refine-next build",
-        "build:all": "pnpm --filter './packages/**' build",
-        "test": "vitest",
-        "test:ui": "vitest --ui",
-        "test:run": "vitest run",
-        "test:all": "pnpm --filter './packages/**' test",
-        "lint": "eslint \"packages/**/*.{ts,tsx}\" \"packages-ext/**/*.{ts,tsx}\"",
-        "lint:all": "pnpm --filter './packages/**' --filter './packages-ext/**' lint",
-        "format": "prettier --write \"packages/**/*.{ts,tsx,js,jsx,json,md}\" \"packages-ext/**/*.{ts,tsx,js,jsx,json,md}\" \"*.{json,md,yml,yaml}\"",
-        "typecheck": "tsc --noEmit",
-        "typecheck:all": "pnpm --filter './packages/**' typecheck",
-        "pack": "node scripts/pack.mjs",
-        "deploy-nightly": "node scripts/deploy_nightly_build.js",
-        "clean": "pnpm --filter './packages/**' --filter './packages-ext/**' clean && rm -rf dist",
-        "dev": "pnpm --filter todo-example dev"
-    },
-    "peerDependencies": {
-        "react": ">=18"
-    },
-    "devDependencies": {
-        "@rollup/plugin-commonjs": "^28.0.6",
-        "@rollup/plugin-node-resolve": "^16.0.1",
-        "@rollup/plugin-typescript": "^12.1.4",
-        "@testing-library/jest-dom": "^6.6.3",
-        "@testing-library/react": "^16.3.0",
-        "@types/hamt_plus": "^1.0.0",
-        "@types/node": "^18.15.3",
-        "@types/react": "^18.2.39",
-        "@types/react-dom": "^18.2.14",
-        "@typescript-eslint/eslint-plugin": "^8.36.0",
-        "@vitest/ui": "^3.2.4",
-        "eslint-config-prettier": "^10.1.5",
-        "eslint-plugin-prettier": "^5.5.1",
-        "hamt_plus": "^1.0.2",
-        "jsdom": "^26.1.0",
-        "react": "^19.1.1",
-        "react-dom": "^19.1.1",
-        "react-test-renderer": "^19.1.0",
-        "rollup": "^4.0.0",
-        "rollup-plugin-dts": "^6.2.1",
-        "tslib": "^2.6.0",
-        "typescript": "^5.4.2",
-        "vitest": "^3.2.4"
+  "name": "recoil-next",
+  "version": "0.2.0",
+  "description": "Continuation of Recoil - A state management library for React",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:shared": "pnpm --filter shared build",
+    "build:recoil": "pnpm --filter recoil-next build",
+    "build:recoil-relay": "pnpm --filter recoil-relay-next build",
+    "build:recoil-sync": "pnpm --filter recoil-sync-next build",
+    "build:refine": "pnpm --filter refine-next build",
+    "build:all": "pnpm --filter './packages/**' build",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:all": "pnpm --filter './packages/**' test",
+    "lint": "eslint \"packages/**/*.{ts,tsx}\" \"packages-ext/**/*.{ts,tsx}\"",
+    "lint:all": "pnpm --filter './packages/**' --filter './packages-ext/**' lint",
+    "format": "prettier --write \"packages/**/*.{ts,tsx,js,jsx,json,md}\" \"packages-ext/**/*.{ts,tsx,js,jsx,json,md}\" \"*.{json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"packages/**/*.{ts,tsx,js,jsx,json,md}\" \"packages-ext/**/*.{ts,tsx,js,jsx,json,md}\" \"*.{json,md,yml,yaml}\"",
+    "lint:fix": "eslint \"packages/**/*.{ts,tsx}\" \"packages-ext/**/*.{ts,tsx}\" --fix",
+    "typecheck": "tsc --noEmit",
+    "typecheck:all": "pnpm --filter './packages/**' typecheck",
+    "pack": "node scripts/pack.mjs",
+    "deploy-nightly": "node scripts/deploy_nightly_build.js",
+    "clean": "pnpm --filter './packages/**' --filter './packages-ext/**' clean && rm -rf dist",
+    "dev": "pnpm --filter todo-example dev"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.6",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.4",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@types/hamt_plus": "^1.0.0",
+    "@types/node": "^18.15.3",
+    "@types/react": "^18.2.39",
+    "@types/react-dom": "^18.2.14",
+    "@typescript-eslint/eslint-plugin": "^8.36.0",
+    "@typescript-eslint/parser": "^8.39.1",
+    "@vitest/ui": "^3.2.4",
+    "eslint": "^9.33.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-prettier": "^5.5.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-unused-imports": "^4.2.0",
+    "hamt_plus": "^1.0.2",
+    "jsdom": "^26.1.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-test-renderer": "^19.1.0",
+    "rollup": "^4.0.0",
+    "rollup-plugin-dts": "^6.2.1",
+    "tslib": "^2.6.0",
+    "typescript": "^5.4.2",
+    "vitest": "^3.2.4"
+  }
 }

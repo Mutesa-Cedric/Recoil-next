@@ -2,8 +2,8 @@
  * TypeScript port of Refine_UtilityCheckers.js
  */
 
-import type { Checker, CheckFailure, CheckResult } from './Checkers';
-import { Path, compose, failure, success } from './Checkers';
+import type {Checker, CheckFailure, CheckResult} from './Checkers';
+import {Path, compose, failure, success} from './Checkers';
 
 /**
  * Cast the type of a value after passing a given checker
@@ -19,7 +19,7 @@ import { Path, compose, failure, success } from './Checkers';
  * ```
  */
 function asType<A, B>(checker: Checker<A>, cast: (value: A) => B): Checker<B> {
-  return compose(checker, ({ value, warnings }) =>
+  return compose(checker, ({value, warnings}) =>
     success(cast(value), warnings),
   );
 }
@@ -72,7 +72,11 @@ function union<V>(...checkers: readonly Checker<V>[]): Checker<V> {
       }
     }
 
-    return unionFailure('value did not match any provided type', path, failures);
+    return unionFailure(
+      'value did not match any provided type',
+      path,
+      failures,
+    );
   };
 }
 
@@ -116,7 +120,7 @@ function nullable<T>(
     nullWithWarningWhenInvalid?: boolean;
   }>,
 ): Checker<T | null> {
-  const { nullWithWarningWhenInvalid = false } = options ?? {};
+  const {nullWithWarningWhenInvalid = false} = options ?? {};
 
   return (value: unknown, parentPath = new Path()): CheckResult<T | null> => {
     if (value === null) {
@@ -134,7 +138,7 @@ function nullable<T>(
       return success(null, [result]);
     }
 
-    const { message, path } = result;
+    const {message, path} = result;
     return failure(message, path);
   };
 }
@@ -182,9 +186,12 @@ function voidable<T>(
     undefinedWithWarningWhenInvalid?: boolean;
   }>,
 ): Checker<T | undefined> {
-  const { undefinedWithWarningWhenInvalid = false } = options ?? {};
+  const {undefinedWithWarningWhenInvalid = false} = options ?? {};
 
-  return (value: unknown, parentPath = new Path()): CheckResult<T | undefined> => {
+  return (
+    value: unknown,
+    parentPath = new Path(),
+  ): CheckResult<T | undefined> => {
     if (value === undefined) {
       return success(value, []);
     }
@@ -200,7 +207,7 @@ function voidable<T>(
       return success(undefined, [result]);
     }
 
-    const { message, path } = result;
+    const {message, path} = result;
     return failure(message, path);
   };
 }
@@ -252,7 +259,7 @@ function constraint<T>(
   constraintFunc: (value: T) => boolean,
   constraintMessage: string = 'constraint violated',
 ): Checker<T> {
-  return compose(checker, ({ value, warnings }, path) => {
+  return compose(checker, ({value, warnings}, path) => {
     return constraintFunc(value)
       ? success(value, warnings)
       : failure(constraintMessage, path);
@@ -323,4 +330,4 @@ export {
   asType,
   lazy,
   custom,
-}; 
+};

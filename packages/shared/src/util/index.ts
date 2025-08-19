@@ -28,4 +28,4 @@ export * from './Recoil_concatIterables';
 export * from './Recoil_recoverableViolation';
 export * from './Recoil_expectationViolation';
 export * from './Recoil_invariant';
-export * from './Recoil_err'; 
+export * from './Recoil_err';

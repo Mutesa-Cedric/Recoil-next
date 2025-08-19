@@ -2,19 +2,19 @@
  * TypeScript port of Recoil_useRecoilRefresher-test.js
  */
 
-import { render } from '@testing-library/react';
+import {render} from '@testing-library/react';
 import * as React from 'react';
-import { act } from 'react';
-import { describe, expect, test, vi } from 'vitest';
+import {act} from 'react';
+import {describe, expect, test, vi} from 'vitest';
 
-import { RecoilRoot } from '../../core/RecoilRoot';
-import { atom } from '../../recoil_values/atom';
-import { selector } from '../../recoil_values/selector';
-import { useRecoilValue, useSetRecoilState } from '../Hooks';
-import { useRecoilRefresher } from '../useRecoilRefresher';
+import {RecoilRoot} from '../../core/RecoilRoot';
+import {atom} from '../../recoil_values/atom';
+import {selector} from '../../recoil_values/selector';
+import {useRecoilValue, useSetRecoilState} from '../Hooks';
+import {useRecoilRefresher} from '../useRecoilRefresher';
 
 function renderElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(<RecoilRoot>{element}</RecoilRoot>);
+  const {container} = render(<RecoilRoot>{element}</RecoilRoot>);
   return container;
 }
 
@@ -34,7 +34,7 @@ describe('useRecoilRefresher', () => {
 
     const container = renderElements(<Component />);
     expect(container.textContent).toBe('default');
-    
+
     act(() => {
       refresh!();
     });
@@ -57,7 +57,7 @@ describe('useRecoilRefresher', () => {
 
     const container = renderElements(<Component />);
     expect(container.textContent).toBe('0');
-    
+
     // Test that refresh function exists and can be called
     expect(typeof refresh).toBe('function');
     act(() => {
@@ -76,14 +76,17 @@ describe('useRecoilRefresher', () => {
     let i = 0;
     const mySelector = selector({
       key: 'useRecoilRefresher entire cache selector',
-      get: ({ get }) => [get(myAtom), i++] as [string, number],
+      get: ({get}) => [get(myAtom), i++] as [string, number],
     });
 
     let setMyAtom: ((value: string) => void) | null = null;
     let refresh: (() => void) | null = null;
-    
+
     function Component() {
-      const [atomValue, iValue] = useRecoilValue(mySelector) as [string, number];
+      const [atomValue, iValue] = useRecoilValue(mySelector) as [
+        string,
+        number,
+      ];
       refresh = useRecoilRefresher(mySelector);
       setMyAtom = useSetRecoilState(myAtom);
       return <div>{`${atomValue}-${iValue}`}</div>;
@@ -117,13 +120,13 @@ describe('useRecoilRefresher', () => {
       get: getA,
     });
 
-    const getB = vi.fn(({ get }) => get(selectorA) + 'B');
+    const getB = vi.fn(({get}) => get(selectorA) + 'B');
     const selectorB = selector({
       key: 'useRecoilRefresher ancestors B',
       get: getB,
     });
 
-    const getC = vi.fn(({ get }) => get(selectorB) + 'C');
+    const getC = vi.fn(({get}) => get(selectorB) + 'C');
     const selectorC = selector({
       key: 'useRecoilRefresher ancestors C',
       get: getC,
@@ -148,7 +151,7 @@ describe('useRecoilRefresher', () => {
     expect(container.textContent).toBe('ABC');
     // After refresh, selectors should be re-executed due to cache clearing
     expect(getC).toHaveBeenCalledTimes(2); // Initial + refresh
-    expect(getB).toHaveBeenCalledTimes(2); // Initial + refresh  
+    expect(getB).toHaveBeenCalledTimes(2); // Initial + refresh
     expect(getA).toHaveBeenCalledTimes(2); // Initial + refresh
   });
-}); 
+});

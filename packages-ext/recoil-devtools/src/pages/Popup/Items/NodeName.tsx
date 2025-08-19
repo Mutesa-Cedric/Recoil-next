@@ -24,8 +24,8 @@ const styles = {
 };
 
 type KeyProps = {
-  name: string | number,
-  node: Node | null | undefined,
+  name: string | number;
+  node: Node | null | undefined;
 };
 
 export default function NodeName({name, node}: KeyProps): React.ReactElement {

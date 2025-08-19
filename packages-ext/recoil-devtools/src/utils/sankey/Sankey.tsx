@@ -114,7 +114,10 @@ function Sankey<N extends any, L extends any>({
 
   // Chart Size
   const positionRange = useMemo(
-    (): [number, number] => [0, (orientation === 'horizontal' ? height : width) - margin * 2],
+    (): [number, number] => [
+      0,
+      (orientation === 'horizontal' ? height : width) - margin * 2,
+    ],
     [orientation, height, width, margin],
   );
   const depthRange = useMemo(
@@ -334,8 +337,8 @@ function Sankey<N extends any, L extends any>({
           l.fadeSource
             ? 'url(#mask_fade_left)'
             : l.fadeTarget
-            ? 'url(#mask_fade_right)'
-            : null,
+              ? 'url(#mask_fade_right)'
+              : null,
         class: linkClass ?? '',
       })
       .style({

@@ -1,7 +1,7 @@
 /**
  * TypeScript port of Recoil_lazyProxy-test.js
  */
-import { test, expect, vi } from 'vitest';
+import {test, expect, vi} from 'vitest';
 import lazyProxy from '../Recoil_lazyProxy';
 
 test('lazyProxy', () => {
@@ -42,4 +42,4 @@ test('lazyProxy - keys', () => {
     keys.push(key);
   }
   expect(keys).toEqual(['foo', 'bar']);
-}); 
+});

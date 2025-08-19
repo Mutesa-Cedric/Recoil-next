@@ -15,7 +15,8 @@ const SerializedValueType = Object.freeze({
   symbol: 'b',
 });
 
-export type SupportedSerializedValueTypes = typeof SerializedValueType[keyof typeof SerializedValueType];
+export type SupportedSerializedValueTypes =
+  (typeof SerializedValueType)[keyof typeof SerializedValueType];
 
 export type SerializedValue = {
   t: SupportedSerializedValueTypes;
@@ -180,7 +181,9 @@ function deserialize(item: SerializedValue | null | undefined): any {
   } else if (type === SerializedValueType.set) {
     return new Set(value?.map(deserialize));
   } else if (type === SerializedValueType.map) {
-    return new Map(value?.map((entry: SerializedValue[]) => entry.map(deserialize)));
+    return new Map(
+      value?.map((entry: SerializedValue[]) => entry.map(deserialize)),
+    );
   } else if (type === SerializedValueType.date) {
     return new Date(value ?? 0);
   } else if (type === SerializedValueType.function) {
@@ -194,10 +197,13 @@ function deserialize(item: SerializedValue | null | undefined): any {
   } else if (type === SerializedValueType.array) {
     return value?.map(deserialize);
   } else if (type === SerializedValueType.object) {
-    return value?.reduce((prev: any, [key, val]: [SerializedValue, SerializedValue]) => {
-      prev[deserialize(key)] = deserialize(val);
-      return prev;
-    }, {});
+    return value?.reduce(
+      (prev: any, [key, val]: [SerializedValue, SerializedValue]) => {
+        prev[deserialize(key)] = deserialize(val);
+        return prev;
+      },
+      {},
+    );
   } else if (type === SerializedValueType.promise) {
     return String(item);
   } else {
@@ -217,10 +223,13 @@ function formatForDiff(item: SerializedValue | null | undefined): any {
   } else if (type === SerializedValueType.set) {
     return value?.map(formatForDiff);
   } else if (type === SerializedValueType.map) {
-    return value?.reduce((prev: any, [key, val]: [SerializedValue, SerializedValue]) => {
-      prev[formatForDiff(key)] = formatForDiff(val);
-      return prev;
-    }, {});
+    return value?.reduce(
+      (prev: any, [key, val]: [SerializedValue, SerializedValue]) => {
+        prev[formatForDiff(key)] = formatForDiff(val);
+        return prev;
+      },
+      {},
+    );
   } else if (type === SerializedValueType.date) {
     return new Date(value ?? 0);
   } else if (type === SerializedValueType.error) {
@@ -234,10 +243,13 @@ function formatForDiff(item: SerializedValue | null | undefined): any {
   } else if (type === SerializedValueType.array) {
     return value?.map(formatForDiff);
   } else if (type === SerializedValueType.object) {
-    return value?.reduce((prev: any, [key, val]: [SerializedValue, SerializedValue]) => {
-      prev[formatForDiff(key)] = formatForDiff(val);
-      return prev;
-    }, {});
+    return value?.reduce(
+      (prev: any, [key, val]: [SerializedValue, SerializedValue]) => {
+        prev[formatForDiff(key)] = formatForDiff(val);
+        return prev;
+      },
+      {},
+    );
   } else if (type === SerializedValueType.promise) {
     return String(item);
   } else {

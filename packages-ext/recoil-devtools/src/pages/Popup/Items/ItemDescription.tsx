@@ -5,7 +5,7 @@
 
 import React from 'react';
 import type {SerializedValue} from '../../../utils/Serialization';
-import { SerializedValueType } from '../../../utils/Serialization';
+import {SerializedValueType} from '../../../utils/Serialization';
 
 const styles = {
   description: {
@@ -22,8 +22,8 @@ const styles = {
 };
 
 type KeyProps = {
-  content: SerializedValue | null | undefined,
-  previous?: SerializedValue | null | undefined,
+  content: SerializedValue | null | undefined;
+  previous?: SerializedValue | null | undefined;
 };
 
 function totalLength(content: SerializedValue): number {
@@ -50,13 +50,21 @@ function ItemDescription({content}: KeyProps): React.ReactNode {
   }
 
   // hasItemDescription makes sure this works
-  const description = ItemDescriptionRenderers[content.t as unknown as keyof typeof ItemDescriptionRenderers](content);
+  const description =
+    ItemDescriptionRenderers[
+      content.t as unknown as keyof typeof ItemDescriptionRenderers
+    ](content);
 
   return <span style={styles.description}>{description}</span>;
 }
 
-const hasItemDescription = function (content: SerializedValue | null | undefined): boolean {
-  return content?.t != null && Object.prototype.hasOwnProperty.call(ItemDescriptionRenderers, content.t);
+const hasItemDescription = function (
+  content: SerializedValue | null | undefined,
+): boolean {
+  return (
+    content?.t != null &&
+    Object.prototype.hasOwnProperty.call(ItemDescriptionRenderers, content.t)
+  );
 };
 
 export default ItemDescription;

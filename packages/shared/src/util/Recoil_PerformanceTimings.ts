@@ -5,5 +5,5 @@
 'use strict';
 
 export function startPerfBlock(_id: unknown): () => null {
-    return () => null;
-} 
+  return () => null;
+}

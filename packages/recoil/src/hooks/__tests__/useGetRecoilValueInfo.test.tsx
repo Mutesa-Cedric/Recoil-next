@@ -2,29 +2,36 @@
  * TypeScript port of Recoil_useGetRecoilValueInfo-test.js
  */
 
-import { describe, test, expect } from 'vitest';
+import {describe, test, expect} from 'vitest';
 import * as React from 'react';
-import { act } from 'react';
-import { render } from '@testing-library/react';
+import {act} from 'react';
+import {render} from '@testing-library/react';
 
-import type { RecoilState, RecoilValue, RecoilValueReadOnly } from '../../core/RecoilValue';
-import type { RecoilValueInfo } from '../../core/FunctionalCore';
+import type {
+  RecoilState,
+  RecoilValue,
+  RecoilValueReadOnly,
+} from '../../core/RecoilValue';
+import type {RecoilValueInfo} from '../../core/FunctionalCore';
 
-import { RecoilRoot } from '../../core/RecoilRoot';
-import { atom } from '../../recoil_values/atom';
-import { selector } from '../../recoil_values/selector';
-import { useGetRecoilValueInfo } from '../useGetRecoilValueInfo';
-import { useRecoilValue, useRecoilState, useResetRecoilState } from '../Hooks';
+import {RecoilRoot} from '../../core/RecoilRoot';
+import {atom} from '../../recoil_values/atom';
+import {selector} from '../../recoil_values/selector';
+import {useGetRecoilValueInfo} from '../useGetRecoilValueInfo';
+import {useRecoilValue, useRecoilState, useResetRecoilState} from '../Hooks';
 
 // Error boundary component for testing
 class ErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: (error: Error) => React.ReactNode },
-  { hasError: boolean; error?: Error }
+  {children: React.ReactNode; fallback?: (error: Error) => React.ReactNode},
+  {hasError: boolean; error?: Error}
 > {
-  state: { hasError: boolean; error?: Error } = { hasError: false };
+  state: {hasError: boolean; error?: Error} = {hasError: false};
 
-  static getDerivedStateFromError(error: Error): { hasError: boolean; error?: Error } {
-    return { hasError: true, error };
+  static getDerivedStateFromError(error: Error): {
+    hasError: boolean;
+    error?: Error;
+  } {
+    return {hasError: true, error};
   }
 
   render(): React.ReactNode {
@@ -38,18 +45,18 @@ class ErrorBoundary extends React.Component<
 
 // React rendering utilities for testing
 function renderElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(
+  const {container} = render(
     <RecoilRoot>
       <ErrorBoundary>
         <React.Suspense fallback="loading">{element}</React.Suspense>
       </ErrorBoundary>
-    </RecoilRoot>
+    </RecoilRoot>,
   );
   return container;
 }
 
 // Test component to read atom values
-function ReadsAtom<T>({ atom }: { atom: RecoilValue<T> }) {
+function ReadsAtom<T>({atom}: {atom: RecoilValue<T>}) {
   const value = useRecoilValue(atom);
   return <>{JSON.stringify(value)}</>;
 }
@@ -57,10 +64,14 @@ function ReadsAtom<T>({ atom }: { atom: RecoilValue<T> }) {
 // Test component that reads and writes atom values
 function componentThatReadsAndWritesAtom<T>(
   recoilState: RecoilState<T>,
-): [React.ComponentType<{}>, ((updater: T | ((prev: T) => T)) => void), () => void] {
+): [
+  React.ComponentType<{}>,
+  (updater: T | ((prev: T) => T)) => void,
+  () => void,
+] {
   let updateValue: ((updater: T | ((prev: T) => T)) => void) | null = null;
   let resetValue: (() => void) | null = null;
-  
+
   const Component = () => {
     const [value, setValue] = useRecoilState(recoilState);
     const resetRecoilState = useResetRecoilState(recoilState);
@@ -68,19 +79,19 @@ function componentThatReadsAndWritesAtom<T>(
     resetValue = resetRecoilState;
     return <>{JSON.stringify(value)}</>;
   };
-  
+
   const setterWrapper = (updater: T | ((prev: T) => T)) => {
     if (updateValue) {
       updateValue(updater);
     }
   };
-  
+
   const resetWrapper = () => {
     if (resetValue) {
       resetValue();
     }
   };
-  
+
   return [Component, setterWrapper, resetWrapper];
 }
 
@@ -99,7 +110,9 @@ describe('useGetRecoilValueInfo', () => {
       get: ({get}) => get(selectorA) + get(myAtom),
     });
 
-    let getNodeInfo = (_: RecoilState<string> | RecoilValueReadOnly<string>): RecoilValueInfo<string> => {
+    let getNodeInfo = (
+      _: RecoilState<string> | RecoilValueReadOnly<string>,
+    ): RecoilValueInfo<string> => {
       expect(false).toBe(true);
       throw new Error('getRecoilValue not set');
     };
@@ -290,4 +303,4 @@ describe('useGetRecoilValueInfo', () => {
     );
     expect(Array.from(getNodeInfo(selectorB).subscribers.nodes)).toEqual([]);
   });
-}); 
+});

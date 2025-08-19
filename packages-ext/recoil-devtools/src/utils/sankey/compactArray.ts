@@ -5,7 +5,9 @@
  * `null` and `undefined` ones. This brings the benefit of strong typing over
  * `Array.prototype.filter`.
  */
-export default function compactArray<T>(array: readonly (T | null | undefined)[]): T[] {
+export default function compactArray<T>(
+  array: readonly (T | null | undefined)[],
+): T[] {
   const result = [];
   for (let i = 0; i < array.length; ++i) {
     const elem = array[i];

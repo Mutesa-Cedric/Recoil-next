@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import {defineConfig} from 'vitest/config';
 
 export default defineConfig({
   test: {
@@ -22,8 +22,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      'recoil-shared': new URL('../../../packages/shared/src', import.meta.url).pathname,
-      'refine': 'refine-next',
+      'recoil-shared': new URL('../../../packages/shared/src', import.meta.url)
+        .pathname,
+      refine: 'refine-next',
     },
   },
-}); 
+});

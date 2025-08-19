@@ -2,10 +2,10 @@
  * TypeScript port of Recoil_TreeCache-test.js
  */
 
-import { describe, expect, test } from 'vitest';
+import {describe, expect, test} from 'vitest';
 
-import { loadableWithValue } from '../../adt/Loadable';
-import type { NodeKey } from '../../core/Keys';
+import {loadableWithValue} from '../../adt/Loadable';
+import type {NodeKey} from '../../core/Keys';
 import TreeCache from '../TreeCache';
 
 describe('TreeCache', () => {
@@ -42,20 +42,22 @@ describe('TreeCache', () => {
       const result = route1.find(([key]) => key === nodeKey)?.[1];
       return result;
     };
-    
+
     const result1 = cache.get(getRouteValue1);
     expect(result1).toBe(loadable1);
 
-    // Test route2: [['a', 3], ['b', 4]]  
+    // Test route2: [['a', 3], ['b', 4]]
     const getRouteValue2 = (nodeKey: string) => {
       const result = route2.find(([key]) => key === nodeKey)?.[1];
       return result;
     };
-    
+
     const result2 = cache.get(getRouteValue2);
     expect(result2).toBe(loadable2);
 
-    const result3 = cache.get(nodeKey => route3.find(([key]) => key === nodeKey)?.[1]);
+    const result3 = cache.get(
+      nodeKey => route3.find(([key]) => key === nodeKey)?.[1],
+    );
     expect(result3).toBe(loadable3);
 
     expect(cache.size()).toBe(3);
@@ -86,8 +88,10 @@ describe('TreeCache', () => {
     expect(cache.size()).toBe(2);
 
     // Get the leaf node to delete
-    const leafToDelete = cache.getLeafNode(nodeKey => route1.find(([key]) => key === nodeKey)?.[1]);
-    
+    const leafToDelete = cache.getLeafNode(
+      nodeKey => route1.find(([key]) => key === nodeKey)?.[1],
+    );
+
     if (leafToDelete) {
       const deleted = cache.delete(leafToDelete);
       expect(deleted).toBe(true);
@@ -119,8 +123,12 @@ describe('TreeCache', () => {
     cache.clear();
 
     expect(cache.size()).toBe(0);
-    expect(cache.get(nodeKey => route1.find(([key]) => key === nodeKey)?.[1])).toBe(undefined);
-    expect(cache.get(nodeKey => route2.find(([key]) => key === nodeKey)?.[1])).toBe(undefined);
+    expect(
+      cache.get(nodeKey => route1.find(([key]) => key === nodeKey)?.[1]),
+    ).toBe(undefined);
+    expect(
+      cache.get(nodeKey => route2.find(([key]) => key === nodeKey)?.[1]),
+    ).toBe(undefined);
   });
 
   test('cache with single node route', () => {
@@ -132,7 +140,9 @@ describe('TreeCache', () => {
     cache.set(route, value);
 
     expect(cache.size()).toBe(1);
-    expect(cache.get(nodeKey => route.find(([key]) => key === nodeKey)?.[1])).toBe(value);
+    expect(
+      cache.get(nodeKey => route.find(([key]) => key === nodeKey)?.[1]),
+    ).toBe(value);
   });
 
   test('cache with empty route', () => {
@@ -156,12 +166,16 @@ describe('TreeCache', () => {
 
     cache.set(route, value1);
     expect(cache.size()).toBe(1);
-    expect(cache.get(nodeKey => route.find(([key]) => key === nodeKey)?.[1])).toBe(value1);
+    expect(
+      cache.get(nodeKey => route.find(([key]) => key === nodeKey)?.[1]),
+    ).toBe(value1);
 
     // Overwrite with new value
     cache.set(route, value2);
     expect(cache.size()).toBe(1); // Size should remain the same
-    expect(cache.get(nodeKey => route.find(([key]) => key === nodeKey)?.[1])).toBe(value2);
+    expect(
+      cache.get(nodeKey => route.find(([key]) => key === nodeKey)?.[1]),
+    ).toBe(value2);
   });
 
   test('complex nested routes', () => {
@@ -195,13 +209,19 @@ describe('TreeCache', () => {
 
     expect(cache.size()).toBe(3);
 
-    expect(cache.get(nodeKey => route1.find(([key]) => key === nodeKey)?.[1])).toBe(value1);
-    expect(cache.get(nodeKey => route2.find(([key]) => key === nodeKey)?.[1])).toBe(value2);
-    expect(cache.get(nodeKey => route3.find(([key]) => key === nodeKey)?.[1])).toBe(value3);
+    expect(
+      cache.get(nodeKey => route1.find(([key]) => key === nodeKey)?.[1]),
+    ).toBe(value1);
+    expect(
+      cache.get(nodeKey => route2.find(([key]) => key === nodeKey)?.[1]),
+    ).toBe(value2);
+    expect(
+      cache.get(nodeKey => route3.find(([key]) => key === nodeKey)?.[1]),
+    ).toBe(value3);
   });
 
   test('cache with name option', () => {
-    const cache = new TreeCache({ name: 'test-cache' });
+    const cache = new TreeCache({name: 'test-cache'});
 
     const route = [['node', 1]] as [NodeKey, unknown][];
     cache.set(route, loadableWithValue('test'));
@@ -211,13 +231,16 @@ describe('TreeCache', () => {
 
   test('cache with mapNodeValue option', () => {
     const cache = new TreeCache({
-      mapNodeValue: (value) => typeof value === 'string' ? value.toUpperCase() : value
+      mapNodeValue: value =>
+        typeof value === 'string' ? value.toUpperCase() : value,
     });
 
     const route = [['node', 'test']] as [NodeKey, unknown][];
     cache.set(route, loadableWithValue('mapped'));
 
     expect(cache.size()).toBe(1);
-    expect(cache.get(nodeKey => route.find(([key]) => key === nodeKey)?.[1])).toEqual(loadableWithValue('mapped'));
+    expect(
+      cache.get(nodeKey => route.find(([key]) => key === nodeKey)?.[1]),
+    ).toEqual(loadableWithValue('mapped'));
   });
-}); 
+});

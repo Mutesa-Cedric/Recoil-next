@@ -2,11 +2,11 @@
  * TypeScript port of RecoilSync_URLInterface-test.js
  */
 
-import { act } from '@testing-library/react';
+import {act} from '@testing-library/react';
 import React from 'react';
-import { atom } from 'recoil-next';
-import { string } from 'refine-next';
-import { expect, test } from 'vitest';
+import {atom} from 'recoil-next';
+import {string} from 'refine-next';
+import {expect, test} from 'vitest';
 import {
   TestURLSync,
   expectURL as testExpectURL,
@@ -16,7 +16,7 @@ import {
   flushPromisesAndTimers,
   renderElements,
 } from '../__test_utils__/TestUtils';
-import { urlSyncEffect } from '../RecoilSync_URL';
+import {urlSyncEffect} from '../RecoilSync_URL';
 
 const urls: Array<string> = ['http://localhost/'];
 const subscriptions: Set<() => void> = new Set();
@@ -44,22 +44,22 @@ const goBack = () => {
 };
 
 test('Push URLs in mock history', async () => {
-  const loc = { part: 'queryParams' };
+  const loc = {part: 'queryParams'};
 
   const atomA = atom({
     key: 'recoil-url-sync replace',
     default: 'DEFAULT',
-    effects: [urlSyncEffect({ refine: string(), history: 'replace' })],
+    effects: [urlSyncEffect({refine: string(), history: 'replace'})],
   });
   const atomB = atom({
     key: 'recoil-url-sync push',
     default: 'DEFAULT',
-    effects: [urlSyncEffect({ refine: string(), history: 'push' })],
+    effects: [urlSyncEffect({refine: string(), history: 'push'})],
   });
   const atomC = atom({
     key: 'recoil-url-sync push 2',
     default: 'DEFAULT',
-    effects: [urlSyncEffect({ refine: string(), history: 'push' })],
+    effects: [urlSyncEffect({refine: string(), history: 'push'})],
   });
 
   const [AtomA, atomAControls] = ComponentThatReadsAndWritesAtom(atomA);
@@ -67,14 +67,14 @@ test('Push URLs in mock history', async () => {
   const [AtomC, atomCControls] = ComponentThatReadsAndWritesAtom(atomC);
   const container = renderElements(
     React.createElement(TestURLSync, {
-      location: { part: 'queryParams' as const },
+      location: {part: 'queryParams' as const},
       browserInterface: mockBrowserURL,
       children: [
-        React.createElement(AtomA, { key: 'A' }),
-        React.createElement(AtomB, { key: 'B' }),
-        React.createElement(AtomC, { key: 'C' }),
+        React.createElement(AtomA, {key: 'A'}),
+        React.createElement(AtomB, {key: 'B'}),
+        React.createElement(AtomC, {key: 'C'}),
       ],
-    })
+    }),
   );
 
   expect(container.textContent).toBe('"DEFAULT""DEFAULT""DEFAULT"');
@@ -163,4 +163,4 @@ test('Push URLs in mock history', async () => {
     ],
   ]);
   expect(urls.length).toBe(baseHistory);
-}); 
+});

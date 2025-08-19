@@ -227,9 +227,12 @@ function layoutPositions<N, L>(
   // Prepare set of depths using d3.group instead of d3Collection.nest
   const groupedByDepth = d3Array.group(visibleNodes, n => n.depth);
   const depths: Array<
-    Array<Node<any, any>> & {paddingPercent: number, padding: number}
+    Array<Node<any, any>> & {paddingPercent: number; padding: number}
   > = Array.from(groupedByDepth.values()).map(nodes => {
-    const depthArray = nodes as Array<Node<any, any>> & {paddingPercent: number, padding: number};
+    const depthArray = nodes as Array<Node<any, any>> & {
+      paddingPercent: number;
+      padding: number;
+    };
     return depthArray;
   });
   sortAsc(depths, depth => depth[0]?.depth); // d3.nest().sortKeys() didn't work?
@@ -257,12 +260,13 @@ function layoutPositions<N, L>(
     );
   }
   // Calculate maximum breadth, including padding
-  const maxPosition: number = d3Array.max(
-    depths.map(
-      depth =>
-        d3Array.sum(depth, node => node.value) / (1 - depth.paddingPercent),
-    ),
-  ) ?? 0;
+  const maxPosition: number =
+    d3Array.max(
+      depths.map(
+        depth =>
+          d3Array.sum(depth, node => node.value) / (1 - depth.paddingPercent),
+      ),
+    ) ?? 0;
   // Calculate node padding for each depth
   for (const depth of depths) {
     depth.padding =
@@ -317,8 +321,8 @@ function layoutPositions<N, L>(
         depth.length > 1
           ? depth.padding
           : depth.length === 1
-          ? maxPosition - depth[0].value
-          : 0;
+            ? maxPosition - depth[0].value
+            : 0;
       for (const node of depth) {
         sortAsc(node.sourceLinks, link => link.source?.position ?? Infinity);
         let trailingPosition = node.position - padding / 2;
@@ -525,7 +529,4 @@ const butterflyGraphLayout = <N, L>(
   };
 };
 
-export {
-  flowGraphLayout,
-  butterflyGraphLayout,
-};
+export {flowGraphLayout, butterflyGraphLayout};

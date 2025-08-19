@@ -7,7 +7,10 @@
     "jsx": "react-jsx",
     "types": ["chrome", "node", "vitest/globals"]
   },
-  "references": [{ "path": "../../packages/shared" }, { "path": "../../packages/recoil" }],
+  "references": [
+    {"path": "../../packages/shared"},
+    {"path": "../../packages/recoil"}
+  ],
   "include": ["src/**/*"],
   "exclude": ["**/__tests__/**", "dist/**", "node_modules/**"]
 }

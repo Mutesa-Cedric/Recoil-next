@@ -41,8 +41,8 @@ export const useAtomsList = (): Array<NodeInfo> | null | undefined => {
 };
 
 type NodeInfo = {
-  name: string,
-  content: SerializedValue,
+  name: string;
+  content: SerializedValue;
 };
 
 export const useSelectorsList = (): Array<NodeInfo> | null | undefined => {

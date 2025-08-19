@@ -10,19 +10,19 @@ import * as d3Array from 'd3-array';
 export type Key = string | number;
 
 export type Link<L, N> = {
-  data: L | Key,
-  key: Key,
-  value: number,
-  source?: Node<N, L>,
-  target?: Node<N, L>,
-  visible: boolean,
-  sourceDepth: number,
-  sourcePosition: number,
-  targetDepth: number,
-  targetPosition: number,
-  backedge: boolean,
-  fadeSource: boolean,
-  fadeTarget: boolean,
+  data: L | Key;
+  key: Key;
+  value: number;
+  source?: Node<N, L>;
+  target?: Node<N, L>;
+  visible: boolean;
+  sourceDepth: number;
+  sourcePosition: number;
+  targetDepth: number;
+  targetPosition: number;
+  backedge: boolean;
+  fadeSource: boolean;
+  fadeTarget: boolean;
 };
 
 export type Node<N, L> = {
@@ -52,8 +52,8 @@ function generateGraph<N, L>({
   nodeData,
   linkData,
 }: {
-  nodeData?: NodeData<N>,
-  linkData: LinkData<L>,
+  nodeData?: NodeData<N>;
+  linkData: LinkData<L>;
 }): Graph<N, L> {
   // Prepare the Nodesx
   const nodesByKey: {[key: Key]: Node<N, L>} = {};
@@ -190,7 +190,4 @@ function updateVisibility<N, L>(graph: Graph<N, L>, nodesSet: Set<Node<N, L>>) {
   }
 }
 
-export {
-  generateGraph,
-  updateVisibility,
-};
+export {generateGraph, updateVisibility};

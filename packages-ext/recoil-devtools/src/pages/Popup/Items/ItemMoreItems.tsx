@@ -5,7 +5,7 @@
 
 import React from 'react';
 import type {SerializedValue} from '../../../utils/Serialization';
-import { SerializedValueType } from '../../../utils/Serialization';
+import {SerializedValueType} from '../../../utils/Serialization';
 
 const styles = {
   description: {
@@ -16,7 +16,7 @@ const styles = {
 };
 
 type KeyProps = {
-  content: SerializedValue | null | undefined,
+  content: SerializedValue | null | undefined;
 };
 
 const Renderers = {
@@ -41,7 +41,9 @@ function ItemMoreItems({content}: KeyProps): React.ReactNode {
   }
 
   // Renderers.hasOwnProperty makes sure this works
-  const description = Renderers[content.t as unknown as keyof typeof Renderers](content.e);
+  const description = Renderers[content.t as unknown as keyof typeof Renderers](
+    content.e,
+  );
 
   return <div style={styles.description}>{description}</div>;
 }

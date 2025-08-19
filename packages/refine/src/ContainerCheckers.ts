@@ -2,8 +2,8 @@
  * TypeScript port of Refine_ContainerCheckers.js
  */
 
-import type { Checker, CheckFailure } from './Checkers';
-import { Path, compose, failure, success } from './Checkers';
+import type {Checker, CheckFailure} from './Checkers';
+import {Path, compose, failure, success} from './Checkers';
 
 // Check that the provided value is a plain object and not an instance of some
 // other container type, built-in, or user class.
@@ -51,7 +51,11 @@ function array<V>(valueChecker: Checker<V>): Checker<readonly V[]> {
  */
 function tuple<Checkers extends readonly Checker<any>[]>(
   checkers: Checkers,
-): Checker<{ readonly [K in keyof Checkers]: Checkers[K] extends Checker<infer T> ? T : never }> {
+): Checker<{
+  readonly [K in keyof Checkers]: Checkers[K] extends Checker<infer T>
+    ? T
+    : never;
+}> {
   return (value: unknown, path = new Path()) => {
     if (!Array.isArray(value)) {
       return failure('value is not an array', path);
@@ -130,7 +134,7 @@ export class OptionalProperty<T> {
   }
 }
 
-// Type alias for optional property checkers 
+// Type alias for optional property checkers
 export type OptionalPropertyChecker<T> = OptionalProperty<T>;
 
 /**
@@ -146,32 +150,41 @@ export type OptionalPropertyChecker<T> = OptionalProperty<T>;
  * assert(checker({a: 1}).type === 'success');
  * ```
  */
-function optional<T>(checker: Checker<T>): OptionalPropertyChecker<T | undefined> {
-  return new OptionalProperty<T | undefined>((value: unknown, path = new Path()) => {
-    const result = checker(value, path);
-    if (result.type === 'failure') {
-      return {
-        ...result,
-        message: '(optional property) ' + result.message,
-      };
-    } else {
-      return result;
-    }
-  });
+function optional<T>(
+  checker: Checker<T>,
+): OptionalPropertyChecker<T | undefined> {
+  return new OptionalProperty<T | undefined>(
+    (value: unknown, path = new Path()) => {
+      const result = checker(value, path);
+      if (result.type === 'failure') {
+        return {
+          ...result,
+          message: '(optional property) ' + result.message,
+        };
+      } else {
+        return result;
+      }
+    },
+  );
 }
 
 // Helper type to extract the type from a checker or optional checker
-type ExtractCheckerType<T> = T extends Checker<infer U>
-  ? U
-  : T extends OptionalPropertyChecker<infer U>
-  ? U
-  : never;
+type ExtractCheckerType<T> =
+  T extends Checker<infer U>
+    ? U
+    : T extends OptionalPropertyChecker<infer U>
+      ? U
+      : never;
 
 // Helper type to make optional properties optional in the result type
 type MakeOptional<T> = {
-  [K in keyof T as T[K] extends OptionalPropertyChecker<any> ? never : K]: ExtractCheckerType<T[K]>;
+  [K in keyof T as T[K] extends OptionalPropertyChecker<any>
+    ? never
+    : K]: ExtractCheckerType<T[K]>;
 } & {
-  [K in keyof T as T[K] extends OptionalPropertyChecker<any> ? K : never]?: ExtractCheckerType<T[K]>;
+  [K in keyof T as T[K] extends OptionalPropertyChecker<any>
+    ? K
+    : never]?: ExtractCheckerType<T[K]>;
 };
 
 /**
@@ -200,12 +213,18 @@ type MakeOptional<T> = {
  * ```
  */
 function object<
-  Checkers extends Readonly<Record<string, Checker<any> | OptionalPropertyChecker<any>>>,
+  Checkers extends Readonly<
+    Record<string, Checker<any> | OptionalPropertyChecker<any>>
+  >,
 >(checkers: Checkers): Checker<Readonly<MakeOptional<Checkers>>> {
   const checkerProperties: readonly string[] = Object.keys(checkers);
 
   return (value: unknown, path = new Path()) => {
-    if (typeof value !== 'object' || value === null || !isPlainObject(value as Record<string, unknown>)) {
+    if (
+      typeof value !== 'object' ||
+      value === null ||
+      !isPlainObject(value as Record<string, unknown>)
+    ) {
       return failure('value is not an object', path);
     }
 
@@ -298,7 +317,10 @@ function map<K, V>(
         return failure(keyResult.message, keyResult.path);
       }
 
-      const valueResult = valueChecker(entryValue, path.extend(`[${index}].value`));
+      const valueResult = valueChecker(
+        entryValue,
+        path.extend(`[${index}].value`),
+      );
       if (valueResult.type === 'failure') {
         return failure(valueResult.message, valueResult.path);
       }
@@ -322,8 +344,8 @@ function map<K, V>(
  * values determined by a provided checker
  */
 function writableArray<V>(valueChecker: Checker<V>): Checker<V[]> {
-  return compose(array(valueChecker), ({ value, warnings }) =>
-    success([...value], warnings)
+  return compose(array(valueChecker), ({value, warnings}) =>
+    success([...value], warnings),
   );
 }
 
@@ -331,11 +353,9 @@ function writableArray<V>(valueChecker: Checker<V>): Checker<V[]> {
  * checker to assert if a mixed value is a mutable {[string]: V}
  * with value types determined by a provided checker
  */
-function writableDict<V>(
-  valueChecker: Checker<V>,
-): Checker<Record<string, V>> {
-  return compose(dict(valueChecker), ({ value, warnings }) =>
-    success({ ...value }, warnings)
+function writableDict<V>(valueChecker: Checker<V>): Checker<Record<string, V>> {
+  return compose(dict(valueChecker), ({value, warnings}) =>
+    success({...value}, warnings),
   );
 }
 
@@ -343,16 +363,18 @@ function writableDict<V>(
  * Like `object()` but returns a mutable object
  */
 function writableObject<
-  Checkers extends Readonly<Record<string, Checker<any> | OptionalPropertyChecker<any>>>,
+  Checkers extends Readonly<
+    Record<string, Checker<any> | OptionalPropertyChecker<any>>
+  >,
 >(checkers: Checkers): Checker<MakeOptional<Checkers>> {
-  return compose(object(checkers), ({ value, warnings }) =>
-    success({ ...value } as any, warnings)
+  return compose(object(checkers), ({value, warnings}) =>
+    success({...value} as any, warnings),
   );
 }
 
 export {
   array,
-  tuple, 
+  tuple,
   dict,
   optional,
   object,
@@ -361,4 +383,4 @@ export {
   writableArray,
   writableDict,
   writableObject,
-}; 
+};

@@ -1,20 +1,21 @@
+/* eslint-disable no-undef */
 /**
  * Typescript port of Recoil_Link.js
  */
 
-import type { MutableSnapshot, Snapshot } from '../../core/Snapshot';
+import type {MutableSnapshot, Snapshot} from '../../core/Snapshot';
 import {
   useGotoRecoilSnapshot,
   useRecoilSnapshot,
 } from '../../hooks/SnapshotHooks';
-import React, { useCallback } from 'react';
+import React, {useCallback} from 'react';
 
 type AnchorProps = {
   download?: true | string;
   rel?: string;
   target?: '_self' | '_blank' | '_parent' | '_top';
   onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
-  style?: { [key: string]: string | number };
+  style?: {[key: string]: string | number};
   children?: React.ReactNode;
 };
 
@@ -22,9 +23,10 @@ type SerializationProps = {
   uriFromSnapshot: (snapshot: Snapshot) => string;
 };
 
-type LinkToSnapshotProps = AnchorProps & SerializationProps & {
-  snapshot: Snapshot;
-};
+type LinkToSnapshotProps = AnchorProps &
+  SerializationProps & {
+    snapshot: Snapshot;
+  };
 
 // A Link component based on the provided `uriFromSnapshot` mapping
 // of a URI from a Recoil Snapshot.
@@ -44,7 +46,7 @@ export function LinkToRecoilSnapshot({
   ...anchorProps
 }: LinkToSnapshotProps): React.ReactElement {
   const gotoSnapshot = useGotoRecoilSnapshot();
-  const { onClick, target } = anchorProps;
+  const {onClick, target} = anchorProps;
 
   const onClickWrapper = useCallback(
     (event: React.MouseEvent<HTMLAnchorElement>) => {
@@ -71,9 +73,10 @@ export function LinkToRecoilSnapshot({
   );
 }
 
-type LinkToStateChangeProps = AnchorProps & SerializationProps & {
-  stateChange: (mutableSnapshot: MutableSnapshot) => void;
-};
+type LinkToStateChangeProps = AnchorProps &
+  SerializationProps & {
+    stateChange: (mutableSnapshot: MutableSnapshot) => void;
+  };
 
 // A Link component based on the provided `uriFromSnapshot` mapping
 // of a URI from a Recoil Snapshot.
@@ -100,4 +103,4 @@ export function LinkToRecoilStateChange({
   const currentSnapshot = useRecoilSnapshot();
   const snapshot = currentSnapshot.map(stateChange);
   return <LinkToRecoilSnapshot {...linkProps} snapshot={snapshot} />;
-} 
+}

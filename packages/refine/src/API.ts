@@ -3,7 +3,7 @@
  */
 
 import err from '../../shared/src/util/Recoil_err';
-import type { Checker, CheckFailure, CheckResult } from './Checkers';
+import type {Checker, CheckFailure, CheckResult} from './Checkers';
 
 /**
  * function to assert that a given value matches a checker
@@ -97,7 +97,4 @@ function coercion<T>(
   };
 }
 
-export {
-  assertion,
-  coercion
-};
+export {assertion, coercion};

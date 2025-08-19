@@ -1,7 +1,6 @@
 // TypeScript port of PopupApp.js
 
 import React, {useEffect, useRef, useState} from 'react';
-import type Connection from '../../utils/Connection';
 import type Store from '../../utils/Store';
 import {RecoilDevToolsActions} from '../../constants/Constants';
 import ConnectionContext from './ConnectionContext';
@@ -13,7 +12,9 @@ type AppProps = {
 
 function PopupApp({store}: AppProps): React.ReactElement {
   const tabId = chrome.devtools?.inspectedWindow?.tabId ?? null;
-  const [selectedConnection, setSelectedConnection] = useState<number | null>(tabId);
+  const [selectedConnection, setSelectedConnection] = useState<number | null>(
+    tabId,
+  );
   const [maxTransactionId, setMaxTransactionId] = useState(
     store.getConnection(selectedConnection)?.transactions.getLast(),
   );

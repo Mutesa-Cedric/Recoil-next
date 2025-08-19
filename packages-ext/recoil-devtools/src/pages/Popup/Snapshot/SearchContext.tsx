@@ -8,8 +8,8 @@ import type {SetterOrUpdater} from 'recoil-next';
 import React from 'react';
 
 type SearchContext = {
-  searchVal: string,
-  setSearchVal: SetterOrUpdater<string>,
+  searchVal: string;
+  setSearchVal: SetterOrUpdater<string>;
 };
 
 const context: React.Context<SearchContext> =

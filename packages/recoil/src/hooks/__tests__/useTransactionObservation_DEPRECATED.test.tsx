@@ -2,35 +2,42 @@
  * TypeScript port of Recoil_useTransactionObservation_DEPRECATED-test.js
  */
 
-import { render } from '@testing-library/react';
-import type { ReactNode } from 'react';
+import {render} from '@testing-library/react';
+import type {ReactNode} from 'react';
 import * as React from 'react';
-import { act, useState } from 'react';
-import { expect, test, vi } from 'vitest';
-import type { RecoilState, RecoilValue, RecoilValueReadOnly } from '../../core/RecoilValue';
-import type { PersistenceSettings } from '../../recoil_values/atom';
+import {act, useState} from 'react';
+import {expect, test, vi} from 'vitest';
+import type {
+  RecoilState,
+  RecoilValue,
+  RecoilValueReadOnly,
+} from '../../core/RecoilValue';
+import type {PersistenceSettings} from '../../recoil_values/atom';
 
 import stableStringify from '../../../../shared/src/util/Recoil_stableStringify';
-import { DefaultValue } from '../../core/Node';
-import { RecoilRoot } from '../../core/RecoilRoot';
-import { atom } from '../../recoil_values/atom';
-import { selector } from '../../recoil_values/selector';
+import {DefaultValue} from '../../core/Node';
+import {RecoilRoot} from '../../core/RecoilRoot';
+import {atom} from '../../recoil_values/atom';
+import {selector} from '../../recoil_values/selector';
 import {
   useRecoilValue,
   useSetRecoilState,
-  useSetUnvalidatedAtomValues
+  useSetUnvalidatedAtomValues,
 } from '../Hooks';
-import { useTransactionObservation_DEPRECATED } from '../SnapshotHooks';
+import {useTransactionObservation_DEPRECATED} from '../SnapshotHooks';
 
 // Error boundary component for testing
 class ErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: (error: Error) => React.ReactNode },
-  { hasError: boolean; error?: Error }
+  {children: React.ReactNode; fallback?: (error: Error) => React.ReactNode},
+  {hasError: boolean; error?: Error}
 > {
-  state: { hasError: boolean; error?: Error } = { hasError: false };
+  state: {hasError: boolean; error?: Error} = {hasError: false};
 
-  static getDerivedStateFromError(error: Error): { hasError: boolean; error?: Error } {
-    return { hasError: true, error };
+  static getDerivedStateFromError(error: Error): {
+    hasError: boolean;
+    error?: Error;
+  } {
+    return {hasError: true, error};
   }
 
   render(): React.ReactNode {
@@ -44,23 +51,23 @@ class ErrorBoundary extends React.Component<
 
 // React rendering utilities for testing
 function renderElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(
+  const {container} = render(
     <RecoilRoot>
       <ErrorBoundary>
         <React.Suspense fallback="loading">{element}</React.Suspense>
       </ErrorBoundary>
-    </RecoilRoot>
+    </RecoilRoot>,
   );
   return container;
 }
 
 function renderUnwrappedElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(<>{element}</>);
+  const {container} = render(<>{element}</>);
   return container;
 }
 
 // Test component to read atom values
-function ReadsAtom<T>({ atom }: { atom: RecoilValue<T> }) {
+function ReadsAtom<T>({atom}: {atom: RecoilValue<T>}) {
   const value = useRecoilValue(atom);
   return <>{stableStringify(value)}</>;
 }
@@ -114,9 +121,11 @@ function plusOneAsyncSelector(
 }
 
 function ObservesTransactions({fn}: {fn: ReturnType<typeof vi.fn>}) {
-  useTransactionObservation_DEPRECATED(({atomValues, atomInfo, modifiedAtoms}) => {
-    fn({atomValues, atomInfo, modifiedAtoms});
-  });
+  useTransactionObservation_DEPRECATED(
+    ({atomValues, atomInfo, modifiedAtoms}) => {
+      fn({atomValues, atomInfo, modifiedAtoms});
+    },
+  );
   return null;
 }
 
@@ -147,8 +156,7 @@ test('useTransactionObservation_DEPRECATED - basic functionality', () => {
           onClick={() => {
             setAtomA(1);
             setAtomB(2);
-          }}
-        >
+          }}>
           Set Atoms
         </button>
         <button
@@ -159,8 +167,7 @@ test('useTransactionObservation_DEPRECATED - basic functionality', () => {
                 [atomB.key, 20],
               ]),
             );
-          }}
-        >
+          }}>
           Set Unvalidated
         </button>
       </div>
@@ -177,11 +184,7 @@ test('useTransactionObservation_DEPRECATED - basic functionality', () => {
     );
   }
 
-  function MyReadsAtom({
-    getAtom,
-  }: {
-    getAtom: () => null | RecoilState<number>;
-  }) {
+  function MyReadsAtom({getAtom}: {getAtom: () => null | RecoilState<number>}) {
     const atom = getAtom();
     if (atom == null) {
       return <div>No atom</div>;
@@ -270,8 +273,7 @@ test('useTransactionObservation_DEPRECATED - with async selectors', async () => 
       <button
         onClick={() => {
           setAtomALocal(5);
-        }}
-      >
+        }}>
         Set Atom
       </button>
     );
@@ -279,8 +281,12 @@ test('useTransactionObservation_DEPRECATED - with async selectors', async () => 
 
   const c = renderElements(
     <>
-      <div data-testid="atomA"><ReadsAtom atom={atomA} /></div>
-      <div data-testid="asyncSelector"><ReadsAtom atom={asyncSelectorA} /></div>
+      <div data-testid="atomA">
+        <ReadsAtom atom={atomA} />
+      </div>
+      <div data-testid="asyncSelector">
+        <ReadsAtom atom={asyncSelectorA} />
+      </div>
       <SetsUnvalidatedAtomValues />
       <ObservesTransactions fn={transactionObserver} />
     </>,
@@ -301,7 +307,7 @@ test('useTransactionObservation_DEPRECATED - with async selectors', async () => 
     await new Promise(resolve => setTimeout(resolve, 0));
   });
   expect(c.textContent).toContain('5');
-  
+
   // The async selector might resolve immediately or show loading briefly
   // Either way, after some time it should resolve to 6
   await act(async () => {
@@ -359,4 +365,4 @@ test('useTransactionObservation_DEPRECATED - cleanup on unmount', () => {
 
   // Should not have observed the transaction
   expect(transactionObserver).toHaveBeenCalledTimes(1);
-}); 
+});

@@ -1,6 +1,6 @@
-import { cleanup } from '@testing-library/react';
+import {cleanup} from '@testing-library/react';
 import React from 'react';
-import { afterEach, beforeAll, vi } from 'vitest';
+import {afterEach, beforeAll, vi} from 'vitest';
 
 // Declare __DEV__ globally for TypeScript
 declare global {
@@ -38,10 +38,10 @@ beforeAll(() => {
     setTimeout(cb, 0);
     return 1;
   });
-  global.cancelAnimationFrame = vi.fn(() => { });
+  global.cancelAnimationFrame = vi.fn(() => {});
 
   // Set up text encoding globals
-  const { TextEncoder, TextDecoder } = require('util');
+  const {TextEncoder, TextDecoder} = require('util');
   global.TextEncoder = TextEncoder;
   global.TextDecoder = TextDecoder;
 
@@ -63,4 +63,4 @@ afterEach(() => {
   vi.clearAllTimers();
   vi.useRealTimers();
   vi.clearAllMocks();
-}); 
+});

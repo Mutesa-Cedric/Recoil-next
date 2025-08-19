@@ -2,18 +2,24 @@
  * TypeScript port of RecoilSync.js
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { AtomEffect, Loadable, RecoilState, Snapshot, StoreID } from 'recoil-next';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
+import type {
+  AtomEffect,
+  Loadable,
+  RecoilState,
+  Snapshot,
+  StoreID,
+} from 'recoil-next';
 import {
   DefaultValue,
   RecoilLoadable,
   useRecoilSnapshot,
   useRecoilStoreID,
-  useRecoilTransaction_UNSTABLE
+  useRecoilTransaction_UNSTABLE,
 } from 'recoil-next';
-import type { Checker } from 'refine-next';
-import type { RecoilValueInfo } from '../../recoil/src/core/FunctionalCore';
-import type { RecoilValue } from '../../recoil/src/core/RecoilValue';
+import type {Checker} from 'refine-next';
+import type {RecoilValueInfo} from '../../recoil/src/core/FunctionalCore';
+import type {RecoilValue} from '../../recoil/src/core/RecoilValue';
 import err from '../../shared/src/util/Recoil_err';
 import lazyProxy from '../../shared/src/util/Recoil_lazyProxy';
 
@@ -32,13 +38,18 @@ export type WriteItem = <T>(itemKey: ItemKey, value: DefaultValue | T) => void;
 export type WriteItems = (writeInterface: WriteInterface) => void;
 export type ResetItem = (itemKey: ItemKey) => void;
 
-export type ReadItem = (itemKey: ItemKey) =>
+export type ReadItem = (
+  itemKey: ItemKey,
+) =>
   | DefaultValue
   | Promise<DefaultValue | any>
   | Loadable<DefaultValue | any>
   | any;
 
-export type UpdateItem = <T>(itemKey: ItemKey, newValue: DefaultValue | T) => void;
+export type UpdateItem = <T>(
+  itemKey: ItemKey,
+  newValue: DefaultValue | T,
+) => void;
 export type UpdateItems = (itemSnapshot: ItemSnapshot) => void;
 export type UpdateAllKnownItems = (itemSnapshot: ItemSnapshot) => void;
 export type ListenInterface = {
@@ -46,7 +57,9 @@ export type ListenInterface = {
   updateItems: UpdateItems;
   updateAllKnownItems: UpdateAllKnownItems;
 };
-export type ListenToItems = (listenInterface: ListenInterface) => void | (() => void);
+export type ListenToItems = (
+  listenInterface: ListenInterface,
+) => void | (() => void);
 type ActionOnFailure = 'errorState' | 'defaultValue';
 
 const DEFAULT_VALUE = new DefaultValue();
@@ -87,7 +100,7 @@ type AtomRegistration<T> = {
   atom: RecoilState<T>;
   effects: Map<EffectKey, EffectRegistration<T>>;
   // In-flight updates to avoid feedback loops
-  pendingUpdate?: { value: any | DefaultValue };
+  pendingUpdate?: {value: any | DefaultValue};
 };
 
 type Storage = {
@@ -124,10 +137,10 @@ class Registries {
     externalStoreKey: StoreKey,
     node: RecoilState<T>,
     options: AtomSyncOptions<T>,
-  ): { effectRegistration: EffectRegistration<T>; unregisterEffect: () => void } {
+  ): {effectRegistration: EffectRegistration<T>; unregisterEffect: () => void} {
     const atomRegistry = this.getAtomRegistry(recoilStoreID, externalStoreKey);
     if (!atomRegistry.has(node.key)) {
-      atomRegistry.set(node.key, { atom: node, effects: new Map() });
+      atomRegistry.set(node.key, {atom: node, effects: new Map()});
     }
     const effectKey = this.nextEffectKey++;
     const effectRegistration = {
@@ -144,7 +157,10 @@ class Registries {
 
   storageRegistries: Map<StoreID, Map<StoreKey, Storage>> = new Map();
 
-  getStorage(recoilStoreID: StoreID, externalStoreKey: StoreKey): Storage | undefined {
+  getStorage(
+    recoilStoreID: StoreID,
+    externalStoreKey: StoreKey,
+  ): Storage | undefined {
     return this.storageRegistries.get(recoilStoreID)?.get(externalStoreKey);
   }
 
@@ -170,7 +186,7 @@ function validateLoadable<T>(
     | Promise<any | DefaultValue>
     | Loadable<any | DefaultValue>
     | any,
-  { refine, actionOnFailure_UNSTABLE }: AtomSyncOptions<T>,
+  {refine, actionOnFailure_UNSTABLE}: AtomSyncOptions<T>,
 ): Loadable<T | DefaultValue> {
   return RecoilLoadable.of(input).map<T | DefaultValue>(x => {
     if (x instanceof DefaultValue) {
@@ -192,7 +208,7 @@ function readAtomItems<T>(
   readFromStorage?: ReadItem,
   diff?: ItemDiff,
 ): Loadable<T | DefaultValue> | null {
-  const { options } = effectRegistration;
+  const {options} = effectRegistration;
   const readFromStorageRequired =
     readFromStorage ??
     ((itemKey: ItemKey) =>
@@ -220,12 +236,12 @@ function readAtomItems<T>(
 
   let value;
   try {
-    value = options.read({ read });
+    value = options.read({read});
   } catch (error) {
     return RecoilLoadable.error(error);
   }
-  return value instanceof DefaultValue 
-    ? RecoilLoadable.of(value) 
+  return value instanceof DefaultValue
+    ? RecoilLoadable.of(value)
     : validateLoadable(value, options);
 }
 
@@ -253,7 +269,7 @@ function writeAtomItemsToDiff<T>(
   const reset = (k: ItemKey) => void diff.set(k, DEFAULT_VALUE);
 
   options.write(
-    { write, reset, read },
+    {write, reset, read},
     loadable == null ? DEFAULT_VALUE : loadable.contents,
   );
   return diff;
@@ -265,11 +281,11 @@ const itemsFromSnapshot = (
   getInfo: <T>(recoilValue: RecoilValue<T>) => RecoilValueInfo<T>,
 ): ItemSnapshot => {
   const items: ItemSnapshot = new Map();
-  for (const [, { atom, effects }] of registries.getAtomRegistry(
+  for (const [, {atom, effects}] of registries.getAtomRegistry(
     recoilStoreID,
     storeKey,
   )) {
-    for (const [, { options }] of effects) {
+    for (const [, {options}] of effects) {
       const atomInfo = getInfo(atom);
       writeAtomItemsToDiff(
         items,
@@ -292,8 +308,8 @@ function getWriteInterface(
 ): WriteInterface {
   // Use a Proxy so we only generate `allItems` if it's actually used.
   return lazyProxy(
-    { diff },
-    { allItems: () => itemsFromSnapshot(recoilStoreID, storeKey, getInfo) },
+    {diff},
+    {allItems: () => itemsFromSnapshot(recoilStoreID, storeKey, getInfo)},
   );
 }
 
@@ -315,18 +331,24 @@ export function useRecoilSync({
 }: RecoilSyncOptions): void {
   const recoilStoreID = useRecoilStoreID();
 
-  // Subscribe to Recoil state changes  
+  // Subscribe to Recoil state changes
   const [snapshotError, setSnapshotError] = useState<boolean>(false);
-  
+
   let snapshot: Snapshot | null = null;
   try {
     snapshot = useRecoilSnapshot();
   } catch (error) {
     // In React 19, snapshots can be released more aggressively during component lifecycle
-    if (error && typeof error === 'object' && 'message' in error && 
-        typeof error.message === 'string' && 
-        error.message.includes('already been released')) {
-      console.warn('Snapshot already released in useRecoilSync, disabling sync');
+    if (
+      error &&
+      typeof error === 'object' &&
+      'message' in error &&
+      typeof error.message === 'string' &&
+      error.message.includes('already been released')
+    ) {
+      console.warn(
+        'Snapshot already released in useRecoilSync, disabling sync',
+      );
       if (!snapshotError) {
         setSnapshotError(true);
       }
@@ -334,36 +356,39 @@ export function useRecoilSync({
       throw error;
     }
   }
-  
+
   const previousSnapshotRef = useRef(snapshot);
   const isMountedRef = useRef(true);
-  
+
   useEffect(() => {
     return () => {
       isMountedRef.current = false;
     };
   }, []);
-  
+
   useEffect(() => {
     if (!isMountedRef.current || snapshot === null || snapshotError) return;
-    
+
     // Check if snapshot is still valid before using it
     try {
       if (write != null && snapshot !== previousSnapshotRef.current) {
         previousSnapshotRef.current = snapshot;
         const diff: ItemDiff = new Map();
-        const atomRegistry = registries.getAtomRegistry(recoilStoreID, storeKey);
-        
+        const atomRegistry = registries.getAtomRegistry(
+          recoilStoreID,
+          storeKey,
+        );
+
         // Get modified nodes with error handling
         let modifiedNodes;
         try {
-          modifiedNodes = snapshot.getNodes_UNSTABLE({ isModified: true });
+          modifiedNodes = snapshot.getNodes_UNSTABLE({isModified: true});
         } catch (error) {
           // Snapshot was released, skip this update
           console.warn('Snapshot already released, skipping sync:', error);
           return;
         }
-        
+
         for (const atom of modifiedNodes) {
           if (!isMountedRef.current) return; // Exit early if unmounted
           const registration = atomRegistry.get(atom.key);
@@ -373,10 +398,13 @@ export function useRecoilSync({
               atomInfo = snapshot.getInfo_UNSTABLE(registration.atom);
             } catch (error) {
               // Snapshot was released, skip this atom
-              console.warn('Snapshot already released for atom, skipping:', error);
+              console.warn(
+                'Snapshot already released for atom, skipping:',
+                error,
+              );
               continue;
             }
-            
+
             // Avoid feedback loops:
             // Don't write to storage updates that came from listening to storage
             if (
@@ -386,7 +414,7 @@ export function useRecoilSync({
               (!atomInfo.isSet &&
                 !(registration.pendingUpdate?.value instanceof DefaultValue))
             ) {
-              for (const [, { options }] of registration.effects) {
+              for (const [, {options}] of registration.effects) {
                 writeAtomItemsToDiff(
                   diff,
                   options,
@@ -408,11 +436,14 @@ export function useRecoilSync({
                 storeKey,
                 diff,
                 snapshot.getInfo_UNSTABLE as any,
-            ),
+              ),
             );
           } catch (error) {
             // Snapshot was released during write, log and continue
-            console.warn('Snapshot already released during write, skipping:', error);
+            console.warn(
+              'Snapshot already released during write, skipping:',
+              error,
+            );
           }
         }
       }
@@ -423,7 +454,7 @@ export function useRecoilSync({
   }, [read, recoilStoreID, snapshot, storeKey, write, snapshotError]);
 
   const updateItems = useRecoilTransaction_UNSTABLE(
-    ({ set, reset }) =>
+    ({set, reset}) =>
       (diff: ItemDiff) => {
         const atomRegistry = registries.getAtomRegistry(
           recoilStoreID,
@@ -437,13 +468,9 @@ export function useRecoilSync({
           for (const [, effectRegistration] of Array.from(
             atomRegistration.effects,
           ).reverse()) {
-            const { options, subscribedItemKeys } = effectRegistration;
+            const {options, subscribedItemKeys} = effectRegistration;
             if (setIntersectsMap(subscribedItemKeys, diff)) {
-              const loadable = readAtomItems(
-                effectRegistration,
-                read,
-                diff,
-              );
+              const loadable = readAtomItems(effectRegistration, read, diff);
               if (loadable != null) {
                 switch (loadable.state) {
                   case 'hasValue':
@@ -496,7 +523,7 @@ export function useRecoilSync({
       // the user-provided snapshot.
       const atomRegistry = registries.getAtomRegistry(recoilStoreID, storeKey);
       for (const [, registration] of atomRegistry) {
-        for (const [, { subscribedItemKeys }] of registration.effects) {
+        for (const [, {subscribedItemKeys}] of registration.effects) {
           for (const itemKey of subscribedItemKeys) {
             if (!itemSnapshot.has(itemKey)) {
               itemSnapshot.set(itemKey, DEFAULT_VALUE);
@@ -512,15 +539,15 @@ export function useRecoilSync({
   useEffect(
     () =>
       // TODO try/catch errors and set atom to error state if actionOnFailure is errorState
-      listen?.({ updateItem, updateItems, updateAllKnownItems }),
+      listen?.({updateItem, updateItems, updateAllKnownItems}),
     [updateItem, updateItems, updateAllKnownItems, listen],
   );
 
   // Register Storage
   // Save before effects so that we can initialize atoms for initial render
-  registries.setStorage(recoilStoreID, storeKey, { write, read });
+  registries.setStorage(recoilStoreID, storeKey, {write, read});
   useEffect(
-    () => registries.setStorage(recoilStoreID, storeKey, { write, read }),
+    () => registries.setStorage(recoilStoreID, storeKey, {write, read}),
     [recoilStoreID, storeKey, read, write],
   );
 }
@@ -538,8 +565,10 @@ export function RecoilSync({
 ///////////////////////
 // syncEffect()
 ///////////////////////
-export type ReadAtomInterface = { read: ReadItem };
-export type ReadAtom = (readInterface: ReadAtomInterface) =>
+export type ReadAtomInterface = {read: ReadItem};
+export type ReadAtom = (
+  readInterface: ReadAtomInterface,
+) =>
   | DefaultValue
   | Promise<DefaultValue | unknown>
   | Loadable<DefaultValue | unknown>
@@ -550,7 +579,10 @@ export type WriteAtomInterface = {
   reset: ResetItem;
   read: ReadItem;
 };
-export type WriteAtom<T> = (writeInterface: WriteAtomInterface, value: DefaultValue | T) => void;
+export type WriteAtom<T> = (
+  writeInterface: WriteAtomInterface,
+  value: DefaultValue | T,
+) => void;
 
 export type SyncEffectOptions<T> = {
   storeKey?: StoreKey;
@@ -566,22 +598,22 @@ export type SyncEffectOptions<T> = {
 };
 
 export function syncEffect<T>(opt: SyncEffectOptions<T>): AtomEffect<T> {
-  return ({ node, trigger, storeID, setSelf, getLoadable, getInfo_UNSTABLE }) => {
+  return ({node, trigger, storeID, setSelf, getLoadable, getInfo_UNSTABLE}) => {
     // Get options with defaults
     const itemKey = opt.itemKey ?? node.key;
     const options: AtomSyncOptions<T> = {
       itemKey,
-      read: ({ read }) => read(itemKey),
-      write: ({ write }, loadable) => write(itemKey, loadable),
+      read: ({read}) => read(itemKey),
+      write: ({write}, loadable) => write(itemKey, loadable),
       syncDefault: false,
       actionOnFailure_UNSTABLE: 'errorState',
       ...opt,
     };
-    const { storeKey } = options;
+    const {storeKey} = options;
     const storage = registries.getStorage(storeID, storeKey);
 
     // Register Atom
-    const { effectRegistration, unregisterEffect } = registries.setAtomEffect(
+    const {effectRegistration, unregisterEffect} = registries.setAtomEffect(
       storeID,
       storeKey,
       node,
@@ -631,7 +663,12 @@ export function syncEffect<T>(opt: SyncEffectOptions<T>): AtomEffect<T> {
               loadable,
             );
             writeToStorage(
-              getWriteInterface(storeID, storeKey, diff, getInfo_UNSTABLE as any),
+              getWriteInterface(
+                storeID,
+                storeKey,
+                diff,
+                getInfo_UNSTABLE as any,
+              ),
             );
           }
         }, 0);
@@ -643,4 +680,4 @@ export function syncEffect<T>(opt: SyncEffectOptions<T>): AtomEffect<T> {
   };
 }
 
-export const registries_FOR_TESTING = registries; 
+export const registries_FOR_TESTING = registries;

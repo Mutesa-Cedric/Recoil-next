@@ -2,25 +2,28 @@
  * TypeScript port of Recoil_useRecoilTransaction-test.js
  */
 
-import { render } from '@testing-library/react';
+import {render} from '@testing-library/react';
 import * as React from 'react';
-import { act, useEffect } from 'react';
-import { describe, expect, test } from 'vitest';
+import {act, useEffect} from 'react';
+import {describe, expect, test} from 'vitest';
 
-import { RecoilRoot } from '../../core/RecoilRoot';
-import { atom } from '../../recoil_values/atom';
-import { useRecoilValue } from '../Hooks';
+import {RecoilRoot} from '../../core/RecoilRoot';
+import {atom} from '../../recoil_values/atom';
+import {useRecoilValue} from '../Hooks';
 import useRecoilTransaction from '../useRecoilTransaction';
 
 // Error boundary component for testing
 class ErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: (error: Error) => React.ReactNode },
-  { hasError: boolean; error?: Error }
+  {children: React.ReactNode; fallback?: (error: Error) => React.ReactNode},
+  {hasError: boolean; error?: Error}
 > {
-  state: { hasError: boolean; error?: Error } = { hasError: false };
+  state: {hasError: boolean; error?: Error} = {hasError: false};
 
-  static getDerivedStateFromError(error: Error): { hasError: boolean; error?: Error } {
-    return { hasError: true, error };
+  static getDerivedStateFromError(error: Error): {
+    hasError: boolean;
+    error?: Error;
+  } {
+    return {hasError: true, error};
   }
 
   render(): React.ReactNode {
@@ -34,18 +37,18 @@ class ErrorBoundary extends React.Component<
 
 // React rendering utilities for testing
 function renderElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(
+  const {container} = render(
     <RecoilRoot>
       <ErrorBoundary>
         <React.Suspense fallback="loading">{element}</React.Suspense>
       </ErrorBoundary>
-    </RecoilRoot>
+    </RecoilRoot>,
   );
   return container;
 }
 
 // Test component to read atom values
-function ReadsAtom<T>({ atom }: { atom: any }) {
+function ReadsAtom<T>({atom}: {atom: any}) {
   const value = useRecoilValue(atom);
   return <>{JSON.stringify(value)}</>;
 }
@@ -60,7 +63,7 @@ describe('useRecoilTransaction', () => {
     let readAtom: any;
     let ranTransaction = false;
     function Component() {
-      readAtom = useRecoilTransaction(({ get }) => () => {
+      readAtom = useRecoilTransaction(({get}) => () => {
         expect(get(myAtom)).toEqual('DEFAULT');
         ranTransaction = true;
       });
@@ -80,7 +83,7 @@ describe('useRecoilTransaction', () => {
     });
 
     function Component() {
-      const transact = useRecoilTransaction(({ set, get }) => (value: string) => {
+      const transact = useRecoilTransaction(({set, get}) => (value: string) => {
         set(myAtom, 'TMP');
         expect(get(myAtom)).toEqual('TMP');
         set(myAtom, (old: string) => {
@@ -116,7 +119,7 @@ describe('useRecoilTransaction', () => {
 
     let transaction: any;
     function Component() {
-      transaction = useRecoilTransaction(({ set, get }) => () => {
+      transaction = useRecoilTransaction(({set, get}) => () => {
         expect(get(atomA)).toEqual('A');
         expect(get(atomB)).toEqual('B');
         set(atomA, 'A_UPDATED');
@@ -139,7 +142,7 @@ describe('useRecoilTransaction', () => {
 
     let transaction: any;
     function Component() {
-      transaction = useRecoilTransaction(({ set, get }) => async () => {
+      transaction = useRecoilTransaction(({set, get}) => async () => {
         expect(get(myAtom)).toEqual('DEFAULT');
         set(myAtom, 'UPDATED');
         expect(get(myAtom)).toEqual('UPDATED');
@@ -164,7 +167,7 @@ describe('useRecoilTransaction', () => {
 
     let transaction: any;
     function Component() {
-      transaction = useRecoilTransaction(({ set, get }) => () => {
+      transaction = useRecoilTransaction(({set, get}) => () => {
         try {
           set(myAtom, 'BEFORE_ERROR');
           expect(get(myAtom)).toEqual('BEFORE_ERROR');
@@ -180,4 +183,4 @@ describe('useRecoilTransaction', () => {
     renderElements(<Component />);
     expect(() => act(() => transaction())).not.toThrow();
   });
-}); 
+});

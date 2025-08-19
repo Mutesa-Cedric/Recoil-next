@@ -6,4 +6,4 @@
 
 export default function useComponentName(): string {
   return '<component name not available>';
-} 
+}

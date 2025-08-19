@@ -2,8 +2,8 @@
  * TypeScript port of Recoil_MapCache-test.js
  */
 
-import { describe, test, expect } from 'vitest';
-import { MapCache } from '../MapCache';
+import {describe, test, expect} from 'vitest';
+import {MapCache} from '../MapCache';
 
 describe('MapCache', () => {
   test('setting and getting', () => {
@@ -37,4 +37,4 @@ describe('MapCache', () => {
     expect(cache.get('b')).toBe(2);
     expect(cache.has('a')).toBe(false);
   });
-}); 
+});

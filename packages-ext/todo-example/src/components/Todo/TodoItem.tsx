@@ -1,20 +1,20 @@
 // TypeScript port of TodoItem.jsx
 
-import { TodoItem as TodoItemType } from './Todo_types';
-import { todoListState } from './Todo_state';
-import React, { ChangeEvent } from 'react';
-import { useRecoilState } from 'recoil-next';
+import {TodoItem as TodoItemType} from './Todo_types';
+import {todoListState} from './Todo_state';
+import React, {ChangeEvent} from 'react';
+import {useRecoilState} from 'recoil-next';
 
 interface TodoItemProps {
   item: TodoItemType;
   index: number;
 }
 
-export const TodoItem: React.FC<TodoItemProps> = ({ item, index }) => {
+export const TodoItem: React.FC<TodoItemProps> = ({item, index}) => {
   const [todoList, setTodoList] = useRecoilState(todoListState);
 
   const editItemText = (event: ChangeEvent<HTMLInputElement>) => {
-    const { value } = event.target;
+    const {value} = event.target;
     const newList = replaceItemAtIndex(todoList, index, {
       ...item,
       text: value,

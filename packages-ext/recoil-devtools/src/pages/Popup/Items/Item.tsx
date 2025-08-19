@@ -9,20 +9,20 @@ import ItemDependencies from './ItemDependencies';
 import ItemValue from './ItemValue';
 
 import ConnectionContext from '../ConnectionContext';
-import React, { useContext } from 'react';
-import { useSelectedTransaction } from '../useSelectionHooks';
+import React, {useContext} from 'react';
+import {useSelectedTransaction} from '../useSelectionHooks';
 import CollapsibleItem from './CollapsibleItem';
-import ItemDescription, { hasItemDescription } from './ItemDescription';
+import ItemDescription, {hasItemDescription} from './ItemDescription';
 import ItemLabel from './ItemLabel';
 import ItemMoreItems from './ItemMoreItems';
 import nullthrows from 'nullthrows';
 
 type KeyProps = {
-  name: string | number,
-  content: SerializedValue,
-  startCollapsed?: boolean | null | undefined,
-  node?: Node | null | undefined,
-  isRoot?: boolean,
+  name: string | number;
+  content: SerializedValue;
+  startCollapsed?: boolean | null | undefined;
+  node?: Node | null | undefined;
+  isRoot?: boolean;
 };
 
 function Item({

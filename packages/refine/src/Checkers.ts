@@ -43,7 +43,7 @@ export type Checker<V> = (value: unknown, path?: Path) => CheckResult<V>;
  * type MyArray = CheckerReturnType<typeof check>;
  * ```
  */
-export type CheckerReturnType<CheckerFunction extends Checker<any>> = 
+export type CheckerReturnType<CheckerFunction extends Checker<any>> =
   CheckerFunction extends Checker<infer T> ? T : never;
 
 /**
@@ -83,14 +83,14 @@ export function success<V>(
   value: V,
   warnings: readonly CheckFailure[] = [],
 ): CheckSuccess<V> {
-  return { type: 'success', value, warnings };
+  return {type: 'success', value, warnings};
 }
 
 /**
  * indicate typecheck failed
  */
 export function failure(message: string, path: Path): CheckFailure {
-  return { type: 'failure', message, path };
+  return {type: 'failure', message, path};
 }
 
 /**
@@ -104,4 +104,4 @@ export function compose<T, V>(
     const result = checker(value, path);
     return result.type === 'failure' ? result : next(result, path);
   };
-} 
+}

@@ -2,9 +2,14 @@
  * TypeScript port of test utilities for recoil-sync
  */
 
-import { act, render } from '@testing-library/react';
+import {act, render} from '@testing-library/react';
 import React from 'react';
-import { RecoilRoot, useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil-next';
+import {
+  RecoilRoot,
+  useRecoilValue,
+  useResetRecoilState,
+  useSetRecoilState,
+} from 'recoil-next';
 
 // Simple stringify that handles Set and Map like the original stableStringify
 function simpleStringify(value: any): string {
@@ -22,27 +27,32 @@ function simpleStringify(value: any): string {
 }
 
 // Component that reads an atom
-export function ReadsAtom({ atom }: { atom: any }) {
+export function ReadsAtom({atom}: {atom: any}) {
   const value = useRecoilValue(atom);
   return React.createElement('div', null, simpleStringify(value));
 }
 
 // Component that reads and writes an atom - returns component and reference objects for setters
-export function ComponentThatReadsAndWritesAtom(atom: any): [React.ComponentType, { setValue: any; resetValue: any }] {
-  const refs: { setValue: any; resetValue: any } = { setValue: null, resetValue: null };
-  
+export function ComponentThatReadsAndWritesAtom(
+  atom: any,
+): [React.ComponentType, {setValue: any; resetValue: any}] {
+  const refs: {setValue: any; resetValue: any} = {
+    setValue: null,
+    resetValue: null,
+  };
+
   const Component = () => {
     const value = useRecoilValue(atom);
     const setValue = useSetRecoilState(atom);
     const resetValue = useResetRecoilState(atom);
-    
+
     // Assign immediately during render
     refs.setValue = setValue;
     refs.resetValue = resetValue;
-    
+
     return <div>{JSON.stringify(value)}</div>;
   };
-  
+
   return [Component, refs];
 }
 
@@ -56,9 +66,9 @@ export async function flushPromisesAndTimers() {
 // Simple render function that wraps with RecoilRoot
 export function renderElements(elements: React.ReactNode) {
   const div = document.createElement('div');
-  const { container } = render(
+  const {container} = render(
     <RecoilRoot override={false}>{elements}</RecoilRoot>,
-    { container: div }
+    {container: div},
   );
   return container;
 }

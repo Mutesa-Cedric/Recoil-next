@@ -13,7 +13,7 @@ const getConnectionId = ({sender}: chrome.runtime.Port): number => {
   return sender?.tab?.id ?? 0;
 };
 const getConnectionName = ({name}: chrome.runtime.Port): string => {
-  let id = name ?? 'Recoil Connection';
+  const id = name ?? 'Recoil Connection';
   return id;
 };
 

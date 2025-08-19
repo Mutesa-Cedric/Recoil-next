@@ -3,24 +3,26 @@
  * Recoil DevTools browser extension.
  */
 
-import { createGraph, depsHaveChaged } from '../GraphUtils';
-import { describe, it, expect } from 'vitest';
+import {createGraph, depsHaveChaged} from '../GraphUtils';
+import {describe, it, expect} from 'vitest';
 
 describe('base cases', () => {
   const emptySet = new Set<string>();
   it('empty snapshot and deps', () => {
-    expect(createGraph({})).toEqual({ levels: [[]], edges: [] });
+    expect(createGraph({})).toEqual({levels: [[]], edges: []});
   });
 
   it('only snapshot', () => {
-    expect(createGraph({ a: new Set(), b: new Set() })).toEqual({
+    expect(createGraph({a: new Set(), b: new Set()})).toEqual({
       levels: [['a', 'b']],
       edges: [],
     });
   });
 
   it('snapshot with single dep', () => {
-    expect(createGraph({ a: emptySet, b: emptySet, c: new Set<string>(['a']) })).toEqual({
+    expect(
+      createGraph({a: emptySet, b: emptySet, c: new Set<string>(['a'])}),
+    ).toEqual({
       levels: [['a', 'b'], ['c']],
       edges: [
         [
@@ -136,7 +138,9 @@ describe('depsHaveChaged util', () => {
 
   it('returns true when sets have different sizes', () => {
     expect(depsHaveChaged(new Set<string>(['a']), newSet)).toBeTruthy();
-    expect(depsHaveChaged(new Set<string>(['a', 'b', 'c']), newSet)).toBeTruthy();
+    expect(
+      depsHaveChaged(new Set<string>(['a', 'b', 'c']), newSet),
+    ).toBeTruthy();
   });
 
   it('returns false when sets are equal', () => {

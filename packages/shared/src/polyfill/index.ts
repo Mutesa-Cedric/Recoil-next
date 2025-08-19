@@ -4,4 +4,4 @@ export * from './sprintf';
 export * from './recoverableViolation';
 export * from './invariant';
 export * from './expectationViolation';
-export * from './err'; 
+export * from './err';

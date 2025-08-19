@@ -2,18 +2,19 @@
  * TypeScript port of RecoilRelay_RecoilRelayEnvironment-test.js
  */
 
-import React, { act } from 'react';
-import { atom } from 'recoil-next';
-import { describe, expect, test } from 'vitest';
-import { testFeedbackQuery } from '../__test_utils__/MockQueries';
-import { mockRelayEnvironment } from '../__test_utils__/mockRelayEnvironment';
-import { flushPromisesAndTimers, ReadsAtom } from '../__test_utils__/TestUtils';
-import { graphQLQueryEffect } from '../graphQLQueryEffect';
-import { graphQLSelectorFamily } from '../graphQLSelectorFamily';
+import React, {act} from 'react';
+import {atom} from 'recoil-next';
+import {describe, expect, test} from 'vitest';
+import {testFeedbackQuery} from '../__test_utils__/MockQueries';
+import {mockRelayEnvironment} from '../__test_utils__/mockRelayEnvironment';
+import {flushPromisesAndTimers, ReadsAtom} from '../__test_utils__/TestUtils';
+import {graphQLQueryEffect} from '../graphQLQueryEffect';
+import {graphQLSelectorFamily} from '../graphQLSelectorFamily';
 
 describe('Multiple Environments', () => {
   test('graphQLQueryEffect() with multiple atoms', async () => {
-    const { environment, mockEnvironmentKey, renderElements } = mockRelayEnvironment();
+    const {environment, mockEnvironmentKey, renderElements} =
+      mockRelayEnvironment();
 
     const myAtomA = atom({
       key: 'graphql environments A',
@@ -22,8 +23,8 @@ describe('Multiple Environments', () => {
         graphQLQueryEffect({
           environment: mockEnvironmentKey,
           query: testFeedbackQuery,
-          variables: { id: 'A' },
-          mapResponse: ({ feedback }: any) => feedback?.seen_count,
+          variables: {id: 'A'},
+          mapResponse: ({feedback}: any) => feedback?.seen_count,
         }),
       ],
     });
@@ -35,21 +36,27 @@ describe('Multiple Environments', () => {
         graphQLQueryEffect({
           environment: mockEnvironmentKey,
           query: testFeedbackQuery,
-          variables: { id: 'B' },
-          mapResponse: ({ feedback }: any) => feedback?.seen_count,
+          variables: {id: 'B'},
+          mapResponse: ({feedback}: any) => feedback?.seen_count,
         }),
       ],
     });
 
     const c = renderElements(
-      React.createElement('div', null,
-        React.createElement(React.Suspense, { fallback: '"loading"' },
-          React.createElement(ReadsAtom, { key: 'A', atom: myAtomA })
+      React.createElement(
+        'div',
+        null,
+        React.createElement(
+          React.Suspense,
+          {fallback: '"loading"'},
+          React.createElement(ReadsAtom, {key: 'A', atom: myAtomA}),
         ),
-        React.createElement(React.Suspense, { fallback: '"loading"' },
-          React.createElement(ReadsAtom, { key: 'B', atom: myAtomB })
-        )
-      )
+        React.createElement(
+          React.Suspense,
+          {fallback: '"loading"'},
+          React.createElement(ReadsAtom, {key: 'B', atom: myAtomB}),
+        ),
+      ),
     );
 
     await flushPromisesAndTimers();
@@ -67,27 +74,30 @@ describe('Multiple Environments', () => {
             },
           },
         });
-      })
+      }),
     );
     await flushPromisesAndTimers();
     expect(c.textContent).toBe('123123');
   });
 
   test('graphQLSelectorFamily() basic functionality', async () => {
-    const { environment, mockEnvironmentKey, renderElements } = mockRelayEnvironment();
+    const {environment, mockEnvironmentKey, renderElements} =
+      mockRelayEnvironment();
 
     const mySelector = graphQLSelectorFamily({
       key: 'graphql environments selector',
       environment: mockEnvironmentKey,
       query: testFeedbackQuery,
-      variables: ({ id }: { id: string }) => ({ id }),
-      mapResponse: ({ feedback }: any) => feedback?.seen_count,
+      variables: ({id}: {id: string}) => ({id}),
+      mapResponse: ({feedback}: any) => feedback?.seen_count,
     });
 
     const c = renderElements(
-      React.createElement(React.Suspense, { fallback: '"loading"' },
-        React.createElement(ReadsAtom, { atom: mySelector({ id: 'TEST' }) })
-      )
+      React.createElement(
+        React.Suspense,
+        {fallback: '"loading"'},
+        React.createElement(ReadsAtom, {atom: mySelector({id: 'TEST'})}),
+      ),
     );
 
     await flushPromisesAndTimers();
@@ -107,4 +117,4 @@ describe('Multiple Environments', () => {
     await flushPromisesAndTimers();
     expect(c.textContent).toBe('456');
   });
-}); 
+});

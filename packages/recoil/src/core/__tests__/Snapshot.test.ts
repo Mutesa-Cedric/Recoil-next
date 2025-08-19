@@ -2,17 +2,17 @@
  * TypeScript port of Recoil_Snapshot-test.js
  */
 
-import { beforeEach, describe, expect, test } from 'vitest';
+import {beforeEach, describe, expect, test} from 'vitest';
 
-import type { RecoilState, RecoilValueReadOnly } from '../RecoilValue';
-import type { Snapshot } from '../Snapshot';
-import type { Store } from '../State';
+import type {RecoilState, RecoilValueReadOnly} from '../RecoilValue';
+import type {Snapshot} from '../Snapshot';
+import type {Store} from '../State';
 
-import { persistentMap } from '../../adt/PersistentMap';
-import { atom } from '../../recoil_values/atom';
-import { selector } from '../../recoil_values/selector';
-import { getNextStoreID, getNextTreeStateVersion } from '../Keys';
-import { freshSnapshot } from '../Snapshot';
+import {persistentMap} from '../../adt/PersistentMap';
+import {atom} from '../../recoil_values/atom';
+import {selector} from '../../recoil_values/selector';
+import {getNextStoreID, getNextTreeStateVersion} from '../Keys';
+import {freshSnapshot} from '../Snapshot';
 
 // Create a proper mock store for testing (same pattern as other tests)
 function makeStore(): Store {
@@ -47,27 +47,30 @@ function makeStore(): Store {
   const store: Store = {
     storeID: getNextStoreID(),
     getState: () => storeState,
-    replaceState: (replacer) => {
+    replaceState: replacer => {
       const currentStoreState = store.getState();
       currentStoreState.currentTree = replacer(currentStoreState.currentTree);
     },
-    getGraph: (version) => {
+    getGraph: version => {
       const graphs = storeState.graphsByVersion;
       if (graphs.has(version)) {
         return graphs.get(version)!;
       }
-      const newGraph = { nodeDeps: new Map(), nodeToNodeSubscriptions: new Map() };
+      const newGraph = {
+        nodeDeps: new Map(),
+        nodeToNodeSubscriptions: new Map(),
+      };
       graphs.set(version, newGraph);
       return newGraph;
     },
     subscribeToTransactions: () => {
-      return { release: () => {} };
+      return {release: () => {}};
     },
     addTransactionMetadata: () => {
       // no-op in test mock
     },
   };
-  
+
   return store;
 }
 
@@ -88,14 +91,18 @@ function getInfo(
 describe('Snapshot', () => {
   test('getNodes', () => {
     const snapshot = freshSnapshot();
-    const { getNodes_UNSTABLE } = snapshot;
+    const {getNodes_UNSTABLE} = snapshot;
     expect(Array.from(getNodes_UNSTABLE()).length).toEqual(0);
-    expect(Array.from(getNodes_UNSTABLE({ isInitialized: true })).length).toEqual(0);
+    expect(Array.from(getNodes_UNSTABLE({isInitialized: true})).length).toEqual(
+      0,
+    );
 
     // Test atoms
-    const myAtom = atom({ key: 'snapshot getNodes atom', default: 'DEFAULT' });
+    const myAtom = atom({key: 'snapshot getNodes atom', default: 'DEFAULT'});
     expect(Array.from(getNodes_UNSTABLE()).length).toEqual(1);
-    expect(Array.from(getNodes_UNSTABLE({ isInitialized: true })).length).toEqual(0);
+    expect(Array.from(getNodes_UNSTABLE({isInitialized: true})).length).toEqual(
+      0,
+    );
     expect(snapshot.getLoadable(myAtom).contents).toEqual('DEFAULT');
     const nodesAfterGet = Array.from(getNodes_UNSTABLE());
     expect(nodesAfterGet.length).toEqual(1);
@@ -105,19 +112,25 @@ describe('Snapshot', () => {
     // Test selectors
     const mySelector = selector({
       key: 'snapshot getNodes selector',
-      get: ({ get }) => get(myAtom) + '-SELECTOR',
+      get: ({get}) => get(myAtom) + '-SELECTOR',
     });
     expect(Array.from(getNodes_UNSTABLE()).length).toEqual(2);
-    expect(Array.from(getNodes_UNSTABLE({ isInitialized: true })).length).toEqual(1);
-    expect(snapshot.getLoadable(mySelector).contents).toEqual('DEFAULT-SELECTOR');
-    expect(Array.from(getNodes_UNSTABLE({ isInitialized: true })).length).toEqual(2);
+    expect(Array.from(getNodes_UNSTABLE({isInitialized: true})).length).toEqual(
+      1,
+    );
+    expect(snapshot.getLoadable(mySelector).contents).toEqual(
+      'DEFAULT-SELECTOR',
+    );
+    expect(Array.from(getNodes_UNSTABLE({isInitialized: true})).length).toEqual(
+      2,
+    );
   });
 
   test('getLoadable', () => {
     const snapshot = freshSnapshot();
 
     // Test atom
-    const myAtom = atom({ key: 'snapshot getLoadable atom', default: 'DEFAULT' });
+    const myAtom = atom({key: 'snapshot getLoadable atom', default: 'DEFAULT'});
     const loadable = snapshot.getLoadable(myAtom);
     expect(loadable.state).toBe('hasValue');
     expect(loadable.contents).toEqual('DEFAULT');
@@ -125,7 +138,7 @@ describe('Snapshot', () => {
     // Test selector
     const mySelector = selector({
       key: 'snapshot getLoadable selector',
-      get: ({ get }) => get(myAtom) + '-SELECTOR',
+      get: ({get}) => get(myAtom) + '-SELECTOR',
     });
     const selectorLoadable = snapshot.getLoadable(mySelector);
     expect(selectorLoadable.state).toBe('hasValue');
@@ -135,7 +148,7 @@ describe('Snapshot', () => {
   test('getPromise', () => {
     const snapshot = freshSnapshot();
 
-    const myAtom = atom({ key: 'snapshot getPromise atom', default: 'DEFAULT' });
+    const myAtom = atom({key: 'snapshot getPromise atom', default: 'DEFAULT'});
     return snapshot.getPromise(myAtom).then(value => {
       expect(value).toEqual('DEFAULT');
     });
@@ -144,7 +157,7 @@ describe('Snapshot', () => {
   test('getInfo_UNSTABLE', () => {
     const snapshot = freshSnapshot();
 
-    const myAtom = atom({ key: 'snapshot getInfo atom', default: 'DEFAULT' });
+    const myAtom = atom({key: 'snapshot getInfo atom', default: 'DEFAULT'});
     const info = getInfo(snapshot, myAtom);
     expect(info.type).toBe('atom');
     expect(info.isSet).toBe(false);
@@ -155,9 +168,9 @@ describe('Snapshot', () => {
 
   test('map', () => {
     const snapshot = freshSnapshot();
-    const myAtom = atom({ key: 'snapshot map atom', default: 'DEFAULT' });
+    const myAtom = atom({key: 'snapshot map atom', default: 'DEFAULT'});
 
-    const newSnapshot = snapshot.map(({ set }) => {
+    const newSnapshot = snapshot.map(({set}) => {
       set(myAtom, 'MAPPED');
     });
 
@@ -167,9 +180,9 @@ describe('Snapshot', () => {
 
   test('asyncMap', async () => {
     const snapshot = freshSnapshot();
-    const myAtom = atom({ key: 'snapshot asyncMap atom', default: 'DEFAULT' });
+    const myAtom = atom({key: 'snapshot asyncMap atom', default: 'DEFAULT'});
 
-    const newSnapshot = await snapshot.asyncMap(async ({ set }) => {
+    const newSnapshot = await snapshot.asyncMap(async ({set}) => {
       await Promise.resolve(); // Simulate async operation
       set(myAtom, 'ASYNC_MAPPED');
     });
@@ -177,4 +190,4 @@ describe('Snapshot', () => {
     expect(snapshot.getLoadable(myAtom).contents).toEqual('DEFAULT');
     expect(newSnapshot.getLoadable(myAtom).contents).toEqual('ASYNC_MAPPED');
   });
-}); 
+});

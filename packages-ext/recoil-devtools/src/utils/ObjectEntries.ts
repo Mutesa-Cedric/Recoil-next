@@ -13,12 +13,12 @@ declare const __DEV__: boolean;
  * equivalent to `[['1', 'lol']]` and NOT `[[1, 'lol']]`. Thus, TypeScript will
  * incorrectly type the return in these cases.
  */
-export default function objectEntries<TKey extends string | number | symbol, TValue>(
-  obj: Record<TKey, TValue>
-): Array<[string, TValue]> {
+export default function objectEntries<
+  TKey extends string | number | symbol,
+  TValue,
+>(obj: Record<TKey, TValue>): Array<[string, TValue]> {
   if (__DEV__) {
     if (obj instanceof Map) {
-      // eslint-disable-next-line fb-www/no-console
       console.error(
         "objectEntries doesn't work on Map instances; use instance.entries() instead",
       );

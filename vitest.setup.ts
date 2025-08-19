@@ -1,5 +1,5 @@
-import { beforeAll, afterEach, vi } from 'vitest';
-import { cleanup } from '@testing-library/react';
+import {beforeAll, afterEach, vi} from 'vitest';
+import {cleanup} from '@testing-library/react';
 
 // Set up DOM environment
 beforeAll(() => {
@@ -29,10 +29,10 @@ beforeAll(() => {
     setTimeout(cb, 0);
     return 1;
   });
-  global.cancelAnimationFrame = vi.fn(() => { });
+  global.cancelAnimationFrame = vi.fn(() => {});
 
   // Set up text encoding globals
-  const { TextEncoder, TextDecoder } = require('util');
+  const {TextEncoder, TextDecoder} = require('util');
   global.TextEncoder = TextEncoder;
   global.TextDecoder = TextDecoder;
 
@@ -60,4 +60,4 @@ afterEach(() => {
   vi.useRealTimers();
   // Clear all mocks to prevent spy pollution
   vi.clearAllMocks();
-}); 
+});

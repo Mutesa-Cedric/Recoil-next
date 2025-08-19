@@ -2,11 +2,15 @@
  * TypeScript port of RecoilSync_MockURLSerialization.js
  */
 
-import React, { useCallback } from 'react';
-import { RecoilURLSync, LocationOption, BrowserInterface } from '../RecoilSync_URL';
-import { flushPromisesAndTimers } from '../../../shared/src/util/__tests__/TestUtils';
+import React, {useCallback} from 'react';
+import {
+  RecoilURLSync,
+  LocationOption,
+  BrowserInterface,
+} from '../RecoilSync_URL';
+import {flushPromisesAndTimers} from '../../../shared/src/util/__tests__/TestUtils';
 import nullthrows from '../../../shared/src/util/Recoil_nullthrows';
-import { expect } from 'vitest';
+import {expect} from 'vitest';
 
 // ////////////////////////////
 // // Mock Serialization
@@ -49,7 +53,7 @@ function TestURLSync({
       } catch {
         // Catch errors for open source CI tests which tend to keep previous tests alive so they are
         // still subscribed to URL changes from future tests and may get invalid JSON as a result.
-        return { error: 'PARSE ERROR' };
+        return {error: 'PARSE ERROR'};
       }
     },
     [location.part],
@@ -69,7 +73,11 @@ function encodeState(obj: Record<string, any>) {
   return encodeURIComponent(JSON.stringify(obj));
 }
 
-function encodeURLPart(href: string, loc: LocationOption, obj: Record<string, any>): string {
+function encodeURLPart(
+  href: string,
+  loc: LocationOption,
+  obj: Record<string, any>,
+): string {
   const url = new URL(href);
   switch (loc.part) {
     case 'href':
@@ -84,8 +92,8 @@ function encodeURLPart(href: string, loc: LocationOption, obj: Record<string, an
       break;
     }
     case 'queryParams': {
-      const { param } = loc;
-      const { searchParams } = url;
+      const {param} = loc;
+      const {searchParams} = url;
       if (param != null) {
         searchParams.set(param, JSON.stringify(obj));
       } else {
@@ -130,10 +138,4 @@ async function goBack() {
   await flushPromisesAndTimers();
 }
 
-export {
-  TestURLSync,
-  encodeURL,
-  expectURL,
-  gotoURL,
-  goBack,
-}; 
+export {TestURLSync, encodeURL, expectURL, gotoURL, goBack};

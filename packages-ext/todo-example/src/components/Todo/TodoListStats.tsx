@@ -1,9 +1,9 @@
 import React from 'react';
-import { useRecoilValue } from 'recoil-next';
-import { todoListStatsState } from './Todo_state';
+import {useRecoilValue} from 'recoil-next';
+import {todoListStatsState} from './Todo_state';
 
 export const TodoListStats: React.FC = () => {
-  const { totalNum, totalCompletedNum, totalUncompletedNum, percentCompleted } =
+  const {totalNum, totalCompletedNum, totalUncompletedNum, percentCompleted} =
     useRecoilValue(todoListStatsState);
 
   const formattedPercentCompleted = Math.round(percentCompleted);

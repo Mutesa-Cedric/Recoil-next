@@ -2,8 +2,8 @@
  * TypeScript port of Recoil_ArrayKeyedMap-test.js
  */
 
-import { test, expect } from 'vitest';
-import { ArrayKeyedMap } from '../ArrayKeyedMap';
+import {test, expect} from 'vitest';
+import {ArrayKeyedMap} from '../ArrayKeyedMap';
 
 test('basic operation', () => {
   const m = new ArrayKeyedMap<number>();
@@ -39,4 +39,4 @@ test('copying', () => {
   expect(mm.get(['a'])).toBe(1);
   expect(mm.get(['a', 'b'])).toBe(2);
   expect(Array.from(m.entries())).toEqual(Array.from(mm.entries()));
-}); 
+});

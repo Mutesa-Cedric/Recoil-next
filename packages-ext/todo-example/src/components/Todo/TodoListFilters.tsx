@@ -1,15 +1,15 @@
 // TypeScript port of TodoListFilters.jsx
 
-import { todoListFilterState } from './Todo_state';
-import { TodoFilterType } from './Todo_types';
-import React, { ChangeEvent } from 'react';
-import { useRecoilState } from 'recoil-next';
+import {todoListFilterState} from './Todo_state';
+import {TodoFilterType} from './Todo_types';
+import React, {ChangeEvent} from 'react';
+import {useRecoilState} from 'recoil-next';
 
 export const TodoListFilters: React.FC = () => {
   const [filter, setFilter] = useRecoilState(todoListFilterState);
 
   const updateFilter = (event: ChangeEvent<HTMLSelectElement>) => {
-    const { value } = event.target;
+    const {value} = event.target;
     setFilter(value as TodoFilterType);
   };
 

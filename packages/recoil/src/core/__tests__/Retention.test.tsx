@@ -2,31 +2,38 @@
  * TypeScript port of Recoil_Retention-test.js
  */
 
-import { render } from '@testing-library/react';
+import {render} from '@testing-library/react';
 import * as React from 'react';
-import { act, useState } from 'react';
-import { describe, expect, test, vi } from 'vitest';
+import {act, useState} from 'react';
+import {describe, expect, test, vi} from 'vitest';
 
-import type { RecoilState } from '../../core/RecoilValue';
-import type { RetentionZone } from '../RetentionZone';
-import { retentionZone } from '../RetentionZone';
+import type {RecoilState} from '../../core/RecoilValue';
+import type {RetentionZone} from '../RetentionZone';
+import {retentionZone} from '../RetentionZone';
 
-import { useRecoilState, useRecoilValue, useRecoilValueLoadable } from '../../hooks/Hooks';
-import { useRecoilCallback } from '../../hooks/useRecoilCallback';
+import {
+  useRecoilState,
+  useRecoilValue,
+  useRecoilValueLoadable,
+} from '../../hooks/Hooks';
+import {useRecoilCallback} from '../../hooks/useRecoilCallback';
 import useRetain from '../../hooks/useRetain';
-import { atom } from '../../recoil_values/atom';
-import { selector } from '../../recoil_values/selector';
-import { RecoilRoot } from '../RecoilRoot';
+import {atom} from '../../recoil_values/atom';
+import {selector} from '../../recoil_values/selector';
+import {RecoilRoot} from '../RecoilRoot';
 
 // Error boundary component for testing
 class ErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: (error: Error) => React.ReactNode },
-  { hasError: boolean; error?: Error }
+  {children: React.ReactNode; fallback?: (error: Error) => React.ReactNode},
+  {hasError: boolean; error?: Error}
 > {
-  state: { hasError: boolean; error?: Error } = { hasError: false };
+  state: {hasError: boolean; error?: Error} = {hasError: false};
 
-  static getDerivedStateFromError(error: Error): { hasError: boolean; error?: Error } {
-    return { hasError: true, error };
+  static getDerivedStateFromError(error: Error): {
+    hasError: boolean;
+    error?: Error;
+  } {
+    return {hasError: true, error};
   }
 
   render(): React.ReactNode {
@@ -40,18 +47,18 @@ class ErrorBoundary extends React.Component<
 
 // React rendering utilities for testing
 function renderElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(
+  const {container} = render(
     <RecoilRoot>
       <ErrorBoundary>
         <React.Suspense fallback="loading">{element}</React.Suspense>
       </ErrorBoundary>
-    </RecoilRoot>
+    </RecoilRoot>,
   );
   return container;
 }
 
 // Test component to read atom values
-function ReadsAtom<T>({ atom }: { atom: any }) {
+function ReadsAtom<T>({atom}: {atom: any}) {
   const value = useRecoilValue(atom);
   return <>{JSON.stringify(value)}</>;
 }
@@ -60,18 +67,14 @@ function ReadsAtom<T>({ atom }: { atom: any }) {
 
 // Mock gkx for testing
 const gkx = {
-  'recoil_memory_managament_2020': true,
+  recoil_memory_managament_2020: true,
   setPass: vi.fn(),
   setFail: vi.fn(),
 };
 
 let nextKey = 0;
 function atomRetainedBy(
-  retainedBy:
-    | undefined
-    | RetentionZone
-    | 'components'
-    | Array<RetentionZone>,
+  retainedBy: undefined | RetentionZone | 'components' | Array<RetentionZone>,
 ) {
   return atom({
     key: `retention/${nextKey++}`,
@@ -80,10 +83,15 @@ function atomRetainedBy(
   });
 }
 
-function switchComponent(defaultVisible: boolean): [React.ComponentType<{ children: React.ReactNode }>, (visible: boolean) => void] {
+function switchComponent(
+  defaultVisible: boolean,
+): [
+  React.ComponentType<{children: React.ReactNode}>,
+  (visible: boolean) => void,
+] {
   let innerSetVisible: (value: boolean) => void = (_: boolean) => undefined;
   const setVisible = (v: boolean) => innerSetVisible(v); // acts like a ref basically
-  function Switch({ children }: { children: React.ReactNode }) {
+  function Switch({children}: {children: React.ReactNode}) {
     const [visible, setVisibleState] = useState(defaultVisible);
     innerSetVisible = setVisibleState;
     return visible ? children : null;
@@ -144,10 +152,12 @@ function testWhetherAtomIsRetained(
 // Mock component that reads and writes atom
 function componentThatReadsAndWritesAtom(
   recoilState: RecoilState<any>,
-): [React.ComponentType<{}>, ((updater: any | ((prev: any) => any)) => void)] {
-  let innerUpdateValue: ((updater: any | ((prev: any) => any)) => void) = () => undefined;
-  const updateValue = (updater: any | ((prev: any) => any)) => innerUpdateValue(updater);
-  
+): [React.ComponentType<{}>, (updater: any | ((prev: any) => any)) => void] {
+  let innerUpdateValue: (updater: any | ((prev: any) => any)) => void = () =>
+    undefined;
+  const updateValue = (updater: any | ((prev: any) => any)) =>
+    innerUpdateValue(updater);
+
   const Component = vi.fn(() => {
     const [value, setValue] = useRecoilState(recoilState);
     innerUpdateValue = setValue;
@@ -204,7 +214,7 @@ describe('Retention of and via selectors', () => {
     const aSelector = selector({
       key: '...',
       retainedBy_UNSTABLE: 'components',
-      get: ({ get }) => {
+      get: ({get}) => {
         return get(anAtom);
       },
     });
@@ -227,7 +237,7 @@ describe('Retention of and via selectors', () => {
     const aSelector = selector({
       key: '......',
       retainedBy_UNSTABLE: 'components',
-      get: ({ get }) => {
+      get: ({get}) => {
         evalCount++;
         get(anAtom);
         return new Promise(r => {
@@ -261,7 +271,7 @@ describe('Retention of and via selectors', () => {
     const aSelector = selector({
       key: 'retention/asyncSettlesAfterRelease',
       retainedBy_UNSTABLE: 'components',
-      get: ({ get }) => {
+      get: ({get}) => {
         evalCount++;
         get(anAtom);
         return new Promise((res, rej) => {
@@ -279,7 +289,13 @@ describe('Retention of and via selectors', () => {
       // Test without using Suspense to avoid complications with Jest promises
       // and timeouts when using Suspense. This doesn't affect what's under test.
       const l = useRecoilValueLoadable(aSelector);
-      return <>{l.state === 'loading' ? 'loading' : (l.getValue() as React.ReactNode)}</>;
+      return (
+        <>
+          {l.state === 'loading'
+            ? 'loading'
+            : (l.getValue() as React.ReactNode)}
+        </>
+      );
     }
     const [Switch, setMounted] = switchComponent(true);
 
@@ -290,14 +306,15 @@ describe('Retention of and via selectors', () => {
     );
     expect(c.textContent).toEqual('loading');
     expect(evalCount).toBe(1);
-    
+
     // Set up error handlers for unhandled promises
-    const originalOnUnhandledRejection = process.listeners('unhandledRejection');
+    const originalOnUnhandledRejection =
+      process.listeners('unhandledRejection');
     const testRejectionHandler = () => {
       // Silently handle unhandled rejections during this test
     };
     process.on('unhandledRejection', testRejectionHandler);
-    
+
     try {
       act(() => setMounted(false)); // release selector while promise is in flight
       act(() => resolveFirst(123));
@@ -325,7 +342,7 @@ describe('Retention of and via selectors', () => {
     const depB = atomRetainedBy('components');
     const theSelector = selector({
       key: 'sel',
-      get: ({ get }) => {
+      get: ({get}) => {
         if (get(switchAtom)) {
           return get(depB);
         } else {
@@ -337,7 +354,7 @@ describe('Retention of and via selectors', () => {
 
     let setup: any;
     function Setup() {
-      setup = useRecoilCallback(({ set }) => () => {
+      setup = useRecoilCallback(({set}) => () => {
         set(depA, 123);
         set(depB, 456);
       });
@@ -434,7 +451,7 @@ describe('Retention during a transaction', () => {
     const zoneA = retentionZone();
     const zoneB = retentionZone();
     const anAtom = atomRetainedBy([zoneA, zoneB]);
-    function RetainsZone({ zone }: { zone: RetentionZone }) {
+    function RetainsZone({zone}: {zone: RetentionZone}) {
       useRetain(zone);
       return null;
     }
@@ -472,4 +489,4 @@ describe('Retention during a transaction', () => {
       </>,
     );
   });
-}); 
+});

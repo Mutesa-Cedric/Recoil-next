@@ -3,7 +3,7 @@
  * Recoil DevTools browser extension.
  */
 
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import AtomList from './Snapshot/AtomList';
 import SelectorList from './Snapshot/SelectorList';
 import SnapshotSearch from './Snapshot/SnapshotSearch';

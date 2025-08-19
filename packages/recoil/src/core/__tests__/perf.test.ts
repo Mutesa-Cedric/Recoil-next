@@ -2,20 +2,20 @@
  * TypeScript port of Recoil_perf-test.js
  */
 
-import { performance } from 'perf_hooks';
-import { describe, expect, test } from 'vitest';
+import {performance} from 'perf_hooks';
+import {describe, expect, test} from 'vitest';
 
-import type { Loadable, RecoilState, RecoilValue } from '../../index';
+import type {Loadable, RecoilState, RecoilValue} from '../../index';
 
-import { atom, selectorFamily } from '../../index';
-import { waitForAll } from '../../recoil_values/WaitFor';
-import { graph as makeGraph } from '../Graph';
-import { getNextStoreID } from '../Keys';
+import {atom, selectorFamily} from '../../index';
+import {waitForAll} from '../../recoil_values/WaitFor';
+import {graph as makeGraph} from '../Graph';
+import {getNextStoreID} from '../Keys';
 import {
   getRecoilValueAsLoadable,
   setRecoilValue,
 } from '../RecoilValueInterface';
-import { makeEmptyStoreState, type Store } from '../State';
+import {makeEmptyStoreState, type Store} from '../State';
 
 // Create a proper mock store for testing
 function makeStore(): Store {
@@ -23,14 +23,14 @@ function makeStore(): Store {
   const store: Store = {
     storeID: getNextStoreID(),
     getState: () => storeState,
-    replaceState: (replacer) => {
+    replaceState: replacer => {
       const currentStoreState = store.getState();
       // FIXME: does not increment state version number
       currentStoreState.currentTree = replacer(currentStoreState.currentTree);
       // Note: We're not calling invalidateDownstreams or other complex logic
       // for performance testing purposes
     },
-    getGraph: (version) => {
+    getGraph: version => {
       const graphs = storeState.graphsByVersion;
       if (graphs.has(version)) {
         return graphs.get(version)!;
@@ -60,9 +60,15 @@ const ITERATIONS = [1]; // Avoid iterating for automated testing
 
 function testPerf(
   name: string,
-  fn: ({ iterations, perf }: { iterations: number; perf: (cb: () => void) => void }) => void,
+  fn: ({
+    iterations,
+    perf,
+  }: {
+    iterations: number;
+    perf: (cb: () => void) => void;
+  }) => void,
 ) {
-  test.each(ITERATIONS)(name, (iterations) => {
+  test.each(ITERATIONS)(name, iterations => {
     store = makeStore();
     const perf = (cb: () => void) => {
       const BEGIN = performance.now();
@@ -70,7 +76,7 @@ function testPerf(
       const END = performance.now();
       console.log(`${name}(${iterations})`, END - BEGIN);
     };
-    fn({ iterations, perf });
+    fn({iterations, perf});
   });
 }
 
@@ -106,11 +112,11 @@ function createAtoms(num: number): Array<RecoilState<string>> {
 // Helper functions removed since snapshot functionality is simplified for performance testing
 
 describe('Performance Tests', () => {
-  testPerf('create n atoms', ({ iterations }) => {
+  testPerf('create n atoms', ({iterations}) => {
     createAtoms(iterations);
   });
 
-  testPerf('get n atoms', ({ iterations, perf }) => {
+  testPerf('get n atoms', ({iterations, perf}) => {
     const atoms = createAtoms(iterations);
     perf(() => {
       for (const node of atoms) {
@@ -119,7 +125,7 @@ describe('Performance Tests', () => {
     });
   });
 
-  testPerf('set n atoms', ({ iterations, perf }) => {
+  testPerf('set n atoms', ({iterations, perf}) => {
     const atoms = createAtoms(iterations);
     perf(() => {
       for (const node of atoms) {
@@ -128,13 +134,13 @@ describe('Performance Tests', () => {
     });
   });
 
-  testPerf('get n selectors', ({ iterations, perf }) => {
+  testPerf('get n selectors', ({iterations, perf}) => {
     const atoms = createAtoms(iterations);
     const testFamily = selectorFamily({
       key: 'PERF-getselectors',
       get:
         (id: number) =>
-        ({ get }) =>
+        ({get}) =>
           get(atoms[id]) + get(atoms[0]),
     });
     perf(() => {
@@ -144,7 +150,7 @@ describe('Performance Tests', () => {
     });
   });
 
-  testPerf('clone n snapshots', ({ iterations, perf }) => {
+  testPerf('clone n snapshots', ({iterations, perf}) => {
     const atoms = createAtoms(iterations);
     perf(() => {
       for (const node of atoms) {
@@ -156,29 +162,32 @@ describe('Performance Tests', () => {
     });
   });
 
-  testPerf('get 1 selector with n dependencies', ({ iterations, perf }) => {
+  testPerf('get 1 selector with n dependencies', ({iterations, perf}) => {
     const atoms = createAtoms(iterations);
     perf(() => {
       getNodeValue(waitForAll(atoms));
     });
   });
 
-  testPerf('get 1 selector with n dependencies n times', ({ iterations, perf }) => {
-    const atoms = createAtoms(iterations);
-    perf(() => {
-      for (let i = 0; i < iterations; i++) {
-        getNodeValue(waitForAll(atoms));
-      }
-    });
-  });
+  testPerf(
+    'get 1 selector with n dependencies n times',
+    ({iterations, perf}) => {
+      const atoms = createAtoms(iterations);
+      perf(() => {
+        for (let i = 0; i < iterations; i++) {
+          getNodeValue(waitForAll(atoms));
+        }
+      });
+    },
+  );
 
-  testPerf('get n selectors n times', ({ iterations, perf }) => {
+  testPerf('get n selectors n times', ({iterations, perf}) => {
     const atoms = createAtoms(iterations);
     const testFamily = selectorFamily({
       key: 'PERF-getselectors',
       get:
         (id: number) =>
-        ({ get }) =>
+        ({get}) =>
           get(atoms[id]) + get(atoms[0]),
     });
     perf(() => {
@@ -192,7 +201,7 @@ describe('Performance Tests', () => {
 
   testPerf(
     'get n selectors with n dependencies n times',
-    ({ iterations, perf }) => {
+    ({iterations, perf}) => {
       const atoms = createAtoms(iterations);
       const testFamily = selectorFamily<unknown, number>({
         key: 'PERF-getselectors',
@@ -207,4 +216,4 @@ describe('Performance Tests', () => {
       });
     },
   );
-}); 
+});

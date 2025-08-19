@@ -6,7 +6,7 @@
     "outDir": "dist",
     "jsx": "react-jsx"
   },
-  "references": [{ "path": "../shared" }],
+  "references": [{"path": "../shared"}],
   "include": ["src/**/*"],
   "exclude": ["**/__tests__/**"]
 }

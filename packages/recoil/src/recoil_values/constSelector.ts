@@ -4,22 +4,22 @@
 
 'use strict';
 
-import { RecoilValueReadOnly } from '../core/RecoilValue';
-import selectorFamily, { Parameter } from './selectorFamily';
+import {RecoilValueReadOnly} from '../core/RecoilValue';
+import selectorFamily, {Parameter} from './selectorFamily';
 
 const constantSelector = selectorFamily<any, any>({
-    key: '__constant',
-    get: (constant: any) => () => constant,
-    cachePolicyForParams_UNSTABLE: {
-        equality: 'reference',
-    },
+  key: '__constant',
+  get: (constant: any) => () => constant,
+  cachePolicyForParams_UNSTABLE: {
+    equality: 'reference',
+  },
 });
 
 function constSelector<T extends Parameter>(
-    constant: T,
+  constant: T,
 ): RecoilValueReadOnly<T> {
-    return constantSelector(constant);
+  return constantSelector(constant);
 }
 
-export { constSelector };
-export default constSelector; 
+export {constSelector};
+export default constSelector;

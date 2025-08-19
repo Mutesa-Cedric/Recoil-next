@@ -8,12 +8,12 @@ import {RecoilDevToolsActions} from '../constants/Constants';
 export type RecoilSnapshot = Snapshot;
 
 export type SnapshotType = {
-  [key: string]: SerializedValue,
+  [key: string]: SerializedValue;
 };
 
 export type TransactionNodeType = {
-  name: string,
-  isSubscriber: boolean,
+  name: string;
+  isSubscriber: boolean;
 };
 
 export type TransactionType = {
@@ -27,7 +27,7 @@ export type DependenciesSnapshotType = {[key: string]: DependenciesSetType};
 export type NodesSnapshotType = {[key: string]: NodeState};
 
 export type BackgroundPage = {
-  store: Store,
+  store: Store;
 };
 
 export type DevToolsOptions = Readonly<{
@@ -40,11 +40,14 @@ export type DevToolsOptions = Readonly<{
   devMode: boolean;
 }>;
 
-export type DevToolsConnnectProps = Readonly<DevToolsOptions & {
-  goToSnapshot: (snapshot: any) => void;
-}>;
+export type DevToolsConnnectProps = Readonly<
+  DevToolsOptions & {
+    goToSnapshot: (snapshot: any) => void;
+  }
+>;
 
-export type RecoilDevToolsActionsType = typeof RecoilDevToolsActions[keyof typeof RecoilDevToolsActions];
+export type RecoilDevToolsActionsType =
+  (typeof RecoilDevToolsActions)[keyof typeof RecoilDevToolsActions];
 
 export type PostMessageData = Readonly<{
   source?: string;

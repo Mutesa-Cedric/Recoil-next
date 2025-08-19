@@ -2,8 +2,8 @@
  * TypeScript port of Refine_PrimitiveCheckers.js
  */
 
-import type { Checker } from './Checkers';
-import { Path, compose, failure, success } from './Checkers';
+import type {Checker} from './Checkers';
+import {Path, compose, failure, success} from './Checkers';
 
 /**
  * a mixed (i.e. untyped) value
@@ -11,7 +11,7 @@ import { Path, compose, failure, success } from './Checkers';
 function mixed(): Checker<unknown> {
   return MIXED_CHECKER;
 }
-const MIXED_CHECKER: Checker<unknown> = (value) => success(value, []);
+const MIXED_CHECKER: Checker<unknown> = value => success(value, []);
 
 /**
  * checker to assert if a mixed value matches a literal value
@@ -23,7 +23,10 @@ function literal<T extends string | boolean | number | null | undefined>(
   return (value: unknown, path = new Path()) => {
     return value === literalValue
       ? success(literalValue, [])
-      : failure(`value is not literal ${str(literalValue) ?? 'undefined'}`, path);
+      : failure(
+          `value is not literal ${str(literalValue) ?? 'undefined'}`,
+          path,
+        );
   };
 }
 
@@ -140,7 +143,7 @@ function enumObject<T extends Record<string, string> | Record<string, number>>(
   enumObj: T,
 ): Checker<T[keyof T]> {
   const enumValues = Object.keys(enumObj).reduce(
-    (res, key) => Object.assign(res, { [enumObj[key]]: enumObj[key] }),
+    (res, key) => Object.assign(res, {[enumObj[key]]: enumObj[key]}),
     {} as Record<string, T[keyof T]>,
   );
   const stringLiteralsChecker = stringLiterals(enumValues);
@@ -190,7 +193,7 @@ function date(): Checker<Date> {
  * ```
  */
 function jsonDate(): Checker<Date> {
-  return compose(string(), ({ value, warnings }, path) => {
+  return compose(string(), ({value, warnings}, path) => {
     const parsedDate = new Date(value);
     return Number.isNaN(parsedDate.getTime())
       ? failure('value is not valid date string', path)
@@ -208,4 +211,4 @@ export {
   date,
   jsonDate,
   enumObject,
-}; 
+};

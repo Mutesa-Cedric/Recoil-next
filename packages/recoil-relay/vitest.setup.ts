@@ -1,5 +1,5 @@
-import { cleanup } from '@testing-library/react';
-import { afterEach, beforeAll, vi } from 'vitest';
+import {cleanup} from '@testing-library/react';
+import {afterEach, beforeAll, vi} from 'vitest';
 
 // Mock jest for relay-test-utils
 (globalThis as any).jest = vi;
@@ -32,10 +32,10 @@ beforeAll(() => {
     setTimeout(cb, 0);
     return 1;
   });
-  global.cancelAnimationFrame = vi.fn(() => { });
+  global.cancelAnimationFrame = vi.fn(() => {});
 
   // Set up text encoding globals
-  const { TextEncoder, TextDecoder } = require('util');
+  const {TextEncoder, TextDecoder} = require('util');
   global.TextEncoder = TextEncoder;
   global.TextDecoder = TextDecoder;
 
@@ -49,4 +49,4 @@ afterEach(() => {
   vi.clearAllTimers();
   vi.useRealTimers();
   vi.clearAllMocks();
-}); 
+});

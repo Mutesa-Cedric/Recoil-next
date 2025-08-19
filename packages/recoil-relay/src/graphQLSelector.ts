@@ -4,26 +4,28 @@
 
 'use strict';
 
-import { GetRecoilValue, RecoilState } from 'recoil-next';
-import { Variables } from 'react-relay';
-import { IEnvironment, GraphQLTaggedNode } from 'relay-runtime';
-import { EnvironmentKey } from './Environments';
-import { graphQLSelectorFamily } from './graphQLSelectorFamily';
+import {GetRecoilValue, RecoilState} from 'recoil-next';
+import {Variables} from 'react-relay';
+import {IEnvironment, GraphQLTaggedNode} from 'relay-runtime';
+import {EnvironmentKey} from './Environments';
+import {graphQLSelectorFamily} from './graphQLSelectorFamily';
 
 interface GraphQLSelectorOptions<TVariables extends Variables, T> {
-    key: string;
-    environment: IEnvironment | EnvironmentKey;
-    query: GraphQLTaggedNode;
-    variables: TVariables | ((callbacks: { get: GetRecoilValue }) => TVariables | null);
-    mapResponse: (
-        response: any,
-        callbacks: { get: GetRecoilValue; variables: TVariables }
-    ) => T;
-    default?: T;
-    mutations?: {
-        mutation: GraphQLTaggedNode;
-        variables: (newData: T) => TVariables | null;
-    };
+  key: string;
+  environment: IEnvironment | EnvironmentKey;
+  query: GraphQLTaggedNode;
+  variables:
+    | TVariables
+    | ((callbacks: {get: GetRecoilValue}) => TVariables | null);
+  mapResponse: (
+    response: any,
+    callbacks: {get: GetRecoilValue; variables: TVariables},
+  ) => T;
+  default?: T;
+  mutations?: {
+    mutation: GraphQLTaggedNode;
+    variables: (newData: T) => TVariables | null;
+  };
 }
 
 /**
@@ -36,12 +38,14 @@ interface GraphQLSelectorOptions<TVariables extends Variables, T> {
  * write-through cache for updates to commit to the server.
  */
 export function graphQLSelector<TVariables extends Variables, T>({
-    variables, mutations, ...options
+  variables,
+  mutations,
+  ...options
 }: GraphQLSelectorOptions<TVariables, T>): RecoilState<T> {
-    return graphQLSelectorFamily({
-        ...options,
-        variables: () => (param: any) =>
-            typeof variables === 'function' ? variables({ get: param.get }) : variables,
-        mutations: mutations == null ? undefined : { ...mutations },
-    })(undefined); // Pass undefined as the parameter
-} 
+  return graphQLSelectorFamily({
+    ...options,
+    variables: () => (param: any) =>
+      typeof variables === 'function' ? variables({get: param.get}) : variables,
+    mutations: mutations == null ? undefined : {...mutations},
+  })(undefined); // Pass undefined as the parameter
+}

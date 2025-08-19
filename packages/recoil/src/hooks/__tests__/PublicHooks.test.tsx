@@ -2,40 +2,43 @@
  * TypeScript port of Recoil_PublicHooks-test.js
  */
 
-import { render } from '@testing-library/react';
+import {render} from '@testing-library/react';
 import * as React from 'react';
-import { Profiler, act, useState } from 'react';
-import { describe, expect, test, vi } from 'vitest';
+import {Profiler, act, useState} from 'react';
+import {describe, expect, test, vi} from 'vitest';
 
 import type {
   RecoilState,
   RecoilValue,
   RecoilValueReadOnly,
 } from '../../core/RecoilValue';
-import type { PersistenceSettings } from '../../recoil_values/atom';
+import type {PersistenceSettings} from '../../recoil_values/atom';
 
 import invariant from '../../../../shared/src/util/Recoil_invariant';
 import stableStringify from '../../../../shared/src/util/Recoil_stableStringify';
-import { reactMode } from '../../core/ReactMode';
-import { RecoilRoot } from '../../core/RecoilRoot';
-import { atom } from '../../recoil_values/atom';
-import { selector } from '../../recoil_values/selector';
+import {reactMode} from '../../core/ReactMode';
+import {RecoilRoot} from '../../core/RecoilRoot';
+import {atom} from '../../recoil_values/atom';
+import {selector} from '../../recoil_values/selector';
 import {
   useRecoilState,
   useRecoilStateLoadable,
   useRecoilValue,
-  useSetRecoilState
+  useSetRecoilState,
 } from '../Hooks';
 
 // Error boundary component for testing
 class ErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: (error: Error) => React.ReactNode },
-  { hasError: boolean; error?: Error }
+  {children: React.ReactNode; fallback?: (error: Error) => React.ReactNode},
+  {hasError: boolean; error?: Error}
 > {
-  state: { hasError: boolean; error?: Error } = { hasError: false };
+  state: {hasError: boolean; error?: Error} = {hasError: false};
 
-  static getDerivedStateFromError(error: Error): { hasError: boolean; error?: Error } {
-    return { hasError: true, error };
+  static getDerivedStateFromError(error: Error): {
+    hasError: boolean;
+    error?: Error;
+  } {
+    return {hasError: true, error};
   }
 
   render(): React.ReactNode {
@@ -49,23 +52,23 @@ class ErrorBoundary extends React.Component<
 
 // React rendering utilities for testing
 function renderElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(
+  const {container} = render(
     <RecoilRoot>
       <ErrorBoundary>
         <React.Suspense fallback="loading">{element}</React.Suspense>
       </ErrorBoundary>
-    </RecoilRoot>
+    </RecoilRoot>,
   );
   return container;
 }
 
 function renderUnwrappedElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(<>{element}</>);
+  const {container} = render(<>{element}</>);
   return container;
 }
 
 // Test component to read atom values
-function ReadsAtom<T>({ atom }: { atom: RecoilValue<T> }) {
+function ReadsAtom<T>({atom}: {atom: RecoilValue<T>}) {
   const value = useRecoilValue(atom);
   return <>{stableStringify(value)}</>;
 }
@@ -84,7 +87,7 @@ function plusOneSelector(dep: RecoilValue<number>) {
   const fn = vi.fn(x => x + 1);
   const sel = selector({
     key: `selector${nextID++}`,
-    get: ({ get }) => fn(get(dep)),
+    get: ({get}) => fn(get(dep)),
   });
   return [sel, fn] as const;
 }
@@ -102,7 +105,7 @@ function plusOneAsyncSelector(
   });
   const sel = selector({
     key: `selector${nextID++}`,
-    get: ({ get }) => fn(get(dep)),
+    get: ({get}) => fn(get(dep)),
   });
   return [
     sel,
@@ -119,45 +122,45 @@ function additionSelector(
   const fn = vi.fn((a, b) => a + b);
   const sel = selector({
     key: `selector${nextID++}`,
-    get: ({ get }) => fn(get(depA), get(depB)),
+    get: ({get}) => fn(get(depA), get(depB)),
   });
   return [sel, fn] as const;
 }
 
 function componentThatReadsAndWritesAtom<T>(
   recoilState: RecoilState<T>,
-): [React.ComponentType<{}>, ((updater: T | ((prev: T) => T)) => void)] {
+): [React.ComponentType<{}>, (updater: T | ((prev: T) => T)) => void] {
   let updateValue: ((updater: T | ((prev: T) => T)) => void) | null = null;
   const Component = vi.fn(() => {
     updateValue = useSetRecoilState(recoilState);
     const value = useRecoilValue(recoilState);
     return <>{stableStringify(value)}</>;
   });
-  
+
   const setterWrapper = (updater: T | ((prev: T) => T)) => {
     if (updateValue) {
       updateValue(updater);
     }
   };
-  
+
   return [Component as any, setterWrapper];
 }
 
 function componentThatWritesAtom<T>(
   recoilState: RecoilState<T>,
-): [any, ((value: T | ((prev: T) => T)) => void)] {
+): [any, (value: T | ((prev: T) => T)) => void] {
   let updateValue: ((value: T | ((prev: T) => T)) => void) | null = null;
   const Component = vi.fn(() => {
     updateValue = useSetRecoilState(recoilState);
     return null;
   });
-  
+
   const setterWrapper = (value: T | ((prev: T) => T)) => {
     if (updateValue) {
       updateValue(value);
     }
   };
-  
+
   return [Component as any, setterWrapper];
 }
 
@@ -166,7 +169,9 @@ function componentThatReadsTwoAtoms(
   two: RecoilValue<any>,
 ) {
   return vi.fn(function ReadTwoAtoms() {
-    return <>{`${stableStringify(useRecoilValue(one))},${stableStringify(useRecoilValue(two))}`}</>;
+    return (
+      <>{`${stableStringify(useRecoilValue(one))},${stableStringify(useRecoilValue(two))}`}</>
+    );
   }) as any;
 }
 
@@ -185,7 +190,7 @@ function componentThatReadsAtomWithCommitCount(
 }
 
 function componentThatToggles(a: React.ReactNode, b: React.ReactNode | null) {
-  const toggle = { current: () => invariant(false, 'bug in test code') };
+  const toggle = {current: () => invariant(false, 'bug in test code')};
   const Toggle = vi.fn(() => {
     const [value, setValue] = useState(false);
     toggle.current = () => setValue(v => !v);
@@ -293,7 +298,7 @@ describe('Render counts', () => {
       <>
         <Component />
         <SetterComponent />
-      </>
+      </>,
     );
 
     expect(Component).toHaveBeenCalledTimes(strictMode ? 2 : 1);
@@ -304,18 +309,22 @@ describe('Render counts', () => {
   test('Component that reads atom only during updates is unsubscribed', () => {
     const anAtom = counterAtom();
     const anotherAtom = counterAtom();
-    
+
     // Track render counts for the actual components that read atoms
     let bothComponentRenderCount = 0;
     let anotherComponentRenderCount = 0;
-    
+
     const BothAtomsComponent = vi.fn(() => {
       bothComponentRenderCount++;
       const [val1] = useRecoilState(anAtom);
       const [val2] = useRecoilState(anotherAtom);
-      return <div>both:{val1}-{val2}</div>;
+      return (
+        <div>
+          both:{val1}-{val2}
+        </div>
+      );
     });
-    
+
     const AnotherAtomComponent = vi.fn(() => {
       anotherComponentRenderCount++;
       const [val] = useRecoilState(anotherAtom);
@@ -325,13 +334,13 @@ describe('Render counts', () => {
     // Create a toggle component that switches between reading different atoms
     const [ToggleComponent, toggle] = componentThatToggles(
       <BothAtomsComponent />,
-      <AnotherAtomComponent />
+      <AnotherAtomComponent />,
     );
 
     // External setters to update atoms
     let setAnAtomValue: ((value: number) => void) | null = null;
     let setAnotherAtomValue: ((value: number) => void) | null = null;
-    
+
     const SetterComponent = () => {
       const [, setAnAtom] = useRecoilState(anAtom);
       const [, setAnotherAtom] = useRecoilState(anotherAtom);
@@ -339,12 +348,12 @@ describe('Render counts', () => {
       setAnotherAtomValue = setAnotherAtom;
       return null;
     };
-    
+
     const container = renderElements(
       <>
         <ToggleComponent />
         <SetterComponent />
-      </>
+      </>,
     );
 
     // Initially showing first component that reads both atoms
@@ -352,7 +361,7 @@ describe('Render counts', () => {
     expect(bothComponentRenderCount).toBe(1);
     expect(anotherComponentRenderCount).toBe(0);
 
-    // Toggle to second component that only reads anotherAtom 
+    // Toggle to second component that only reads anotherAtom
     act(() => toggle.current());
     expect(container.textContent).toBe('another:0');
     expect(bothComponentRenderCount).toBe(1); // Should not increase
@@ -361,13 +370,13 @@ describe('Render counts', () => {
     // Reset counters to track subscription behavior
     bothComponentRenderCount = 0;
     anotherComponentRenderCount = 0;
-    
+
     // Updating anAtom should not cause re-render since component no longer reads it
     act(() => {
       if (setAnAtomValue) setAnAtomValue(1);
     });
     expect(bothComponentRenderCount).toBe(0); // Should not re-render
-    expect(anotherComponentRenderCount).toBe(0); // Should not re-render  
+    expect(anotherComponentRenderCount).toBe(0); // Should not re-render
     expect(container.textContent).toBe('another:0'); // Should still show anotherAtom value
 
     // Updating anotherAtom should cause re-render since component still reads it
@@ -420,7 +429,7 @@ describe('useRecoilValue', () => {
   test('useRecoilValue selector', () => {
     const anAtom = counterAtom();
     const [aSelector] = plusOneSelector(anAtom);
-    
+
     let setValue: any;
     function Component(): React.ReactElement {
       setValue = useSetRecoilState(anAtom);
@@ -437,13 +446,13 @@ describe('useRecoilValue', () => {
 describe('useSetRecoilState', () => {
   test('useSetRecoilState', () => {
     const anAtom = counterAtom();
-    
+
     let setValue: any;
     function Component() {
       setValue = useSetRecoilState(anAtom);
       return null;
     }
-    
+
     function ReaderComponent() {
       return <>{stableStringify(useRecoilValue(anAtom))}</>;
     }
@@ -463,7 +472,7 @@ describe('useSetRecoilState', () => {
 describe('useRecoilStateLoadable', () => {
   test('useRecoilStateLoadable - resolve', () => {
     const anAtom = counterAtom();
-    
+
     let setValue: any;
     function Component() {
       const [loadable, setLoadable] = useRecoilStateLoadable(anAtom);
@@ -482,7 +491,7 @@ describe('useRecoilStateLoadable', () => {
       key: 'loadable async',
       default: Promise.resolve('RESOLVE'),
     });
-    
+
     function Component() {
       const [loadable] = useRecoilStateLoadable(anAtom);
       return <>{loadable.state}</>;
@@ -494,7 +503,7 @@ describe('useRecoilStateLoadable', () => {
 });
 
 test('Hooks cannot be used outside of RecoilRoot', () => {
-  const myAtom = atom({ key: 'hook outside RecoilRoot', default: 'INVALID' });
+  const myAtom = atom({key: 'hook outside RecoilRoot', default: 'INVALID'});
   function Test() {
     useRecoilValue(myAtom);
     return <>TEST</>;
@@ -502,4 +511,4 @@ test('Hooks cannot be used outside of RecoilRoot', () => {
 
   // Make sure there is a friendly error message mentioning <RecoilRoot>
   expect(() => renderUnwrappedElements(<Test />)).toThrow('<RecoilRoot>');
-}); 
+});

@@ -2,8 +2,13 @@
  * TypeScript port of RecoilRelay_MockQueries.js
  */
 
-// Mock GraphQL queries for testing that properly mirrors Relay's expected structure  
-const mockGraphQL = (name: string, query: string, operationKind = 'query', argumentDefinitions: any[] = []) => {
+// Mock GraphQL queries for testing that properly mirrors Relay's expected structure
+const mockGraphQL = (
+  name: string,
+  query: string,
+  operationKind = 'query',
+  argumentDefinitions: any[] = [],
+) => {
   // Create the query object that Relay expects
   const concreteRequest = {
     kind: 'Request',
@@ -18,14 +23,14 @@ const mockGraphQL = (name: string, query: string, operationKind = 'query', argum
           name: 'feedback',
           storageKey: null,
           type: 'Feedback',
-          args: [{ kind: 'Variable', name: 'id', variableName: 'id' }],
+          args: [{kind: 'Variable', name: 'id', variableName: 'id'}],
           selections: [
-            { kind: 'ScalarField', name: 'id', storageKey: null },
-            { kind: 'ScalarField', name: 'seen_count', storageKey: null }
-          ]
-        }
+            {kind: 'ScalarField', name: 'id', storageKey: null},
+            {kind: 'ScalarField', name: 'seen_count', storageKey: null},
+          ],
+        },
       ],
-      type: 'Query'
+      type: 'Query',
     },
     operation: {
       argumentDefinitions: argumentDefinitions,
@@ -37,44 +42,47 @@ const mockGraphQL = (name: string, query: string, operationKind = 'query', argum
           name: 'feedback',
           storageKey: null,
           type: 'Feedback',
-          args: [{ kind: 'Variable', name: 'id', variableName: 'id' }],
+          args: [{kind: 'Variable', name: 'id', variableName: 'id'}],
           selections: [
-            { kind: 'ScalarField', name: 'id', storageKey: null },
-            { kind: 'ScalarField', name: 'seen_count', storageKey: null }
-          ]
-        }
-      ]
+            {kind: 'ScalarField', name: 'id', storageKey: null},
+            {kind: 'ScalarField', name: 'seen_count', storageKey: null},
+          ],
+        },
+      ],
     },
     params: {
       cacheID: `mock-${name}-cache-id`,
       id: `mock-${name}-id`,
       metadata: {
-        argumentDefinitions: argumentDefinitions
+        argumentDefinitions: argumentDefinitions,
       },
       name: name,
       operationKind: operationKind,
-      text: null
-    }
+      text: null,
+    },
   };
-  
+
   return concreteRequest;
 };
 
-export const testFeedbackQuery = mockGraphQL('TestFeedbackQuery', `
+export const testFeedbackQuery = mockGraphQL(
+  'TestFeedbackQuery',
+  `
   query RecoilRelayMockQueriesFeedbackQuery($id: ID!) {
     feedback(id: $id) {
       id
       seen_count
     }
   }
-`, 'query', [
-  { name: 'id', type: 'ID!' }
-]);
+`,
+  'query',
+  [{name: 'id', type: 'ID!'}],
+);
 
 export const testFeedbackSubscription = {
   kind: 'Request',
   fragment: {
-    argumentDefinitions: [{ name: 'input', type: 'FeedbackLikeSubscribeData!' }],
+    argumentDefinitions: [{name: 'input', type: 'FeedbackLikeSubscribeData!'}],
     kind: 'Fragment',
     metadata: null,
     name: 'TestFeedbackSubscriptionFragment',
@@ -83,7 +91,7 @@ export const testFeedbackSubscription = {
         kind: 'LinkedField',
         name: 'feedback_like_subscribe',
         storageKey: null,
-        args: [{ kind: 'Variable', name: 'data', variableName: 'input' }],
+        args: [{kind: 'Variable', name: 'data', variableName: 'input'}],
         selections: [
           {
             kind: 'InlineFragment',
@@ -95,19 +103,19 @@ export const testFeedbackSubscription = {
                 storageKey: null,
                 args: [],
                 selections: [
-                  { kind: 'ScalarField', name: 'id', storageKey: null },
-                  { kind: 'ScalarField', name: 'seen_count', storageKey: null }
-                ]
-              }
-            ]
-          }
-        ]
-      }
+                  {kind: 'ScalarField', name: 'id', storageKey: null},
+                  {kind: 'ScalarField', name: 'seen_count', storageKey: null},
+                ],
+              },
+            ],
+          },
+        ],
+      },
     ],
-    type: 'Subscription'
+    type: 'Subscription',
   },
   operation: {
-    argumentDefinitions: [{ name: 'input', type: 'FeedbackLikeSubscribeData!' }],
+    argumentDefinitions: [{name: 'input', type: 'FeedbackLikeSubscribeData!'}],
     kind: 'Operation',
     name: 'TestFeedbackSubscription',
     selections: [
@@ -115,7 +123,7 @@ export const testFeedbackSubscription = {
         kind: 'LinkedField',
         name: 'feedback_like_subscribe',
         storageKey: null,
-        args: [{ kind: 'Variable', name: 'data', variableName: 'input' }],
+        args: [{kind: 'Variable', name: 'data', variableName: 'input'}],
         selections: [
           {
             kind: 'InlineFragment',
@@ -127,32 +135,34 @@ export const testFeedbackSubscription = {
                 storageKey: null,
                 args: [],
                 selections: [
-                  { kind: 'ScalarField', name: 'id', storageKey: null },
-                  { kind: 'ScalarField', name: 'seen_count', storageKey: null }
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    ]
+                  {kind: 'ScalarField', name: 'id', storageKey: null},
+                  {kind: 'ScalarField', name: 'seen_count', storageKey: null},
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
   },
   params: {
     cacheID: 'mock-TestFeedbackSubscription-cache-id',
     id: 'mock-TestFeedbackSubscription-id',
     metadata: {
-      argumentDefinitions: [{ name: 'input', type: 'FeedbackLikeSubscribeData!' }]
+      argumentDefinitions: [
+        {name: 'input', type: 'FeedbackLikeSubscribeData!'},
+      ],
     },
     name: 'TestFeedbackSubscription',
     operationKind: 'subscription',
-    text: null
-  }
+    text: null,
+  },
 };
 
 export const testFeedbackMutation = {
   kind: 'Request',
   fragment: {
-    argumentDefinitions: [{ name: 'data', type: 'FeedbackLikeData!' }],
+    argumentDefinitions: [{name: 'data', type: 'FeedbackLikeData!'}],
     kind: 'Fragment',
     metadata: null,
     name: 'TestFeedbackMutationFragment',
@@ -161,33 +171,29 @@ export const testFeedbackMutation = {
         kind: 'LinkedField',
         name: 'feedback_like',
         storageKey: null,
-        args: [{ kind: 'Variable', name: 'data', variableName: 'data' }],
+        args: [{kind: 'Variable', name: 'data', variableName: 'data'}],
         selections: [
           {
             kind: 'LinkedField',
             name: 'feedback',
             storageKey: null,
             args: [],
-            selections: [
-              { kind: 'ScalarField', name: 'id', storageKey: null }
-            ]
+            selections: [{kind: 'ScalarField', name: 'id', storageKey: null}],
           },
           {
-            kind: 'LinkedField', 
+            kind: 'LinkedField',
             name: 'liker',
             storageKey: null,
             args: [],
-            selections: [
-              { kind: 'ScalarField', name: 'id', storageKey: null }
-            ]
-          }
-        ]
-      }
+            selections: [{kind: 'ScalarField', name: 'id', storageKey: null}],
+          },
+        ],
+      },
     ],
-    type: 'Mutation'
+    type: 'Mutation',
   },
   operation: {
-    argumentDefinitions: [{ name: 'data', type: 'FeedbackLikeData!' }],
+    argumentDefinitions: [{name: 'data', type: 'FeedbackLikeData!'}],
     kind: 'Operation',
     name: 'TestFeedbackMutation',
     selections: [
@@ -195,40 +201,36 @@ export const testFeedbackMutation = {
         kind: 'LinkedField',
         name: 'feedback_like',
         storageKey: null,
-        args: [{ kind: 'Variable', name: 'data', variableName: 'data' }],
+        args: [{kind: 'Variable', name: 'data', variableName: 'data'}],
         selections: [
           {
             kind: 'LinkedField',
             name: 'feedback',
             storageKey: null,
             args: [],
-            selections: [
-              { kind: 'ScalarField', name: 'id', storageKey: null }
-            ]
+            selections: [{kind: 'ScalarField', name: 'id', storageKey: null}],
           },
           {
             kind: 'LinkedField',
-            name: 'liker', 
+            name: 'liker',
             storageKey: null,
             args: [],
-            selections: [
-              { kind: 'ScalarField', name: 'id', storageKey: null }
-            ]
-          }
-        ]
-      }
-    ]
+            selections: [{kind: 'ScalarField', name: 'id', storageKey: null}],
+          },
+        ],
+      },
+    ],
   },
   params: {
     cacheID: 'mock-TestFeedbackMutation-cache-id',
     id: 'mock-TestFeedbackMutation-id',
     metadata: {
-      argumentDefinitions: [{ name: 'data', type: 'FeedbackLikeData!' }]
+      argumentDefinitions: [{name: 'data', type: 'FeedbackLikeData!'}],
     },
     name: 'TestFeedbackMutation',
     operationKind: 'mutation',
-    text: null
-  }
+    text: null,
+  },
 };
 
 export const testFeedbackFragment = {
@@ -237,18 +239,21 @@ export const testFeedbackFragment = {
   metadata: null,
   name: 'RecoilRelayMockQueriesFeedbackFragment',
   selections: [
-    { kind: 'ScalarField', name: 'id', storageKey: null },
-    { kind: 'ScalarField', name: 'seen_count', storageKey: null }
+    {kind: 'ScalarField', name: 'id', storageKey: null},
+    {kind: 'ScalarField', name: 'seen_count', storageKey: null},
   ],
-  type: 'Feedback'
+  type: 'Feedback',
 };
 
-export const testFeedbackFragmentQuery = mockGraphQL('TestFeedbackFragmentQuery', `
+export const testFeedbackFragmentQuery = mockGraphQL(
+  'TestFeedbackFragmentQuery',
+  `
   query RecoilRelayMockQueriesFeedbackFragmentQuery($id: ID!) {
     feedback(id: $id) {
       ...RecoilRelayMockQueriesFeedbackFragment
     }
   }
-`, 'query', [
-  { name: 'id', type: 'ID!' }
-]); 
+`,
+  'query',
+  [{name: 'id', type: 'ID!'}],
+);

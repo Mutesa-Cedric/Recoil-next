@@ -11,13 +11,6 @@
       "recoil-shared/*": ["../shared/src/*"]
     }
   },
-  "include": [
-    "src/**/*",
-    "../shared/src/**/*"
-  ],
-  "exclude": [
-    "**/__tests__/**",
-    "**/*.test.*",
-    "dist/**/*"
-  ]
-} 
+  "include": ["src/**/*", "../shared/src/**/*"],
+  "exclude": ["**/__tests__/**", "**/*.test.*", "dist/**/*"]
+}

@@ -76,17 +76,15 @@ Simply change your import statements from `recoil` to `recoil-next`:
 
 ```javascript
 // Before
-import { atom, selector, useRecoilState, useRecoilValue } from 'recoil';
+import {atom, selector, useRecoilState, useRecoilValue} from 'recoil';
 
 // After
-import { atom, selector, useRecoilState, useRecoilValue } from 'recoil-next';
+import {atom, selector, useRecoilState, useRecoilValue} from 'recoil-next';
 ```
 
 ### 3. That's it!
 
 Your existing Recoil code will work exactly the same. All APIs, behavior, and functionality remain identical to the original Recoil library.
-
-
 
 ## Contributing
 

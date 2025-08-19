@@ -3,12 +3,12 @@
  */
 
 import React from 'react';
-import { atom } from 'recoil-next';
-import { array, bool, number, object, string, tuple } from 'refine-next';
-import { expect, test } from 'vitest';
-import { syncEffect } from '../RecoilSync';
-import { RecoilURLSyncJSON } from '../RecoilSync_URLJSON';
-import { RecoilURLSyncTransit } from '../RecoilSync_URLTransit';
+import {atom} from 'recoil-next';
+import {array, bool, number, object, string, tuple} from 'refine-next';
+import {expect, test} from 'vitest';
+import {syncEffect} from '../RecoilSync';
+import {RecoilURLSyncJSON} from '../RecoilSync_URLJSON';
+import {RecoilURLSyncTransit} from '../RecoilSync_URLTransit';
 import {
   ReadsAtom,
   flushPromisesAndTimers,
@@ -18,20 +18,20 @@ import {
 const atomBoolean = atom({
   key: 'boolean',
   default: true,
-  effects: [syncEffect({ storeKey: 'json', refine: bool(), syncDefault: true })],
+  effects: [syncEffect({storeKey: 'json', refine: bool(), syncDefault: true})],
 });
 const atomNumber = atom({
   key: 'number',
   default: 123,
   effects: [
-    syncEffect({ storeKey: 'json', refine: number(), syncDefault: true }),
+    syncEffect({storeKey: 'json', refine: number(), syncDefault: true}),
   ],
 });
 const atomString = atom({
   key: 'string',
   default: 'STRING',
   effects: [
-    syncEffect({ storeKey: 'json', refine: string(), syncDefault: true }),
+    syncEffect({storeKey: 'json', refine: string(), syncDefault: true}),
   ],
 });
 const atomArray = atom({
@@ -47,11 +47,11 @@ const atomArray = atom({
 });
 const atomObject = atom({
   key: 'object',
-  default: { foo: [1, 2] },
+  default: {foo: [1, 2]},
   effects: [
     syncEffect({
       storeKey: 'transit',
-      refine: object({ foo: array(number()) }),
+      refine: object({foo: array(number())}),
       syncDefault: true,
     }),
   ],
@@ -63,19 +63,19 @@ async function testURL(contents: string, beforeURL: string, afterURL: string) {
   const container = renderElements(
     React.createElement(RecoilURLSyncTransit, {
       storeKey: 'transit',
-      location: { part: 'queryParams', param: 'transit' },
+      location: {part: 'queryParams', param: 'transit'},
       children: React.createElement(RecoilURLSyncJSON, {
         storeKey: 'json',
-        location: { part: 'queryParams' },
+        location: {part: 'queryParams'},
         children: [
-          React.createElement(ReadsAtom, { key: 'boolean', atom: atomBoolean }),
-          React.createElement(ReadsAtom, { key: 'number', atom: atomNumber }),
-          React.createElement(ReadsAtom, { key: 'string', atom: atomString }),
-          React.createElement(ReadsAtom, { key: 'array', atom: atomArray }),
-          React.createElement(ReadsAtom, { key: 'object', atom: atomObject }),
+          React.createElement(ReadsAtom, {key: 'boolean', atom: atomBoolean}),
+          React.createElement(ReadsAtom, {key: 'number', atom: atomNumber}),
+          React.createElement(ReadsAtom, {key: 'string', atom: atomString}),
+          React.createElement(ReadsAtom, {key: 'array', atom: atomArray}),
+          React.createElement(ReadsAtom, {key: 'object', atom: atomObject}),
         ],
       }),
-    })
+    }),
   );
   expect(container.textContent).toBe(contents);
   await flushPromisesAndTimers();
@@ -94,4 +94,4 @@ test('URL Parse JSON & Transit', async () =>
     'false456"SET"[2,"b"]{"foo":[]}',
     '/?foo=bar&boolean=false&number=456&string="SET"&transit=["^ ","array",[2,"b"],"object",["^ ","foo",[]],"user",["~%23USER",["PROP"]]]',
     '/?foo=bar&boolean=false&number=456&string=%22SET%22&transit=%5B%22%5E+%22%2C%22array%22%2C%5B2%2C%22b%22%5D%2C%22object%22%2C%5B%22%5E+%22%2C%22foo%22%2C%5B%5D%5D%5D',
-  )); 
+  ));

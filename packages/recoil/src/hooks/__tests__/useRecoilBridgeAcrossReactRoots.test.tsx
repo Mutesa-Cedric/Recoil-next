@@ -2,28 +2,31 @@
  * TypeScript port of Recoil_useRecoilBridgeAcrossReactRoots-test.js
  */
 
-import { render } from '@testing-library/react';
+import {render} from '@testing-library/react';
 import * as React from 'react';
-import { act, useEffect, useRef } from 'react';
-import { describe, expect, test } from 'vitest';
+import {act, useEffect, useRef} from 'react';
+import {describe, expect, test} from 'vitest';
 
-import type { StoreID } from '../../core/Keys';
-import type { MutableSnapshot } from '../../core/Snapshot';
+import type {StoreID} from '../../core/Keys';
+import type {MutableSnapshot} from '../../core/Snapshot';
 
-import { RecoilRoot, useRecoilStoreID } from '../../core/RecoilRoot';
-import { atom } from '../../recoil_values/atom';
-import { useRecoilState } from '../Hooks';
-import { useRecoilBridgeAcrossReactRoots } from '../useRecoilBridgeAcrossReactRoots';
+import {RecoilRoot, useRecoilStoreID} from '../../core/RecoilRoot';
+import {atom} from '../../recoil_values/atom';
+import {useRecoilState} from '../Hooks';
+import {useRecoilBridgeAcrossReactRoots} from '../useRecoilBridgeAcrossReactRoots';
 
 // Error boundary component for testing
 class ErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: (error: Error) => React.ReactNode },
-  { hasError: boolean; error?: Error }
+  {children: React.ReactNode; fallback?: (error: Error) => React.ReactNode},
+  {hasError: boolean; error?: Error}
 > {
-  state: { hasError: boolean; error?: Error } = { hasError: false };
+  state: {hasError: boolean; error?: Error} = {hasError: false};
 
-  static getDerivedStateFromError(error: Error): { hasError: boolean; error?: Error } {
-    return { hasError: true, error };
+  static getDerivedStateFromError(error: Error): {
+    hasError: boolean;
+    error?: Error;
+  } {
+    return {hasError: true, error};
   }
 
   render(): React.ReactNode {
@@ -37,37 +40,42 @@ class ErrorBoundary extends React.Component<
 
 // React rendering utilities for testing
 function renderElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(
+  const {container} = render(
     <RecoilRoot>
       <ErrorBoundary>
         <React.Suspense fallback="loading">{element}</React.Suspense>
       </ErrorBoundary>
-    </RecoilRoot>
+    </RecoilRoot>,
   );
   return container;
 }
 
-function renderUnwrappedElements(element: React.ReactElement, container?: HTMLElement): HTMLElement {
+function renderUnwrappedElements(
+  element: React.ReactElement,
+  container?: HTMLElement,
+): HTMLElement {
   if (container) {
-    const { container: newContainer } = render(element, { container });
+    const {container: newContainer} = render(element, {container});
     return newContainer;
   }
-  const { container: newContainer } = render(<>{element}</>);
+  const {container: newContainer} = render(<>{element}</>);
   return newContainer;
 }
 
-// Test component that reads and writes atom values  
+// Test component that reads and writes atom values
 function componentThatReadsAndWritesAtom<T>(
   recoilState: any,
-): [React.ComponentType<{}>, ((updater: T | ((prev: T) => T)) => void)] {
-  const setterRef = { current: null as ((updater: T | ((prev: T) => T)) => void) | null };
-  
+): [React.ComponentType<{}>, (updater: T | ((prev: T) => T)) => void] {
+  const setterRef = {
+    current: null as ((updater: T | ((prev: T) => T)) => void) | null,
+  };
+
   const Component = () => {
     const [value, setValue] = useRecoilState(recoilState);
     setterRef.current = setValue;
     return <>{JSON.stringify(value)}</>;
   };
-  
+
   const updateValue = (updater: T | ((prev: T) => T)) => {
     if (setterRef.current) {
       setterRef.current(updater);
@@ -75,10 +83,9 @@ function componentThatReadsAndWritesAtom<T>(
       throw new Error('Component not yet rendered');
     }
   };
-  
+
   return [Component, updateValue];
 }
-
 
 function NestedReactRoot({children}: {children: React.ReactNode}) {
   const ref = useRef<HTMLDivElement | null>(null);
@@ -135,7 +142,11 @@ describe('useRecoilBridgeAcrossReactRoots', () => {
   });
 
   test('StoreID matches bridged store', async () => {
-    function RecoilStoreID({storeIDRef}: {storeIDRef: {current: StoreID | null}}) {
+    function RecoilStoreID({
+      storeIDRef,
+    }: {
+      storeIDRef: {current: StoreID | null};
+    }) {
       storeIDRef.current = useRecoilStoreID();
       return null;
     }
@@ -152,14 +163,14 @@ describe('useRecoilBridgeAcrossReactRoots', () => {
         RENDER
       </>,
     );
-    
+
     // Wait for the async useEffect in NestedReactRoot to complete
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 0));
     });
-    
+
     expect(c.textContent).toEqual('RENDER');
     expect(rootStoreIDRef.current).toBe(nestedStoreIDRef.current);
     expect(rootStoreIDRef.current).not.toBe(null);
   });
-}); 
+});

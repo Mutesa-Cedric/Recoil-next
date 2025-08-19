@@ -33,7 +33,6 @@ function cacheKeyFromObject(object: unknown): unknown {
     const t1 = window.performance ? performance.now() : 0;
     if (__DEV__) {
       if (t1 - t0 > TIME_WARNING_THRESHOLD_MS) {
-        // eslint-disable-next-line fb-www/no-console
         console.error('Spent', t1 - t0, 'milliseconds computing a cache key.');
       }
     }
@@ -43,7 +42,9 @@ function cacheKeyFromObject(object: unknown): unknown {
   }
 }
 
-export default function memoize<Arg, Result>(fn: (arg: Arg) => Result): (arg: Arg) => Result {
+export default function memoize<Arg, Result>(
+  fn: (arg: Arg) => Result,
+): (arg: Arg) => Result {
   let map: Immutable.Map<unknown, Result> | undefined;
   return (arg: Arg) => {
     if (!map) {

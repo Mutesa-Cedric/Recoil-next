@@ -2,29 +2,32 @@
  * TypeScript port of Recoil_useGotoRecoilSnapshot-test.js
  */
 
-import { render } from '@testing-library/react';
+import {render} from '@testing-library/react';
 import * as React from 'react';
-import { act, useState } from 'react';
-import { describe, expect, test, vi } from 'vitest';
+import {act, useState} from 'react';
+import {describe, expect, test} from 'vitest';
 
-import { RecoilRoot } from '../../core/RecoilRoot';
-import { freshSnapshot } from '../../core/Snapshot';
-import { useRecoilValue } from '../../hooks/Hooks';
-import { useGotoRecoilSnapshot } from '../../hooks/SnapshotHooks';
-import { useRecoilCallback } from '../../hooks/useRecoilCallback';
-import { atom } from '../../recoil_values/atom';
-import { constSelector } from '../../recoil_values/constSelector';
-import { selector } from '../../recoil_values/selector';
+import {RecoilRoot} from '../../core/RecoilRoot';
+import {freshSnapshot} from '../../core/Snapshot';
+import {useRecoilValue} from '../../hooks/Hooks';
+import {useGotoRecoilSnapshot} from '../../hooks/SnapshotHooks';
+import {useRecoilCallback} from '../../hooks/useRecoilCallback';
+import {atom} from '../../recoil_values/atom';
+import {constSelector} from '../../recoil_values/constSelector';
+import {selector} from '../../recoil_values/selector';
 
 // Error boundary component for testing
 class ErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: (error: Error) => React.ReactNode },
-  { hasError: boolean; error?: Error }
+  {children: React.ReactNode; fallback?: (error: Error) => React.ReactNode},
+  {hasError: boolean; error?: Error}
 > {
-  state: { hasError: boolean; error?: Error } = { hasError: false };
+  state: {hasError: boolean; error?: Error} = {hasError: false};
 
-  static getDerivedStateFromError(error: Error): { hasError: boolean; error?: Error } {
-    return { hasError: true, error };
+  static getDerivedStateFromError(error: Error): {
+    hasError: boolean;
+    error?: Error;
+  } {
+    return {hasError: true, error};
   }
 
   render(): React.ReactNode {
@@ -38,18 +41,18 @@ class ErrorBoundary extends React.Component<
 
 // React rendering utilities for testing
 function renderElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(
+  const {container} = render(
     <RecoilRoot>
       <ErrorBoundary>
         <React.Suspense fallback="loading">{element}</React.Suspense>
       </ErrorBoundary>
-    </RecoilRoot>
+    </RecoilRoot>,
   );
   return container;
 }
 
 // Test component to read atom values
-function ReadsAtom<T>({ atom }: { atom: any }) {
+function ReadsAtom<T>({atom}: {atom: any}) {
   const value = useRecoilValue(atom);
   return <>{JSON.stringify(value)}</>;
 }
@@ -59,24 +62,24 @@ function componentThatReadsAndWritesAtom<T>(
   recoilState: any,
 ): [React.ComponentType<{}>, (updater: T | ((prev: T) => T)) => void] {
   let setValue: ((updater: T | ((prev: T) => T)) => void) | null = null;
-  
+
   const Component = () => {
     const [value, setVal] = useRecoilState(recoilState);
     setValue = setVal;
     return <>{JSON.stringify(value)}</>;
   };
-  
+
   const setter = (updater: T | ((prev: T) => T)) => {
     if (setValue) {
       setValue(updater);
     }
   };
-  
+
   return [Component, setter];
 }
 
 // Import useRecoilState
-import { useRecoilState } from '../Hooks';
+import {useRecoilState} from '../Hooks';
 
 // Helper function to flush promises and timers
 async function flushPromisesAndTimers() {
@@ -95,9 +98,10 @@ function asyncSelector<T, S>(): [any, (value: T) => void] {
   let resolve: (value: T) => void = () => {};
   const sel = selector({
     key: `asyncSelector${Math.random()}`,
-    get: () => new Promise<T>(res => {
-      resolve = res;
-    }),
+    get: () =>
+      new Promise<T>(res => {
+        resolve = res;
+      }),
   });
   return [sel, resolve];
 }
@@ -111,7 +115,8 @@ describe('useGotoRecoilSnapshot', () => {
       key: `Goto Snapshot Atom ${Math.random()}`,
       default: 'DEFAULT',
     });
-    const [ReadsAndWritesAtom, setAtom] = componentThatReadsAndWritesAtom(myAtom);
+    const [ReadsAndWritesAtom, setAtom] =
+      componentThatReadsAndWritesAtom(myAtom);
 
     const mySelector = constSelector(myAtom);
 
@@ -147,7 +152,9 @@ describe('useGotoRecoilSnapshot', () => {
     expect(c.textContent).toEqual('"SET IN SNAPSHOT""SET IN SNAPSHOT"');
 
     act(() => setAtom('SET AGAIN IN CURRENT'));
-    expect(c.textContent).toEqual('"SET AGAIN IN CURRENT""SET AGAIN IN CURRENT"');
+    expect(c.textContent).toEqual(
+      '"SET AGAIN IN CURRENT""SET AGAIN IN CURRENT"',
+    );
 
     // Test that atoms set after snapshot were created are reset
     act(() => gotoRecoilSnapshot(snapshot));
@@ -159,7 +166,8 @@ describe('useGotoRecoilSnapshot', () => {
       key: `Goto Snapshot From Callback ${Math.random()}`,
       default: 'DEFAULT',
     });
-    const [ReadsAndWritesAtom, setAtom] = componentThatReadsAndWritesAtom(myAtom);
+    const [ReadsAndWritesAtom, setAtom] =
+      componentThatReadsAndWritesAtom(myAtom);
 
     const mySelector = constSelector(myAtom);
 
@@ -200,7 +208,8 @@ describe('useGotoRecoilSnapshot', () => {
       key: `atom for dep async snapshot ${Math.random()}`,
       default: 'DEFAULT',
     });
-    const [ReadsAndWritesAtom, setAtom] = componentThatReadsAndWritesAtom(myAtom);
+    const [ReadsAndWritesAtom, setAtom] =
+      componentThatReadsAndWritesAtom(myAtom);
     const mySelector = selector({
       key: `selector for async snapshot ${Math.random()}`,
       get: async ({get}) => {
@@ -231,12 +240,12 @@ describe('useGotoRecoilSnapshot', () => {
     );
 
     expect(c.textContent).toEqual('loading');
-    
+
     // Wait for async selector to resolve
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 10));
     });
-    
+
     expect(c.textContent).toEqual('"DEFAULT""DEFAULT"');
 
     act(() => setAtom('SET IN CURRENT'));
@@ -245,20 +254,20 @@ describe('useGotoRecoilSnapshot', () => {
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 10));
     });
-    
+
     expect(c.textContent).toEqual('"SET IN CURRENT""SET IN CURRENT"');
 
     await expect(updatedSnapshot.getPromise(myAtom)).resolves.toEqual(
       'SET IN SNAPSHOT',
     );
-    
+
     act(() => gotoRecoilSnapshot(updatedSnapshot));
-    
+
     // Wait for async selector to resolve after snapshot change
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 10));
     });
-    
+
     expect(c.textContent).toEqual('"SET IN SNAPSHOT""SET IN SNAPSHOT"');
   });
 
@@ -269,9 +278,10 @@ describe('useGotoRecoilSnapshot', () => {
     let resolveSelector: (value: string) => void = () => {};
     const mySelector = selector({
       key: `async test selector ${Math.random()}`,
-      get: () => new Promise<string>(resolve => {
-        resolveSelector = resolve;
-      }),
+      get: () =>
+        new Promise<string>(resolve => {
+          resolveSelector = resolve;
+        }),
     });
 
     let gotoRecoilSnapshot: any;
@@ -291,12 +301,12 @@ describe('useGotoRecoilSnapshot', () => {
 
     // Resolve the selector manually
     resolveSelector('RESOLVE');
-    
+
     // Wait for the selector to resolve
     await act(async () => {
       await new Promise(resolve => setTimeout(resolve, 10));
     });
-    
+
     expect(c.textContent).toEqual('"RESOLVE"');
 
     act(() => gotoRecoilSnapshot(snapshot));
@@ -353,4 +363,4 @@ describe('useGotoRecoilSnapshot', () => {
     act(forceUpdate);
     expect(init).toEqual(1 * sm);
   });
-}); 
+});

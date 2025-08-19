@@ -1,12 +1,42 @@
+# Dependencies
 node_modules/
+
+# Build outputs
 build/
 cjs/
 es/
 umd/
+dist/
+lib/
+*.tsbuildinfo
 flow-typed/
 recoil_devtools_ext/
 
+# Package manager files
 yarn.lock
-script/project-root-dir.js
+pnpm-lock.yaml
+package-lock.json
 
-*.md
+# Generated files
+script/project-root-dir.js
+*.d.ts.map
+*.js.map
+
+# Documentation (if you want prettier to ignore markdown files)
+# *.md
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log
+logs/
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Temporary files
+.tmp/
+temp/

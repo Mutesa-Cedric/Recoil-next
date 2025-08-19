@@ -2,7 +2,7 @@
  * TypeScript port of Recoil_stableStringify-test.js
  */
 
-import { describe, expect, test } from 'vitest';
+import {describe, expect, test} from 'vitest';
 import stableStringify from '../Recoil_stableStringify';
 
 describe('stableStringify', () => {
@@ -118,9 +118,14 @@ describe('stableStringify', () => {
     expect(stableStringify([null, 1, null])).toBe('[null,1,null]');
     expect(stableStringify({a: null, b: 1})).toBe('{"a":null,"b":1}');
     expect(stableStringify(new Set([null, 1]))).toBe('[null,1]');
-    expect(stableStringify(new Map([['a', null], ['b', 1]]))).toBe(
-      '{"a":null,"b":1}',
-    );
+    expect(
+      stableStringify(
+        new Map([
+          ['a', null],
+          ['b', 1],
+        ]),
+      ),
+    ).toBe('{"a":null,"b":1}');
 
     // Functions (should be ignored)
     const objWithFunction = {
@@ -139,4 +144,4 @@ describe('stableStringify', () => {
     // Should handle circular references gracefully
     expect(() => stableStringify(circular)).not.toThrow();
   });
-}); 
+});

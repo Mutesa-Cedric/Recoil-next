@@ -30,7 +30,11 @@ class TXHashTable<TBaseItem> {
     this.map = new Map();
   }
 
-  set(atomName: string, value: TBaseItem | null | undefined, transactionId: number): void {
+  set(
+    atomName: string,
+    value: TBaseItem | null | undefined,
+    transactionId: number,
+  ): void {
     if (value == null) {
       return;
     }

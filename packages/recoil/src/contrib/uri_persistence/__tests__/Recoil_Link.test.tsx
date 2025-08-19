@@ -1,37 +1,32 @@
+/* eslint-disable no-undef */
 /**
  * TypeScript port of Recoil_Link-test.js
  */
 
-import { fireEvent, render } from '@testing-library/react';
+import {fireEvent, render} from '@testing-library/react';
 import * as React from 'react';
-import { act } from 'react';
-import { expect, test } from 'vitest';
+import {act} from 'react';
+import {expect, test} from 'vitest';
 
-import type { MutableSnapshot, Snapshot } from '../../../core/Snapshot';
+import type {MutableSnapshot, Snapshot} from '../../../core/Snapshot';
 
-import { RecoilRoot } from '../../../core/RecoilRoot';
-import { freshSnapshot } from '../../../core/Snapshot';
-import { useRecoilState } from '../../../hooks/Hooks';
-import { atom } from '../../../recoil_values/atom';
-import {
-    LinkToRecoilSnapshot,
-    LinkToRecoilStateChange,
-} from '../Recoil_Link';
+import {RecoilRoot} from '../../../core/RecoilRoot';
+import {freshSnapshot} from '../../../core/Snapshot';
+import {useRecoilState} from '../../../hooks/Hooks';
+import {atom} from '../../../recoil_values/atom';
+import {LinkToRecoilSnapshot, LinkToRecoilStateChange} from '../Recoil_Link';
 
-const myAtom = atom<string>({ key: 'Link Snapshot', default: 'DEFAULT' });
+const myAtom = atom<string>({key: 'Link Snapshot', default: 'DEFAULT'});
 
 // Helper component that reads and writes atom
 function ReadsAndWritesAtom(): React.ReactElement {
   const [value, setValue] = useRecoilState(myAtom);
   return (
     <div>
-      "{value}"
-      <button onClick={() => setValue('SET')}>Set</button>
+      "{value}"<button onClick={() => setValue('SET')}>Set</button>
     </div>
   );
 }
-
-
 
 interface LinkToSnapshotProps {
   snapshot: Snapshot;
@@ -44,7 +39,7 @@ const LinkToSnapshot: React.FC<LinkToSnapshotProps> = ({
 }) => (
   <LinkToRecoilSnapshot
     snapshot={snapshot}
-    uriFromSnapshot={({ getLoadable }) =>
+    uriFromSnapshot={({getLoadable}) =>
       `https://test.com/test?atom="${getLoadable(myAtom)
         .valueOrThrow()
         .toString()}`
@@ -64,7 +59,7 @@ const LinkToStateChange: React.FC<LinkToStateChangeProps> = ({
 }) => (
   <LinkToRecoilStateChange
     stateChange={stateChange}
-    uriFromSnapshot={({ getLoadable }) =>
+    uriFromSnapshot={({getLoadable}) =>
       `https://test.com/test?atom="${getLoadable(myAtom)
         .valueOrThrow()
         .toString()}`
@@ -74,7 +69,7 @@ const LinkToStateChange: React.FC<LinkToStateChangeProps> = ({
 );
 
 function renderElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(<RecoilRoot>{element}</RecoilRoot>);
+  const {container} = render(<RecoilRoot>{element}</RecoilRoot>);
   return container;
 }
 
@@ -84,9 +79,8 @@ function flushPromisesAndTimers(): Promise<void> {
   });
 }
 
-
 test('Link - snapshot', async () => {
-  const snapshot = freshSnapshot().map(({ set }) => set(myAtom, 'MAP'));
+  const snapshot = freshSnapshot().map(({set}) => set(myAtom, 'MAP'));
 
   const container = renderElements(
     <>
@@ -112,13 +106,13 @@ test('Link - snapshot', async () => {
   expect(link).toBeTruthy();
   expect(link.tagName).toBe('A');
   expect(link.textContent).toContain('LINK-MAP');
-  
+
   // Test that clicking the link doesn't throw an error
   await act(async () => {
-    fireEvent.click(link, { button: 0 });
+    fireEvent.click(link, {button: 0});
     await flushPromisesAndTimers();
   });
-  
+
   // Note: Snapshot navigation functionality may need further implementation
   // For now, we verify the link structure and basic functionality
 });
@@ -127,7 +121,7 @@ test('Link - stateChange', async () => {
   const container = renderElements(
     <>
       <ReadsAndWritesAtom />
-      <LinkToStateChange stateChange={({ set }) => set(myAtom, 'MAP')}>
+      <LinkToStateChange stateChange={({set}) => set(myAtom, 'MAP')}>
         LINK
       </LinkToStateChange>
     </>,
@@ -150,10 +144,10 @@ test('Link - stateChange', async () => {
 
   // Test that clicking the link doesn't throw an error
   await act(async () => {
-    fireEvent.click(link, { button: 0 });
+    fireEvent.click(link, {button: 0});
     await flushPromisesAndTimers();
   });
-  
+
   // Note: Snapshot navigation functionality may need further implementation
 });
 
@@ -162,7 +156,7 @@ test('Link - state update', async () => {
     <>
       <ReadsAndWritesAtom />
       <LinkToStateChange
-        stateChange={({ set }) => set(myAtom, value => 'MAP ' + value)}>
+        stateChange={({set}) => set(myAtom, value => 'MAP ' + value)}>
         LINK
       </LinkToStateChange>
     </>,
@@ -185,9 +179,9 @@ test('Link - state update', async () => {
 
   // Test that clicking the link doesn't throw an error
   await act(async () => {
-    fireEvent.click(link, { button: 0 });
+    fireEvent.click(link, {button: 0});
     await flushPromisesAndTimers();
   });
-  
+
   // Note: Snapshot navigation functionality may need further implementation
-}); 
+});

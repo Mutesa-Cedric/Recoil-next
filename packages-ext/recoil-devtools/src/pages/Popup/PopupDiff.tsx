@@ -3,10 +3,10 @@
  * Recoil DevTools browser extension.
  */
 
-import React, { useContext } from 'react';
+import React, {useContext} from 'react';
 import ConnectionContext from './ConnectionContext';
 import DiffItem from './Items/DiffItem';
-import { useSelectedTransaction } from './useSelectionHooks';
+import {useSelectedTransaction} from './useSelectionHooks';
 
 function PopupDiff(): React.ReactNode {
   const connection = useContext(ConnectionContext);

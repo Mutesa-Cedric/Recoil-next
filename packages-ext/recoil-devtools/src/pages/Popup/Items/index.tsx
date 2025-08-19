@@ -6,7 +6,4 @@
 import DiffItem from './DiffItem';
 import ItemDependencies from './ItemDependencies';
 
-export {
-  DiffItem,
-  ItemDependencies,
-};
+export {DiffItem, ItemDependencies};

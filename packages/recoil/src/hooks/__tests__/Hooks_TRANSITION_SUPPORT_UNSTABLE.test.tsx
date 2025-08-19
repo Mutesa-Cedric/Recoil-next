@@ -2,12 +2,12 @@
  * TypeScript port of Recoil_Hooks_TRANSITION_SUPPORT_UNSTABLE-test.js
  */
 
-import { render } from '@testing-library/react';
+import {render} from '@testing-library/react';
 import * as React from 'react';
-import { describe, expect, test } from 'vitest';
+import {describe, expect, test} from 'vitest';
 
-import { RecoilRoot } from '../../core/RecoilRoot';
-import { atom } from '../../recoil_values/atom';
+import {RecoilRoot} from '../../core/RecoilRoot';
+import {atom} from '../../recoil_values/atom';
 import {
   useRecoilState_TRANSITION_SUPPORT_UNSTABLE,
   useRecoilValue_TRANSITION_SUPPORT_UNSTABLE,
@@ -15,13 +15,16 @@ import {
 
 // Error boundary component for testing
 class ErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: (error: Error) => React.ReactNode },
-  { hasError: boolean; error?: Error }
+  {children: React.ReactNode; fallback?: (error: Error) => React.ReactNode},
+  {hasError: boolean; error?: Error}
 > {
-  state: { hasError: boolean; error?: Error } = { hasError: false };
+  state: {hasError: boolean; error?: Error} = {hasError: false};
 
-  static getDerivedStateFromError(error: Error): { hasError: boolean; error?: Error } {
-    return { hasError: true, error };
+  static getDerivedStateFromError(error: Error): {
+    hasError: boolean;
+    error?: Error;
+  } {
+    return {hasError: true, error};
   }
 
   render(): React.ReactNode {
@@ -35,25 +38,26 @@ class ErrorBoundary extends React.Component<
 
 // React rendering utilities for testing
 function renderElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(
+  const {container} = render(
     <RecoilRoot>
       <ErrorBoundary>
         <React.Suspense fallback="loading">{element}</React.Suspense>
       </ErrorBoundary>
-    </RecoilRoot>
+    </RecoilRoot>,
   );
   return container;
 }
 
 // Test component to read atom values
-function ReadsAtom<T>({ atom }: { atom: any }) {
+function ReadsAtom<T>({atom}: {atom: any}) {
   const value = useRecoilValue_TRANSITION_SUPPORT_UNSTABLE(atom);
   return <>{JSON.stringify(value)}</>;
 }
 
 // Test component to read and write atom values
-function ReadsAndWritesAtom<T>({ atom, value }: { atom: any; value: T }) {
-  const [currentValue, setValue] = useRecoilState_TRANSITION_SUPPORT_UNSTABLE(atom);
+function ReadsAndWritesAtom<T>({atom, value}: {atom: any; value: T}) {
+  const [currentValue, setValue] =
+    useRecoilState_TRANSITION_SUPPORT_UNSTABLE(atom);
   React.useEffect(() => {
     setValue(value);
   }, [setValue, value]);
@@ -78,7 +82,7 @@ describe('_TRANSITION_SUPPORT_UNSTABLE hooks', () => {
     });
 
     const container = renderElements(
-      <ReadsAndWritesAtom atom={testAtom} value="updated" />
+      <ReadsAndWritesAtom atom={testAtom} value="updated" />,
     );
 
     expect(container.textContent).toBe('"updated"');
@@ -97,9 +101,9 @@ describe('_TRANSITION_SUPPORT_UNSTABLE hooks', () => {
             <ReadsAndWritesAtom atom={testAtom} value="transition-value" />
           </React.Suspense>
         </ErrorBoundary>
-      </RecoilRoot>
+      </RecoilRoot>,
     );
 
     expect(container.textContent).toBe('"transition-value"');
   });
-}); 
+});

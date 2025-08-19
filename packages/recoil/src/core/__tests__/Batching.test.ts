@@ -2,8 +2,8 @@
  * TypeScript port of Recoil_Batching-test.js and Recoil_batcher-test.js
  */
 
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
-import { batchUpdates, getBatcher, setBatcher } from '../Batching';
+import {describe, test, expect, vi, beforeEach, afterEach} from 'vitest';
+import {batchUpdates, getBatcher, setBatcher} from '../Batching';
 
 /**
  * Cleanup function that will reset the batcher back
@@ -45,7 +45,7 @@ describe('Batching', () => {
 
     const callback = vi.fn();
     batchUpdates(callback);
-    
+
     expect(batcherFn).toHaveBeenCalledTimes(1);
     // Check that batcherFn was called with a function
     expect(typeof batcherFn.mock.calls[0][0]).toBe('function');
@@ -55,7 +55,7 @@ describe('Batching', () => {
   test('batchUpdates executes callback', () => {
     const callback = vi.fn();
     batchUpdates(callback);
-    
+
     expect(callback).toHaveBeenCalledTimes(1);
   });
-}); 
+});

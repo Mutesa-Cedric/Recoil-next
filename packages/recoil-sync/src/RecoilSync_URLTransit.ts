@@ -2,14 +2,14 @@
  * TypeScript port of RecoilSync_URLTransit.js
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
-import { DefaultValue } from 'recoil-next';
+import React, {useCallback, useEffect, useMemo} from 'react';
+import {DefaultValue} from 'recoil-next';
 import * as transit from 'transit-js';
 import err from '../../shared/src/util/Recoil_err';
 import expectationViolation from '../../shared/src/util/Recoil_expectationViolation';
 import usePrevious from '../../shared/src/util/Recoil_usePrevious';
-import type { RecoilURLSyncOptions } from './RecoilSync_URL';
-import { RecoilURLSync } from './RecoilSync_URL';
+import type {RecoilURLSyncOptions} from './RecoilSync_URL';
+import {RecoilURLSync} from './RecoilSync_URL';
 
 declare const __DEV__: boolean;
 
@@ -82,32 +82,34 @@ export function RecoilURLSyncTransit({
     [handlersProp],
   );
 
-  const writer = useMemo(
-    () => {
-      const writeHandlers = handlers.map(handler => [
+  const writer = useMemo(() => {
+    const writeHandlers = handlers
+      .map(handler => [
         handler.class,
         transit.makeWriteHandler({
           tag: () => handler.tag,
           rep: handler.write,
-          stringRep: function (val: any, h: transit.WriteHandler): string | null {
+          stringRep: function (
+            val: any,
+            h: transit.WriteHandler,
+          ): string | null {
             throw new Error('Function not implemented.');
-          }
+          },
         }),
-      ]).flat();
+      ])
+      .flat();
 
-      return transit.writer('json', {
-        handlers: transit.map(writeHandlers),
-      });
-    },
-    [handlers],
-  );
+    return transit.writer('json', {
+      handlers: transit.map(writeHandlers),
+    });
+  }, [handlers]);
   const serialize = useCallback((x: unknown) => writer.write(x), [writer]);
 
   const reader = useMemo(
     () =>
       transit.reader('json', {
         handlers: handlers.reduce<Record<string, (rep: any) => any>>(
-          (c, { tag, read }) => {
+          (c, {tag, read}) => {
             c[tag] = read;
             return c;
           },
@@ -132,4 +134,4 @@ export function RecoilURLSyncTransit({
     deserialize,
     children: options.children,
   });
-} 
+}

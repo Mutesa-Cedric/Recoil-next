@@ -5,5 +5,5 @@
 'use strict';
 
 export function enqueueExecution(s: string, f: () => unknown): void {
-    f();
-} 
+  f();
+}

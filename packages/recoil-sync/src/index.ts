@@ -3,11 +3,7 @@
  */
 
 // Core Recoil Sync exports
-export {
-  RecoilSync,
-  syncEffect,
-  registries_FOR_TESTING,
-} from './RecoilSync';
+export {RecoilSync, syncEffect, registries_FOR_TESTING} from './RecoilSync';
 
 export type {
   ItemKey,
@@ -33,10 +29,7 @@ export type {
 } from './RecoilSync';
 
 // URL Synchronization exports
-export {
-  RecoilURLSync,
-  urlSyncEffect,
-} from './RecoilSync_URL';
+export {RecoilURLSync, urlSyncEffect} from './RecoilSync_URL';
 
 export type {
   LocationOption,
@@ -45,20 +38,14 @@ export type {
 } from './RecoilSync_URL';
 
 // JSON URL Synchronization exports
-export {
-  RecoilURLSyncJSON,
-} from './RecoilSync_URLJSON';
+export {RecoilURLSyncJSON} from './RecoilSync_URLJSON';
 
-export type {
-  RecoilURLSyncJSONOptions,
-} from './RecoilSync_URLJSON';
+export type {RecoilURLSyncJSONOptions} from './RecoilSync_URLJSON';
 
 // Transit URL Synchronization exports
-export {
-  RecoilURLSyncTransit,
-} from './RecoilSync_URLTransit';
+export {RecoilURLSyncTransit} from './RecoilSync_URLTransit';
 
 export type {
   TransitHandler,
   RecoilURLSyncTransitOptions,
-} from './RecoilSync_URLTransit'; 
+} from './RecoilSync_URLTransit';

@@ -86,10 +86,26 @@ Simply change your import statements from `@recoiljs/refine` to `refine-next`:
 
 ```javascript
 // Before
-import { object, number, string, optional, array, assertion, coercion } from '@recoiljs/refine';
+import {
+  object,
+  number,
+  string,
+  optional,
+  array,
+  assertion,
+  coercion,
+} from '@recoiljs/refine';
 
 // After
-import { object, number, string, optional, array, assertion, coercion } from 'refine-next';
+import {
+  object,
+  number,
+  string,
+  optional,
+  array,
+  assertion,
+  coercion,
+} from 'refine-next';
 ```
 
 ### 3. That's it!

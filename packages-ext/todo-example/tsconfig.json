@@ -19,7 +19,10 @@
     "noFallthroughCasesInSwitch": true,
     "types": ["vitest/globals"]
   },
-  "references": [{ "path": "../../packages/shared" }, { "path": "../../packages/recoil" }],
+  "references": [
+    {"path": "../../packages/shared"},
+    {"path": "../../packages/recoil"}
+  ],
   "include": ["src/**/*"],
   "exclude": ["dist/**", "node_modules/**"]
 }

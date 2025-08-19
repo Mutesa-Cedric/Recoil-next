@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import {defineConfig} from 'vitest/config';
 
 export default defineConfig({
   test: {
@@ -20,16 +20,18 @@ export default defineConfig({
         '**/*.d.ts',
         '**/*.config.*',
         '**/coverage/',
-        "Recoil-old"
+        'Recoil-old',
       ],
     },
   },
   resolve: {
     alias: {
-      'recoil-shared': new URL('./packages/shared/src', import.meta.url).pathname,
-      'recoil': new URL('./packages/recoil/src', import.meta.url).pathname,
-      'react': new URL('./node_modules/react', import.meta.url).pathname,
-      'react-dom': new URL('./node_modules/react-dom', import.meta.url).pathname,
+      'recoil-shared': new URL('./packages/shared/src', import.meta.url)
+        .pathname,
+      recoil: new URL('./packages/recoil/src', import.meta.url).pathname,
+      react: new URL('./node_modules/react', import.meta.url).pathname,
+      'react-dom': new URL('./node_modules/react-dom', import.meta.url)
+        .pathname,
     },
   },
-}); 
+});

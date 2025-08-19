@@ -2,9 +2,8 @@
  * TypeScript port of Recoil_Loadable-test.js
  */
 
-import { test, expect, describe } from 'vitest';
+import {test, expect, describe} from 'vitest';
 import {
-  RecoilLoadable,
   loadableWithError,
   loadableWithPromise,
   loadableWithValue,
@@ -91,4 +90,4 @@ describe('Loadable mapping', () => {
     expect(loadable.state).toBe('hasError');
     expect(loadable.contents).toBe(ERROR);
   });
-}); 
+});

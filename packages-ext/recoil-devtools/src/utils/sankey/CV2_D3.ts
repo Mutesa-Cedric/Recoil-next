@@ -15,14 +15,22 @@ const d3 = {
 // The values are either static values or a function that takes a data element
 // and returns the new value.  Values may be null to remove a style.
 export type Styles<T> = {
-  readonly [key: string]: null | string | number | ((data: T) => string | number | null);
+  readonly [key: string]:
+    | null
+    | string
+    | number
+    | ((data: T) => string | number | null);
 };
 
 // Attributes objects use attribute names for keys.  The values are either
 // static values or a function which takes a data element and returns the value.
 // Values may be null to remove the attribute.
 export type Attributes<T> = {
-  readonly [key: string]: null | string | number | ((data: T) => string | number | null);
+  readonly [key: string]:
+    | null
+    | string
+    | number
+    | ((data: T) => string | number | null);
 };
 
 // Events objects are similar, only use DOM event typenames for the keys
@@ -32,7 +40,7 @@ export type Events<T> = {
 };
 
 type Options = {
-  animationDurationMS: number,
+  animationDurationMS: number;
 };
 
 const OPTION_DEFAULTS: Options = {
@@ -193,7 +201,10 @@ class Selection<T> {
   }
 }
 
-export function select(el: Element, options: Partial<Options>): Selection<void> {
+export function select(
+  el: Element,
+  options: Partial<Options>,
+): Selection<void> {
   const selection = d3.select(el);
   return new Selection(
     {

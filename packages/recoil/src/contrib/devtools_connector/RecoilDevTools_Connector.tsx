@@ -2,12 +2,12 @@
  * Typescript port of RecoilDevTools_Connector.js
  */
 
-import type { Snapshot } from '../../core/Snapshot';
+import type {Snapshot} from '../../core/Snapshot';
 import {
   useGotoRecoilSnapshot,
   useRecoilSnapshot,
 } from '../../hooks/SnapshotHooks';
-import React, { useEffect, useRef } from 'react';
+import React, {useEffect, useRef} from 'react';
 
 type Props = Readonly<{
   name?: string;
@@ -21,7 +21,8 @@ type Props = Readonly<{
 
 type ConnectProps = Readonly<{
   goToSnapshot: (snapshot: Snapshot) => void;
-}> & Props;
+}> &
+  Props;
 
 function connect(props: ConnectProps): {
   track: (transactionId: number, snapshot: Snapshot) => void;
@@ -97,4 +98,4 @@ function Connector({
   return null;
 }
 
-export default Connector; 
+export default Connector;

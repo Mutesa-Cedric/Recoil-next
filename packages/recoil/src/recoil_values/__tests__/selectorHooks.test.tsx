@@ -2,42 +2,45 @@
  * TypeScript port of Recoil_selectorHooks-test.js
  */
 
-import { render } from '@testing-library/react';
+import {render} from '@testing-library/react';
 import * as React from 'react';
-import { Profiler, act, useState } from 'react';
-import { describe, expect, test, vi } from 'vitest';
+import {Profiler, act, useState} from 'react';
+import {describe, expect, test, vi} from 'vitest';
 
 import type {
   RecoilState,
   RecoilValue,
   RecoilValueReadOnly,
 } from '../../core/RecoilValue';
-import type { PersistenceSettings } from '../../recoil_values/atom';
+import type {PersistenceSettings} from '../../recoil_values/atom';
 
 import invariant from '../../../../shared/src/util/Recoil_invariant';
-import { batchUpdates } from '../../core/Batching';
-import { reactMode } from '../../core/ReactMode';
-import { RecoilRoot } from '../../core/RecoilRoot';
+import {batchUpdates} from '../../core/Batching';
+import {reactMode} from '../../core/ReactMode';
+import {RecoilRoot} from '../../core/RecoilRoot';
 import {
   useRecoilState,
   useRecoilValue,
   useRecoilValueLoadable,
-  useSetRecoilState
+  useSetRecoilState,
 } from '../../hooks/Hooks';
-import { atom } from '../../recoil_values/atom';
-import { constSelector } from '../../recoil_values/constSelector';
-import { errorSelector } from '../../recoil_values/errorSelector';
-import { selector } from '../../recoil_values/selector';
+import {atom} from '../../recoil_values/atom';
+import {constSelector} from '../../recoil_values/constSelector';
+import {errorSelector} from '../../recoil_values/errorSelector';
+import {selector} from '../../recoil_values/selector';
 
 // Error boundary component for testing
 class ErrorBoundary extends React.Component<
-  { children: React.ReactNode; fallback?: (error: Error) => React.ReactNode },
-  { hasError: boolean; error?: Error }
+  {children: React.ReactNode; fallback?: (error: Error) => React.ReactNode},
+  {hasError: boolean; error?: Error}
 > {
-  state: { hasError: boolean; error?: Error } = { hasError: false };
+  state: {hasError: boolean; error?: Error} = {hasError: false};
 
-  static getDerivedStateFromError(error: Error): { hasError: boolean; error?: Error } {
-    return { hasError: true, error };
+  static getDerivedStateFromError(error: Error): {
+    hasError: boolean;
+    error?: Error;
+  } {
+    return {hasError: true, error};
   }
 
   render(): React.ReactNode {
@@ -51,37 +54,37 @@ class ErrorBoundary extends React.Component<
 
 // React rendering utilities for testing
 function renderElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(
+  const {container} = render(
     <RecoilRoot>
       <ErrorBoundary>
         <React.Suspense fallback="loading">{element}</React.Suspense>
       </ErrorBoundary>
-    </RecoilRoot>
+    </RecoilRoot>,
   );
   return container;
 }
 
 function renderUnwrappedElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(<>{element}</>);
+  const {container} = render(<>{element}</>);
   return container;
 }
 
-function renderElementsWithSuspenseCount(element: React.ReactElement): [HTMLElement, () => number] {
-  let suspenseCount = 0;
-  const { container } = render(
+function renderElementsWithSuspenseCount(
+  element: React.ReactElement,
+): [HTMLElement, () => number] {
+  const suspenseCount = 0;
+  const {container} = render(
     <RecoilRoot>
       <ErrorBoundary>
-        <React.Suspense fallback="loading">
-          {element}
-        </React.Suspense>
+        <React.Suspense fallback="loading">{element}</React.Suspense>
       </ErrorBoundary>
-    </RecoilRoot>
+    </RecoilRoot>,
   );
   return [container, () => suspenseCount];
 }
 
 // Test component to read atom values
-function ReadsAtom<T>({ atom }: { atom: RecoilValue<T> }) {
+function ReadsAtom<T>({atom}: {atom: RecoilValue<T>}) {
   const value = useRecoilValue(atom);
   return <>{JSON.stringify(value)}</>;
 }
@@ -89,7 +92,7 @@ function ReadsAtom<T>({ atom }: { atom: RecoilValue<T> }) {
 // Test component that reads and writes atom values
 function componentThatReadsAndWritesAtom<T>(
   recoilState: RecoilState<T>,
-): [React.ComponentType<{}>, ((updater: T | ((prev: T) => T)) => void)] {
+): [React.ComponentType<{}>, (updater: T | ((prev: T) => T)) => void] {
   let updateValue: ((updater: T | ((prev: T) => T)) => void) | null = null;
   const Component = () => {
     const [value, setValue] = useRecoilState(recoilState);
@@ -109,7 +112,7 @@ function componentThatReadsAndWritesAtom<T>(
 // Test component that writes atom values
 function componentThatWritesAtom<T>(
   recoilState: RecoilState<T>,
-): [any, ((value: T | ((prev: T) => T)) => void)] {
+): [any, (value: T | ((prev: T) => T)) => void] {
   let updateValue: ((value: T | ((prev: T) => T)) => void) | null = null;
   const Component = vi.fn(() => {
     updateValue = useSetRecoilState(recoilState);
@@ -129,7 +132,7 @@ function componentThatWritesAtom<T>(
 function componentThatReadsAtomWithCommitCount(
   recoilState: RecoilValueReadOnly<number>,
 ): [React.ComponentType<{}>, () => void] {
-  const commit = vi.fn(() => { });
+  const commit = vi.fn(() => {});
   function ReadAtom() {
     return (
       <Profiler id="test" onRender={commit}>
@@ -142,7 +145,7 @@ function componentThatReadsAtomWithCommitCount(
 
 // Test component that toggles between two elements
 function componentThatToggles(a: React.ReactNode, b: React.ReactNode | null) {
-  const toggle = { current: () => invariant(false, 'bug in test code') };
+  const toggle = {current: () => invariant(false, 'bug in test code')};
   const Toggle = () => {
     const [value, setValue] = useState(false);
     toggle.current = () => setValue(v => !v);
@@ -202,7 +205,7 @@ function plusOneSelector(dep: RecoilValue<number>) {
   const fn = vi.fn(x => x + 1);
   const sel = selector({
     key: `selector${nextID++}`,
-    get: ({ get }) => fn(get(dep)),
+    get: ({get}) => fn(get(dep)),
   });
   return [sel, fn] as const;
 }
@@ -220,7 +223,7 @@ function plusOneAsyncSelector(
   });
   const sel = selector({
     key: `selector${nextID++}`,
-    get: ({ get }) => fn(get(dep)),
+    get: ({get}) => fn(get(dep)),
   });
   return [
     sel,
@@ -237,7 +240,7 @@ function additionSelector(
   const fn = vi.fn((a, b) => a + b);
   const sel = selector({
     key: `selector${nextID++}`,
-    get: ({ get }) => fn(get(depA), get(depB)),
+    get: ({get}) => fn(get(depA), get(depB)),
   });
   return [sel, fn] as const;
 }
@@ -248,10 +251,12 @@ function asyncSelectorThatPushesPromisesOntoArray<T, S>(
   const promises: Array<[(T) => void, (unknown) => void]> = [];
   const sel = selector<T>({
     key: `selector${nextID++}`,
-    get: ({ get }) => {
+    get: ({get}) => {
       get(dep);
-      let resolve: (value: T) => void = () => invariant(false, 'bug in test code');
-      let reject: (reason: unknown) => void = () => invariant(false, 'bug in test code');
+      let resolve: (value: T) => void = () =>
+        invariant(false, 'bug in test code');
+      let reject: (reason: unknown) => void = () =>
+        invariant(false, 'bug in test code');
       const p = new Promise<T>((res, rej) => {
         resolve = res;
         reject = rej;
@@ -274,7 +279,7 @@ function asyncSelector<T>(value: T): RecoilValueReadOnly<T> {
 function loadingAsyncSelector<T>(): RecoilValueReadOnly<T> {
   return selector({
     key: `loadingAsyncSelector${nextID++}`,
-    get: () => new Promise(() => { }),
+    get: () => new Promise(() => {}),
   });
 }
 
@@ -428,8 +433,8 @@ describe('Selector Hooks', () => {
     const anAtom = counterAtom();
     const aSelector = selector({
       key: 'invertible1',
-      get: ({ get }) => get(anAtom),
-      set: ({ set }, newValue) => set(anAtom, newValue),
+      get: ({get}) => get(anAtom),
+      set: ({set}, newValue) => set(anAtom, newValue),
     });
 
     const [Component, updateValue] = componentThatWritesAtom(aSelector);
@@ -451,7 +456,7 @@ describe('Selector Hooks', () => {
       const atomB = counterAtom();
       const aSelector = selector({
         key: 'depsChange',
-        get: ({ get }) => {
+        get: ({get}) => {
           const a = get(atomA);
           if (a === 1337) {
             const b = get(atomB);
@@ -492,7 +497,7 @@ describe('Selector Hooks', () => {
       // Depends on inputAtom only when switchAtom is true:
       const aSelector = selector<number>({
         key: 'gainsDeps',
-        get: ({ get }) => {
+        get: ({get}) => {
           if (get(switchAtom)) {
             return get(inputAtom);
           } else {
@@ -563,7 +568,7 @@ describe('Selector Hooks', () => {
       const resolvingSel = resolvingAsyncSelector('READY');
       const blockedSelector = selector({
         key: 'useRecoilState/blocked selector',
-        get: ({ get }) => get(resolvingSel),
+        get: ({get}) => get(resolvingSel),
       });
 
       // On first read, the selectors dependency is still loading
@@ -617,7 +622,9 @@ describe('Selector Hooks', () => {
 
       function ReadsAtomWithoutSuspense({
         state,
-      }: { state: RecoilValueReadOnly<number> }) {
+      }: {
+        state: RecoilValueReadOnly<number>;
+      }) {
         const loadable = useRecoilValueLoadable(state);
         if (loadable.state === 'loading') {
           return 'loading not with suspense';
@@ -669,31 +676,28 @@ describe('Selector Hooks', () => {
         expect(selectorFn).toHaveBeenCalledTimes(2);
       });
 
-      test(
-        'Selector functions are evaluated just once even if multiple upstreams change',
-        () => {
-          const atomA = counterAtom();
-          const atomB = counterAtom();
-          const [aSelector, selectorFn] = additionSelector(atomA, atomB);
-          const [ComponentA, updateValueA] = componentThatWritesAtom(atomA);
-          const [ComponentB, updateValueB] = componentThatWritesAtom(atomB);
-          renderElements(
-            <>
-              <ComponentA />
-              <ComponentB />
-              <ReadsAtom atom={aSelector} />
-            </>,
-          );
-          expect(selectorFn).toHaveBeenCalledTimes(1);
-          act(() => {
-            batchUpdates(() => {
-              updateValueA(1);
-              updateValueB(1);
-            });
+      test('Selector functions are evaluated just once even if multiple upstreams change', () => {
+        const atomA = counterAtom();
+        const atomB = counterAtom();
+        const [aSelector, selectorFn] = additionSelector(atomA, atomB);
+        const [ComponentA, updateValueA] = componentThatWritesAtom(atomA);
+        const [ComponentB, updateValueB] = componentThatWritesAtom(atomB);
+        renderElements(
+          <>
+            <ComponentA />
+            <ComponentB />
+            <ReadsAtom atom={aSelector} />
+          </>,
+        );
+        expect(selectorFn).toHaveBeenCalledTimes(1);
+        act(() => {
+          batchUpdates(() => {
+            updateValueA(1);
+            updateValueB(1);
           });
-          expect(selectorFn).toHaveBeenCalledTimes(3);
-        },
-      );
+        });
+        expect(selectorFn).toHaveBeenCalledTimes(3);
+      });
     });
   });
-}); 
+});

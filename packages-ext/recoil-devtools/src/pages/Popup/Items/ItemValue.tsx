@@ -5,7 +5,7 @@
 
 import React from 'react';
 import type {SerializedValue} from '../../../utils/Serialization';
-import { SerializedValueType } from '../../../utils/Serialization';
+import {SerializedValueType} from '../../../utils/Serialization';
 import Item from './Item';
 
 const styles = {
@@ -18,7 +18,7 @@ const styles = {
 };
 
 type ValueSpanProps = {
-  children: React.ReactNode,
+  children: React.ReactNode;
 };
 
 const ValueSpan = ({children}: ValueSpanProps): React.ReactNode => {
@@ -36,8 +36,8 @@ const ItemRenderers: {[key: string]: (props: any) => React.ReactNode} = {
     value,
     startCollapsed,
   }: {
-    value: readonly SerializedValue[],
-    startCollapsed: boolean | null | undefined,
+    value: readonly SerializedValue[];
+    startCollapsed: boolean | null | undefined;
   }) =>
     value.map((it, i) => (
       <Item name={i} content={it} key={i} startCollapsed={startCollapsed} />
@@ -48,7 +48,7 @@ const ItemRenderers: {[key: string]: (props: any) => React.ReactNode} = {
     startCollapsed,
   }: {
     value: readonly (readonly SerializedValue[])[];
-    startCollapsed: boolean | null | undefined,
+    startCollapsed: boolean | null | undefined;
   }) => {
     return ItemRenderers[SerializedValueType.map]({value, startCollapsed});
   },
@@ -56,8 +56,8 @@ const ItemRenderers: {[key: string]: (props: any) => React.ReactNode} = {
     value,
     startCollapsed,
   }: {
-    value: readonly SerializedValue[],
-    startCollapsed: boolean | null | undefined,
+    value: readonly SerializedValue[];
+    startCollapsed: boolean | null | undefined;
   }) => {
     return ItemRenderers[SerializedValueType.array]({value, startCollapsed});
   },
@@ -66,7 +66,7 @@ const ItemRenderers: {[key: string]: (props: any) => React.ReactNode} = {
     startCollapsed,
   }: {
     value: readonly (readonly SerializedValue[])[];
-    startCollapsed: boolean | null | undefined,
+    startCollapsed: boolean | null | undefined;
   }) => {
     return value.map(([name, content], i) => (
       <Item
@@ -80,21 +80,21 @@ const ItemRenderers: {[key: string]: (props: any) => React.ReactNode} = {
   [SerializedValueType.date]: function SerializedValueTypeDate({
     value,
   }: {
-    value: Date,
+    value: Date;
   }) {
     return <ValueSpan>{new Date(value).toISOString()}</ValueSpan>;
   },
   [SerializedValueType.function]: function SerializedValueTypeFunction({
     value,
   }: {
-    value: string,
+    value: string;
   }) {
     return <ValueSpan>{value}</ValueSpan>;
   },
   [SerializedValueType.symbol]: function SerializedValueTypeSymbol({
     value,
   }: {
-    value: string,
+    value: string;
   }) {
     return <ValueSpan>Symbol({value})</ValueSpan>;
   },
@@ -103,14 +103,14 @@ const ItemRenderers: {[key: string]: (props: any) => React.ReactNode} = {
   [SerializedValueType.promise]: function SerializedValueTypePromise({
     value: _value,
   }: {
-    value: string,
+    value: string;
   }) {
     return <ValueSpan>Promise{'<Pending>'}</ValueSpan>;
   },
   [SerializedValueType.primitive]: function SerializedValueTypePrimitive({
     value,
   }: {
-    value: string | number,
+    value: string | number;
   }) {
     if (typeof value === 'string') {
       return <ValueSpan>&#34;{value}&#34;</ValueSpan>;
@@ -122,9 +122,9 @@ const ItemRenderers: {[key: string]: (props: any) => React.ReactNode} = {
 };
 
 type Props = {
-  content: SerializedValue | null | undefined,
-  inline?: boolean,
-  startCollapsed?: boolean | null | undefined,
+  content: SerializedValue | null | undefined;
+  inline?: boolean;
+  startCollapsed?: boolean | null | undefined;
 };
 
 function ItemValue({
@@ -132,7 +132,7 @@ function ItemValue({
   inline = false,
   startCollapsed,
 }: Props): React.ReactNode {
-  let markup =
+  const markup =
     content == null
       ? 'undefined'
       : ItemRenderers[content.t as keyof typeof ItemRenderers]({

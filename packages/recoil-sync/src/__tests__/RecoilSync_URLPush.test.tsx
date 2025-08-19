@@ -2,11 +2,11 @@
  * TypeScript port of RecoilSync_URLPush-test.js
  */
 
-import { act } from '@testing-library/react';
+import {act} from '@testing-library/react';
 import React from 'react';
-import { atom } from 'recoil-next';
-import { string } from 'refine-next';
-import { expect, test } from 'vitest';
+import {atom} from 'recoil-next';
+import {string} from 'refine-next';
+import {expect, test} from 'vitest';
 import {
   TestURLSync,
   expectURL,
@@ -16,29 +16,29 @@ import {
   ComponentThatReadsAndWritesAtom,
   renderElements,
 } from '../__test_utils__/TestUtils';
-import { urlSyncEffect } from '../RecoilSync_URL';
+import {urlSyncEffect} from '../RecoilSync_URL';
 
 // TODO: React 19 snapshot lifecycle compatibility issue - snapshots are released more aggressively
 // This test is currently failing due to "Snapshot has already been released" error in React 19.
 // The error occurs during useRecoilSnapshot() hook execution when components rapidly re-render
 // during history navigation operations. This is a known compatibility issue that needs investigation.
 test.skip('Push URLs in browser history', async () => {
-  const loc = { part: 'queryParams' } as const;
+  const loc = {part: 'queryParams'} as const;
 
   const atomA = atom({
     key: 'recoil-url-sync replace',
     default: 'DEFAULT',
-    effects: [urlSyncEffect({ refine: string(), history: 'replace' })],
+    effects: [urlSyncEffect({refine: string(), history: 'replace'})],
   });
   const atomB = atom({
     key: 'recoil-url-sync push',
     default: 'DEFAULT',
-    effects: [urlSyncEffect({ refine: string(), history: 'push' })],
+    effects: [urlSyncEffect({refine: string(), history: 'push'})],
   });
   const atomC = atom({
     key: 'recoil-url-sync push 2',
     default: 'DEFAULT',
-    effects: [urlSyncEffect({ refine: string(), history: 'push' })],
+    effects: [urlSyncEffect({refine: string(), history: 'push'})],
   });
 
   const [AtomA, atomAControls] = ComponentThatReadsAndWritesAtom(atomA);
@@ -47,8 +47,12 @@ test.skip('Push URLs in browser history', async () => {
   const container = renderElements(
     React.createElement(TestURLSync, {
       location: loc,
-      children: [React.createElement(AtomA, { key: 'A' }), React.createElement(AtomB, { key: 'B' }), React.createElement(AtomC, { key: 'C' })],
-    })
+      children: [
+        React.createElement(AtomA, {key: 'A'}),
+        React.createElement(AtomB, {key: 'B'}),
+        React.createElement(AtomC, {key: 'C'}),
+      ],
+    }),
   );
 
   expect(container.textContent).toBe('"DEFAULT""DEFAULT""DEFAULT"');
@@ -221,4 +225,4 @@ test.skip('Push URLs in browser history', async () => {
       },
     ],
   ]);
-}); 
+});

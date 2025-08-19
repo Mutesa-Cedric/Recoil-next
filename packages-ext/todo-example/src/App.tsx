@@ -1,6 +1,6 @@
 import './App.css';
-import { TodoList } from './components/Todo/TodoList';
-import { RecoilRoot } from 'recoil-next';
+import {TodoList} from './components/Todo/TodoList';
+import {RecoilRoot} from 'recoil-next';
 import React from 'react';
 
 function App(): React.ReactElement {

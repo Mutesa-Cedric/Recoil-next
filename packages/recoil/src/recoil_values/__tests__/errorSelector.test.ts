@@ -2,15 +2,15 @@
  * TypeScript port of Recoil_errorSelector-test.js
  */
 
-import { describe, test, expect, beforeEach } from 'vitest';
+import {describe, test, expect, beforeEach} from 'vitest';
 
-import type { Store } from '../../core/State';
-import type { RecoilValueReadOnly } from '../../core/RecoilValue';
+import type {Store} from '../../core/State';
+import type {RecoilValueReadOnly} from '../../core/RecoilValue';
 
-import { errorSelector } from '../errorSelector';
-import { persistentMap } from '../../adt/PersistentMap';
-import { getNextStoreID, getNextTreeStateVersion } from '../../core/Keys';
-import { getRecoilValueAsLoadable } from '../../core/RecoilValueInterface';
+import {errorSelector} from '../errorSelector';
+import {persistentMap} from '../../adt/PersistentMap';
+import {getNextStoreID, getNextTreeStateVersion} from '../../core/Keys';
+import {getRecoilValueAsLoadable} from '../../core/RecoilValueInterface';
 
 function makeStore(): Store {
   const storeState = {
@@ -44,27 +44,30 @@ function makeStore(): Store {
   const store: Store = {
     storeID: getNextStoreID(),
     getState: () => storeState,
-    replaceState: (replacer) => {
+    replaceState: replacer => {
       const currentStoreState = store.getState();
       currentStoreState.currentTree = replacer(currentStoreState.currentTree);
     },
-    getGraph: (version) => {
+    getGraph: version => {
       const graphs = storeState.graphsByVersion;
       if (graphs.has(version)) {
         return graphs.get(version)!;
       }
-      const newGraph = { nodeDeps: new Map(), nodeToNodeSubscriptions: new Map() };
+      const newGraph = {
+        nodeDeps: new Map(),
+        nodeToNodeSubscriptions: new Map(),
+      };
       graphs.set(version, newGraph);
       return newGraph;
     },
     subscribeToTransactions: () => {
-      return { release: () => {} };
+      return {release: () => {}};
     },
     addTransactionMetadata: () => {
       // no-op in test mock
-    },  
+    },
   };
-  
+
   return store;
 }
 
@@ -93,32 +96,38 @@ describe('errorSelector', () => {
   test('errorSelector - creates different selectors for different messages', () => {
     const errorA = errorSelector<string>('Error A');
     const errorB = errorSelector<string>('Error B');
-    
+
     expect(errorA).not.toBe(errorB);
-    expect(getError(errorA).message).toEqual(expect.stringContaining('Error A'));
-    expect(getError(errorB).message).toEqual(expect.stringContaining('Error B'));
+    expect(getError(errorA).message).toEqual(
+      expect.stringContaining('Error A'),
+    );
+    expect(getError(errorB).message).toEqual(
+      expect.stringContaining('Error B'),
+    );
   });
 
   test('errorSelector - same message returns same selector', () => {
     const errorA1 = errorSelector<string>('Same Error');
     const errorA2 = errorSelector<string>('Same Error');
-    
+
     expect(errorA1).toBe(errorA2); // Should be the same instance due to selectorFamily caching
   });
 
   test('errorSelector - loadable state is hasError', () => {
     const mySelector = errorSelector<number>('Test Error');
     const loadable = getRecoilValueAsLoadable(store, mySelector);
-    
+
     expect(loadable.state).toBe('hasError');
     expect(loadable.contents).toBeInstanceOf(Error);
-    expect((loadable.contents as Error).message).toEqual(expect.stringContaining('Test Error'));
+    expect((loadable.contents as Error).message).toEqual(
+      expect.stringContaining('Test Error'),
+    );
   });
 
   test('errorSelector - with empty message', () => {
     const mySelector = errorSelector<boolean>('');
     const error = getError(mySelector);
-    
+
     expect(error).toBeInstanceOf(Error);
     // Error message might be empty or have some default content
     expect(typeof error.message).toBe('string');
@@ -128,7 +137,7 @@ describe('errorSelector', () => {
     const specialMessage = 'Error with special chars: !@#$%^&*()';
     const mySelector = errorSelector<object>(specialMessage);
     const error = getError(mySelector);
-    
+
     expect(error.message).toEqual(expect.stringContaining(specialMessage));
   });
-}); 
+});

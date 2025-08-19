@@ -5,7 +5,7 @@
 
 import * as React from 'react';
 import type {Node} from '../../../types/DevtoolsTypes';
-import { getStyle } from '../../../utils/getStyle';
+import {getStyle} from '../../../utils/getStyle';
 import NodeName from './NodeName';
 const styles = {
   label: {
@@ -19,9 +19,9 @@ const styles = {
 };
 
 type KeyProps = {
-  name: string | number,
-  node: Node | null | undefined,
-  isRoot?: boolean,
+  name: string | number;
+  node: Node | null | undefined;
+  isRoot?: boolean;
 };
 
 function ItemLabel({name, node, isRoot = false}: KeyProps): React.ReactElement {

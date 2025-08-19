@@ -2,9 +2,9 @@
  * TypeScript port of Recoil_LRUCache-test.js
  */
 
-import { describe, test, expect } from 'vitest';
+import {describe, test, expect} from 'vitest';
 
-import { LRUCache } from '../LRUCache';
+import {LRUCache} from '../LRUCache';
 
 describe('LRUCache', () => {
   test('setting and getting (without hitting max size)', () => {
@@ -167,26 +167,26 @@ describe('LRUCache', () => {
   test('custom key mapper', () => {
     const cache = new LRUCache<{id: number}, number>({
       maxSize: 3,
-      mapKey: (obj) => obj.id,
+      mapKey: obj => obj.id,
     });
 
-    const keyA = { id: 1 };
-    const keyB = { id: 2 };
-    const keyC = { id: 3 };
+    const keyA = {id: 1};
+    const keyB = {id: 2};
+    const keyC = {id: 3};
 
     cache.set(keyA, 10);
     cache.set(keyB, 20);
-    
+
     // Using different object instances with same id should work
-    expect(cache.get({ id: 1 })).toBe(10);
-    expect(cache.get({ id: 2 })).toBe(20);
+    expect(cache.get({id: 1})).toBe(10);
+    expect(cache.get({id: 2})).toBe(20);
 
     cache.set(keyC, 30);
-    
+
     expect(cache.size()).toBe(3);
-    expect(cache.get({ id: 1 })).toBe(10);
-    expect(cache.get({ id: 2 })).toBe(20);
-    expect(cache.get({ id: 3 })).toBe(30);
+    expect(cache.get({id: 1})).toBe(10);
+    expect(cache.get({id: 2})).toBe(20);
+    expect(cache.get({id: 3})).toBe(30);
   });
 
   test('head and tail methods', () => {
@@ -198,24 +198,24 @@ describe('LRUCache', () => {
     expect(cache.tail()).toBeNull();
 
     cache.set('a', 1);
-    
+
     expect(cache.head()?.key).toBe('a');
     expect(cache.tail()?.key).toBe('a');
 
     cache.set('b', 2);
-    
+
     expect(cache.head()?.key).toBe('b'); // Most recently added
     expect(cache.tail()?.key).toBe('a'); // Least recently used
 
     cache.set('c', 3);
-    
+
     expect(cache.head()?.key).toBe('c');
     expect(cache.tail()?.key).toBe('a');
 
     // Access 'a' to move it to head
     cache.get('a');
-    
+
     expect(cache.head()?.key).toBe('a');
     expect(cache.tail()?.key).toBe('b');
   });
-}); 
+});

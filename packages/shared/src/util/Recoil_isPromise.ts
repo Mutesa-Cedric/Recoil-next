@@ -5,5 +5,5 @@
 'use strict';
 
 export default function isPromise(p: unknown): p is Promise<unknown> {
-    return !!p && typeof (p as any).then === 'function';
-} 
+  return !!p && typeof (p as any).then === 'function';
+}

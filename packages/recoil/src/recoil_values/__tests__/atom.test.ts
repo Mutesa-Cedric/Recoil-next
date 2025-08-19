@@ -2,23 +2,23 @@
  * TypeScript port of Recoil_atom-test.js
  */
 
-import { act } from 'react';
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import {act} from 'react';
+import {afterEach, beforeEach, describe, expect, test, vi} from 'vitest';
 
-import type { Loadable } from '../../adt/Loadable';
-import type { RecoilState, RecoilValue } from '../../core/RecoilValue';
-import type { Store } from '../../core/State';
+import type {Loadable} from '../../adt/Loadable';
+import type {RecoilState, RecoilValue} from '../../core/RecoilValue';
+import type {Store} from '../../core/State';
 
 import RecoilEnv from '../../../../shared/src/util/Recoil_RecoilEnv';
-import { persistentMap } from '../../adt/PersistentMap';
-import { getNextStoreID, getNextTreeStateVersion } from '../../core/Keys';
-import { DEFAULT_VALUE } from '../../core/Node';
+import {persistentMap} from '../../adt/PersistentMap';
+import {getNextStoreID, getNextTreeStateVersion} from '../../core/Keys';
+import {DEFAULT_VALUE} from '../../core/Node';
 import {
   getRecoilValueAsLoadable,
   setRecoilValue,
 } from '../../core/RecoilValueInterface';
-import { atom } from '../atom';
-import { selector } from '../selector';
+import {atom} from '../atom';
+import {selector} from '../selector';
 
 // Create a simplified mock store for testing
 function makeStore(): Store {
@@ -53,27 +53,30 @@ function makeStore(): Store {
   const store: Store = {
     storeID: getNextStoreID(),
     getState: () => storeState,
-    replaceState: (replacer) => {
+    replaceState: replacer => {
       const currentStoreState = store.getState();
       currentStoreState.currentTree = replacer(currentStoreState.currentTree);
     },
-    getGraph: (version) => {
+    getGraph: version => {
       const graphs = storeState.graphsByVersion;
       if (graphs.has(version)) {
         return graphs.get(version)!;
       }
-      const newGraph = { nodeDeps: new Map(), nodeToNodeSubscriptions: new Map() };
+      const newGraph = {
+        nodeDeps: new Map(),
+        nodeToNodeSubscriptions: new Map(),
+      };
       graphs.set(version, newGraph);
       return newGraph;
     },
     subscribeToTransactions: () => {
-      return { release: () => {} };
+      return {release: () => {}};
     },
     addTransactionMetadata: () => {
       // no-op in test mock
     },
   };
-  
+
   return store;
 }
 
@@ -113,7 +116,7 @@ test('Key is required when creating atoms', () => {
   (globalThis as any).__DEV__ = true;
 
   // @ts-expect-error - Testing invalid input
-  expect(() => atom({ default: undefined })).toThrow();
+  expect(() => atom({default: undefined})).toThrow();
 
   (globalThis as any).__DEV__ = devStatus;
 });
@@ -203,7 +206,7 @@ describe('creating two atoms with the same key', () => {
   describe('support for process.env.RECOIL_DUPLICATE_ATOM_KEY_CHECKING_ENABLED if present (workaround for NextJS)', () => {
     const originalProcessEnv = process.env;
     beforeEach(() => {
-      process.env = { ...originalProcessEnv };
+      process.env = {...originalProcessEnv};
       process.env.RECOIL_DUPLICATE_ATOM_KEY_CHECKING_ENABLED = 'false';
     });
 
@@ -261,7 +264,7 @@ describe('Valid values', () => {
 
 describe('Defaults', () => {
   test('default is optional', () => {
-    const myAtom = atom<any>({ key: 'atom without default' });
+    const myAtom = atom<any>({key: 'atom without default'});
     expect(getRecoilStateLoadable(myAtom).state).toBe('loading');
 
     act(() => set(myAtom, 'VALUE'));
@@ -341,7 +344,7 @@ test('Atoms are frozen in dev mode', () => {
 
   const myAtom = atom({
     key: 'frozen atom',
-    default: { count: 0 },
+    default: {count: 0},
   });
 
   const value = getValue(myAtom);
@@ -353,7 +356,7 @@ test('Atoms are frozen in dev mode', () => {
 test('dangerouslyAllowMutability', () => {
   const myAtom = atom({
     key: 'mutable atom',
-    default: { count: 0 },
+    default: {count: 0},
     dangerouslyAllowMutability: true,
   });
 
@@ -361,4 +364,4 @@ test('dangerouslyAllowMutability', () => {
   expect(Object.isFrozen(value)).toBe(false);
   value.count = 1;
   expect(value.count).toBe(1);
-}); 
+});

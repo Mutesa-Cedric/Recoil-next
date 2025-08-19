@@ -68,10 +68,15 @@ function initContentScriptListeners() {
       try {
         bg.postMessage(data);
       } catch (err) {
-        if (err instanceof Error && err.message === 'Message length exceeded maximum allowed length.') {
+        if (
+          err instanceof Error &&
+          err.message === 'Message length exceeded maximum allowed length.'
+        ) {
           sendInChunks(data);
         } else {
-          warn(`Transaction ignored in Recoil DevTools: ${err instanceof Error ? err.message : String(err)}`);
+          warn(
+            `Transaction ignored in Recoil DevTools: ${err instanceof Error ? err.message : String(err)}`,
+          );
         }
       }
     }
@@ -94,7 +99,9 @@ function initContentScriptListeners() {
           isFinalChunk: i + MessageChunkSize >= len,
         });
       } catch (err) {
-        warn(`Transaction ignored in Recoil DevTools: ${err instanceof Error ? err.message : String(err)}`);
+        warn(
+          `Transaction ignored in Recoil DevTools: ${err instanceof Error ? err.message : String(err)}`,
+        );
       }
     }
   }
@@ -113,7 +120,9 @@ function initPageScript() {
       const element = this as HTMLScriptElement;
       element.parentNode?.removeChild(element);
     };
-    nullthrows(document.head ?? document.documentElement).appendChild(pageScript);
+    nullthrows(document.head ?? document.documentElement).appendChild(
+      pageScript,
+    );
   }
 }
 

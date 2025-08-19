@@ -2,19 +2,19 @@
  * TypeScript port of Recoil_useRecoilSnapshot-test.js
  */
 
-import { render } from '@testing-library/react';
+import {render} from '@testing-library/react';
 import * as React from 'react';
-import { beforeEach, describe, expect, test } from 'vitest';
+import {beforeEach, describe, expect, test} from 'vitest';
 
-import type { Store } from '../../core/State';
+import type {Store} from '../../core/State';
 
-import { persistentMap } from '../../adt/PersistentMap';
-import { getNextStoreID, getNextTreeStateVersion } from '../../core/Keys';
-import { RecoilRoot } from '../../core/RecoilRoot';
-import { freshSnapshot } from '../../core/Snapshot';
-import { atom } from '../../recoil_values/atom';
-import { useRecoilValue, useSetRecoilState } from '../Hooks';
-import { useGotoRecoilSnapshot, useRecoilSnapshot } from '../SnapshotHooks';
+import {persistentMap} from '../../adt/PersistentMap';
+import {getNextStoreID, getNextTreeStateVersion} from '../../core/Keys';
+import {RecoilRoot} from '../../core/RecoilRoot';
+import {freshSnapshot} from '../../core/Snapshot';
+import {atom} from '../../recoil_values/atom';
+import {useRecoilValue, useSetRecoilState} from '../Hooks';
+import {useGotoRecoilSnapshot, useRecoilSnapshot} from '../SnapshotHooks';
 
 function makeStore(): Store {
   const storeState = {
@@ -48,27 +48,30 @@ function makeStore(): Store {
   const store: Store = {
     storeID: getNextStoreID(),
     getState: () => storeState,
-    replaceState: (replacer) => {
+    replaceState: replacer => {
       const currentStoreState = store.getState();
       currentStoreState.currentTree = replacer(currentStoreState.currentTree);
     },
-    getGraph: (version) => {
+    getGraph: version => {
       const graphs = storeState.graphsByVersion;
       if (graphs.has(version)) {
         return graphs.get(version)!;
       }
-      const newGraph = { nodeDeps: new Map(), nodeToNodeSubscriptions: new Map() };
+      const newGraph = {
+        nodeDeps: new Map(),
+        nodeToNodeSubscriptions: new Map(),
+      };
       graphs.set(version, newGraph);
       return newGraph;
     },
     subscribeToTransactions: () => {
-      return { release: () => {} };
+      return {release: () => {}};
     },
     addTransactionMetadata: () => {
       // no-op in test mock
     },
   };
-  
+
   return store;
 }
 
@@ -80,17 +83,17 @@ beforeEach(() => {
 
 // React rendering utilities for testing
 function renderElements(element: React.ReactElement): HTMLElement {
-  const { container } = render(
+  const {container} = render(
     <RecoilRoot>
       <React.Suspense fallback="loading">{element}</React.Suspense>
-    </RecoilRoot>
+    </RecoilRoot>,
   );
   return container;
 }
 
 describe('useRecoilSnapshot', () => {
   test('useRecoilSnapshot returns snapshot', () => {
-    const myAtom = atom({ key: 'useRecoilSnapshot atom', default: 'DEFAULT' });
+    const myAtom = atom({key: 'useRecoilSnapshot atom', default: 'DEFAULT'});
     let capturedSnapshot: any = null;
 
     function SnapshotCapture() {
@@ -108,7 +111,10 @@ describe('useRecoilSnapshot', () => {
   });
 
   test('useRecoilSnapshot captures atom values', () => {
-    const myAtom = atom({ key: 'useRecoilSnapshot values atom', default: 'DEFAULT' });
+    const myAtom = atom({
+      key: 'useRecoilSnapshot values atom',
+      default: 'DEFAULT',
+    });
     let capturedSnapshot: any = null;
 
     function SnapshotCapture() {
@@ -127,7 +133,10 @@ describe('useRecoilSnapshot', () => {
   });
 
   test('useRecoilSnapshot captures updated values', () => {
-    const myAtom = atom({ key: 'useRecoilSnapshot updated atom', default: 'DEFAULT' });
+    const myAtom = atom({
+      key: 'useRecoilSnapshot updated atom',
+      default: 'DEFAULT',
+    });
     let capturedSnapshot: any = null;
     let setValue: any = null;
 
@@ -139,12 +148,12 @@ describe('useRecoilSnapshot', () => {
       return <>{value}</>;
     }
 
-    const { rerender } = render(
+    const {rerender} = render(
       <RecoilRoot>
         <React.Suspense fallback="loading">
           <SnapshotCapture />
         </React.Suspense>
-      </RecoilRoot>
+      </RecoilRoot>,
     );
 
     // Initial snapshot
@@ -159,7 +168,7 @@ describe('useRecoilSnapshot', () => {
         <React.Suspense fallback="loading">
           <SnapshotCapture />
         </React.Suspense>
-      </RecoilRoot>
+      </RecoilRoot>,
     );
 
     // Should capture the updated value
@@ -182,7 +191,10 @@ describe('useGotoRecoilSnapshot', () => {
   });
 
   test('useGotoRecoilSnapshot can restore snapshot', () => {
-    const myAtom = atom({ key: 'useGotoRecoilSnapshot restore atom', default: 'DEFAULT' });
+    const myAtom = atom({
+      key: 'useGotoRecoilSnapshot restore atom',
+      default: 'DEFAULT',
+    });
     let gotoSnapshot: any = null;
     let setValue: any = null;
     let currentValue: string = '';
@@ -195,12 +207,12 @@ describe('useGotoRecoilSnapshot', () => {
       return <>{value}</>;
     }
 
-    const { rerender } = render(
+    const {rerender} = render(
       <RecoilRoot>
         <React.Suspense fallback="loading">
           <SnapshotControl />
         </React.Suspense>
-      </RecoilRoot>
+      </RecoilRoot>,
     );
 
     // Initial state
@@ -217,12 +229,12 @@ describe('useGotoRecoilSnapshot', () => {
         <React.Suspense fallback="loading">
           <SnapshotControl />
         </React.Suspense>
-      </RecoilRoot>
+      </RecoilRoot>,
     );
     expect(currentValue).toBe('UPDATED');
 
     // Restore to original snapshot
-    const modifiedSnapshot = originalSnapshot.map(({ set }) => {
+    const modifiedSnapshot = originalSnapshot.map(({set}) => {
       set(myAtom, 'DEFAULT');
     });
     gotoSnapshot(modifiedSnapshot);
@@ -232,11 +244,11 @@ describe('useGotoRecoilSnapshot', () => {
         <React.Suspense fallback="loading">
           <SnapshotControl />
         </React.Suspense>
-      </RecoilRoot>
+      </RecoilRoot>,
     );
 
     // Should be back to default (this test might need adjustment based on actual implementation)
     // The exact behavior depends on how gotoSnapshot works with RecoilRoot
     expect(typeof gotoSnapshot).toBe('function'); // At least verify the function exists
   });
-}); 
+});
