@@ -91,3 +91,32 @@ describe('Loadable mapping', () => {
     expect(loadable.contents).toBe(ERROR);
   });
 });
+
+describe('Loadable equality', () => {
+  test('Loadable.is() with NaN values should be equal', () => {
+    const loadable1 = loadableWithValue(NaN);
+    const loadable2 = loadableWithValue(NaN);
+
+    /* 
+      this won't work for normal comparisions (NaN===NaN), since js will return false everytime
+      fixed by using Object.is()
+    */
+    expect(loadable1.is(loadable2)).toBe(true);
+  });
+
+  test('Loadable.is() with regular values', () => {
+    const loadable1 = loadableWithValue(42);
+    const loadable2 = loadableWithValue(42);
+    const loadable3 = loadableWithValue(43);
+
+    expect(loadable1.is(loadable2)).toBe(true);
+    expect(loadable1.is(loadable3)).toBe(false);
+  });
+
+  test('Loadable.is() with different states', () => {
+    const loadable1 = loadableWithValue(42);
+    const loadable2 = loadableWithError(ERROR);
+
+    expect(loadable1.is(loadable2)).toBe(false);
+  });
+});

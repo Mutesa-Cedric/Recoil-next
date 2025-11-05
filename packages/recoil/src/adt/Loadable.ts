@@ -39,7 +39,7 @@ export abstract class BaseLoadable<T> {
   is(other: Loadable<any>): boolean {
     return (
       (other as any).state === (this as any).state &&
-      (other as any).contents === (this as any).contents
+      Object.is((other as any).contents, (this as any).contents)
     );
   }
 }
