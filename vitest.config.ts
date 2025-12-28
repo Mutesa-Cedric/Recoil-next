@@ -26,9 +26,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      'recoil-shared': new URL('./packages/shared/src', import.meta.url)
-        .pathname,
-      recoil: new URL('./packages/recoil/src', import.meta.url).pathname,
+      recoil: new URL('./src', import.meta.url).pathname,
       react: new URL('./node_modules/react', import.meta.url).pathname,
       'react-dom': new URL('./node_modules/react-dom', import.meta.url)
         .pathname,
